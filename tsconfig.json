@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es5",  // Define el nivel de JavaScript que se va a generar (es5 es lo más compatible).
+    "lib": ["dom", "es2015"],  // Define qué bibliotecas se van a usar (dom y es2015 son necesarios para React).
+    "jsx": "react-jsx",  // Usamos el nuevo JSX Transform de React 17 en adelante.
+    "moduleResolution": "node",  // Resuelve los módulos como Node.js.
+    "strict": true,  // Habilita las comprobaciones estrictas de TypeScript (muy recomendable).
+    "esModuleInterop": true,  // Permite la importación de módulos comunes con la sintaxis de ES6.
+    "skipLibCheck": true,  // Omite la verificación de tipos de las bibliotecas (puede mejorar el rendimiento).
+    "forceConsistentCasingInFileNames": true,  // Asegura que los nombres de los archivos sean consistentes en cuanto a mayúsculas y minúsculas.
+    "module": "esnext",  // Usamos el estándar más moderno para los módulos.
+    "resolveJsonModule": true,  // Permite importar archivos JSON.
+    "noEmit": true,  // No emite archivos de salida (usado cuando trabajas solo en el código fuente).
+    "isolatedModules": true,  // Asegura que cada archivo sea un módulo independiente.
+    "skipDefaultLibCheck": true  // Omite la verificación de bibliotecas predeterminadas (mejora el rendimiento).
+  },
+  "include": [
+    "src/**/*"  // Incluye todos los archivos dentro de la carpeta src.
+  ],
+  "exclude": [
+    "node_modules",  // Excluye la carpeta node_modules.
+    "build"  // Excluye la carpeta de salida de producción.
+  ]
+}
