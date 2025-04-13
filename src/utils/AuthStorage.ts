@@ -1,14 +1,14 @@
-import { User } from "../interfaces/AuthInterfaces";
+import { AuthUser } from "../interfaces/AuthInterfaces";
 
 const USER_KEY = "user";
 const TOKEN_KEY = "token";
 
 export const AuthStorage = {
-  saveUser: (user: User) => {
+  saveUser: (user: AuthUser) => {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   },
 
-  getUser: (): User | null => {
+  getUser: (): AuthUser | null => {
     const user = localStorage.getItem(USER_KEY);
     return user ? JSON.parse(user) : null;
   },

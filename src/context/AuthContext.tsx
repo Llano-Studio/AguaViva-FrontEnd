@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { AuthService } from "../services/AuthService";
-import { AuthContextType, User } from "../interfaces/AuthInterfaces";
+import { AuthContextType, AuthUser } from "../interfaces/AuthInterfaces";
 import { AuthStorage } from "../utils/AuthStorage";
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -12,7 +12,8 @@ interface AuthProviderProps {
 const authService = new AuthService();
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // 🆕 <- estado de carga
 
   useEffect(() => {
     const storedUser = AuthStorage.getUser();
@@ -23,6 +24,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } else {
       logout();
     }
+
+    setIsLoading(false); // <- al finalizar el chequeo
   }, []);
 
   const isTokenExpired = (token: string): boolean => {
@@ -53,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
