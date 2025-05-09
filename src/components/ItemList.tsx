@@ -22,16 +22,19 @@ export function ItemList<T extends { id: number }>({
         <ul>
           {items.map((item) => (
             <li key={item.id}>
-              {Object.entries(item).map(([key, value]) => (
-                <span key={key}>
-                  <strong>{key}:</strong> {String(value)}{" "}
-                </span>
-              ))}
-
-              {onEdit && <button onClick={() => onEdit(item)}>Editar</button>}
-              {onDelete && (
-                <button onClick={() => onDelete(item.id)}>Eliminar</button>
-              )}
+              <div>
+                {Object.entries(item).map(([key, value]) => (
+                  <span key={key} style={{ marginRight: "1rem" }}>
+                    <strong>{key}:</strong> {String(value)}
+                  </span>
+                ))}
+              </div>
+              <div>
+                {onEdit && <button onClick={() => onEdit(item)}>Editar</button>}
+                {onDelete && (
+                  <button onClick={() => onDelete(item.id)}>Eliminar</button>
+                )}
+              </div>
             </li>
           ))}
         </ul>

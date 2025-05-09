@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-// Agregamos validaciones opcionales por campo
+// Validaciones opcionales
 interface FieldValidation {
   required?: boolean;
   isEmail?: boolean;
@@ -37,7 +37,6 @@ export function ItemForm<T extends Record<string, any>>({
       [name]: newValue,
     }));
 
-    // Limpiar error al escribir
     setErrors((prev) => ({
       ...prev,
       [name]: "",
@@ -80,21 +79,28 @@ export function ItemForm<T extends Record<string, any>>({
       {fields.map((field) => {
         const inputType = field.type || "text";
         const name = String(field.name);
+        const value = values[field.name];
 
         return (
-          <div key={name}>
-            <label>{field.label}</label>
-            <input
-              type={inputType}
-              name={name}
-              value={
-                inputType === "checkbox"
-                  ? undefined
-                  : (values[field.name] as string | number | undefined)
-              }
-              checked={inputType === "checkbox" ? values[field.name] : undefined}
-              onChange={handleChange}
-            />
+          <div key={name} style={{ marginBottom: "1rem" }}>
+            <label>
+              {field.label}
+              {inputType === "checkbox" ? (
+                <input
+                  type="checkbox"
+                  name={name}
+                  checked={value}
+                  onChange={handleChange}
+                />
+              ) : (
+                <input
+                  type={inputType}
+                  name={name}
+                  value={value}
+                  onChange={handleChange}
+                />
+              )}
+            </label>
             {errors[field.name] && (
               <div style={{ color: "red", fontSize: "0.85rem" }}>
                 {errors[field.name]}

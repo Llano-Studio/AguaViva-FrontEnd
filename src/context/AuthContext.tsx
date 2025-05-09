@@ -13,19 +13,20 @@ const authService = new AuthService();
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // 🆕 <- estado de carga
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = AuthStorage.getUser();
     const storedToken = AuthStorage.getToken();
 
+    // Verificamos que el usuario y el token existen y que el token no haya expirado
     if (storedUser && storedToken && !isTokenExpired(storedToken)) {
-      setUser(storedUser);
+      setUser(storedUser); // Aquí guardamos el usuario con la propiedad 'role'
     } else {
       logout();
     }
 
-    setIsLoading(false); // <- al finalizar el chequeo
+    setIsLoading(false);
   }, []);
 
   const isTokenExpired = (token: string): boolean => {
@@ -41,7 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     const result = await authService.login(email, password);
     if (result && result.token && result.user) {
-      setUser(result.user);
+      setUser(result.user); // Aquí guardamos el usuario que tiene la propiedad 'role'
       AuthStorage.saveToken(result.token);
       AuthStorage.saveUser(result.user);
       return true;

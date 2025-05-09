@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { ItemList } from "../components/ItemList";
-import { ItemForm } from "../components/ItemForm";
+import { ItemForm, Field } from "../components/ItemForm";
 import { User, CreateUserDTO } from "../interfaces/User";
 import { UserService } from "../services/UserService";
-import { Field } from "../components/ItemForm"; // Importa el tipo Field desde ItemForm.tsx
 
 const userService = new UserService();
 
-export const UsersPage: React.FC = () => {
+const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   const emptyUser: User = {
     id: 0,
@@ -32,7 +32,6 @@ export const UsersPage: React.FC = () => {
 
   const handleSubmit = async (user: User & { password?: string }) => {
     if (user.id === 0) {
-      // Validar password
       if (!user.password || user.password.trim() === "") {
         alert("La contraseña es obligatoria para nuevos usuarios.");
         return;
@@ -46,10 +45,12 @@ export const UsersPage: React.FC = () => {
 
       await userService.createUser(newUser);
     } else {
-      await userService.updateUser(user.id, user);
+      const { name, email, role, isActive } = user;
+      await userService.updateUser(user.id, { name, email, role, isActive });
     }
 
     setEditingUser(null);
+    setShowForm(false);
     fetchUsers();
   };
 
@@ -60,35 +61,52 @@ export const UsersPage: React.FC = () => {
 
   const handleEdit = (user: User) => {
     setEditingUser(user);
+    setShowForm(true);
   };
 
-  // Definir los campos comunes
+  const handleNewUser = () => {
+    setEditingUser(null);
+    setShowForm(true);
+  };
+
   const baseFields: Field<User>[] = [
-    { name: "name", label: "Nombre" },
-    { name: "email", label: "Email", type: "email" },
-    { name: "role", label: "Rol" },
+    { name: "name", label: "Nombre", validation: { required: true } },
+    { name: "email", label: "Email", type: "email", validation: { required: true, isEmail: true } },
+    { name: "role", label: "Rol", validation: { required: true } },
     { name: "isActive", label: "Activo", type: "checkbox" },
   ];
 
-  // Si es nuevo usuario, incluir campo contraseña
   const fields: Field<User & { password?: string }>[] = editingUser?.id
     ? baseFields
     : [
         ...baseFields,
-        { name: "password", label: "Contraseña", type: "password" },
+        {
+          name: "password",
+          label: "Contraseña",
+          type: "password",
+          validation: { required: true, minLength: 6 },
+        },
       ];
 
   return (
-    <div>
-      <h1>Gestión de Usuarios</h1>
+    <div style={{ padding: "1rem" }}>
+      <h1 style={{ marginBottom: "1rem" }}>Gestión de Usuarios</h1>
 
-      <ItemForm<User & { password?: string }>
-        initialValues={editingUser || { ...emptyUser, password: "" }}
-        onSubmit={handleSubmit}
-        fields={fields}
-      />
+      <button onClick={handleNewUser} style={{ marginBottom: "1rem" }}>
+        Nuevo Usuario
+      </button>
 
-      <hr />
+      {showForm && (
+        <ItemForm<User & { password?: string }>
+          initialValues={
+            editingUser ? { ...editingUser } : { ...emptyUser, password: "" }
+          }
+          onSubmit={handleSubmit}
+          fields={fields}
+        />
+      )}
+
+      <hr style={{ margin: "2rem 0" }} />
 
       <ItemList<User>
         items={users}
@@ -99,3 +117,5 @@ export const UsersPage: React.FC = () => {
     </div>
   );
 };
+
+export default UsersPage;

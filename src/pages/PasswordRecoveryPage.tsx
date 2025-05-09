@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AuthService } from "../services/AuthService"; // Aquí sigue importando el servicio, pero no necesitamos pasar la URL
 
-const PasswordRecovery: React.FC = () => {
+const PasswordRecoveryPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -50,4 +50,4 @@ const PasswordRecovery: React.FC = () => {
   );
 };
 
-export default PasswordRecovery;
+export default PasswordRecoveryPage;
