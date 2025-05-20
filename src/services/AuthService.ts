@@ -8,9 +8,9 @@ export class AuthService implements IAuthService {
     this.apiUrl = API_URL;
   }
 
-  async login(email: string, password: string): Promise<any | null> {
+  async login(email: string, password: string): Promise<{ user: any; accessToken: string } | null>  {
     try {
-      const response = await fetch(`${this.apiUrl}/api/auth/login`, {
+      const response = await fetch(`${this.apiUrl}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export class AuthService implements IAuthService {
       });
 
       const data = await response.json();
-      if (data && data.token && data.user) {
+      if (response.ok && data && data.user && data.accessToken) {
         return data;
       }
 
