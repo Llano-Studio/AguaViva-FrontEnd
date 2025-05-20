@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LoginFormProps } from "../interfaces/LoginFormProps"; // Importamos la interfaz
+import { LoginFormProps } from "../../interfaces/LoginFormProps"; // Importamos la interfaz
 
 const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   const [email, setEmail] = useState<string>("");
