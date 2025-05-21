@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import LoginPage from "../pages/LoginPage";
 import PasswordRecovery from "../pages/PasswordRecoveryPage";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
 import PrivateRoute from "./PrivateRoute";
 import ZonesPage from "../pages/ZonesPage";
 
@@ -23,6 +24,7 @@ const AppRouter: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/recuperar-clave" element={<PasswordRecovery />} />
           <Route path="/password-recovery" element={<PasswordRecovery />} />
+          <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
 
           {/* Rutas privadas con layout */}
           <Route
