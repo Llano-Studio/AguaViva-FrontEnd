@@ -50,3 +50,31 @@
     border-radius: 14px;
     margin: 2rem;
 }
+
+/* Estilos para el botón de mostrar/ocultar contraseña */
+.login-container .eye-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #777;
+    z-index: 10;
+}
+
+.login-container .eye-button:focus {
+    outline: none;
+}
+
+.login-container .eye-button:hover {
+    color: #403A92;
+}
+
+.login-container .eye-button svg {
+    width: 20px;
+    height: 20px;
+}

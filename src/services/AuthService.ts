@@ -6,6 +6,11 @@ export interface PasswordRecoveryResponse {
   message?: string;
 }
 
+export interface ResetPasswordResponse {
+  success: boolean;
+  message?: string;
+}
+
 export class AuthService implements IAuthService {
   private apiUrl: string;
 
@@ -47,10 +52,33 @@ export class AuthService implements IAuthService {
       });
 
       const data = await response.json();
+
       return { success: !!data.success, message: data.message };
       
     } catch (error: any) {
       console.error("Error al intentar recuperar la contraseña:", error);
+      let errorMessage = "Error de red o servidor";
+      if (error.message === "Failed to fetch") {
+        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
+      }
+      return { success: false, message: errorMessage };
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<ResetPasswordResponse> {
+    try {
+      const response = await fetch(`${this.apiUrl}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, password: newPassword }),
+      });
+
+      const data = await response.json();
+      return { success: !!data.success, message: data.message };
+    } catch (error: any) {
+      console.error("Error al intentar restablecer la contraseña:", error);
       let errorMessage = "Error de red o servidor";
       if (error.message === "Failed to fetch") {
         errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";

@@ -82,7 +82,7 @@ const PasswordRecoveryPage: React.FC = () => {
             {error && <p className="error">{error}</p>}
             {message && <p className="message">{message}</p>}
             <button type="submit" className="submit-button">
-              Recuperar Contraseña
+              Enviar Correo
             </button>
           </form>
         </div>
