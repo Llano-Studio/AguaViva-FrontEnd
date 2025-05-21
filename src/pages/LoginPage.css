@@ -1,0 +1,52 @@
+.login-container .wrap-form{
+    padding: 5rem 3rem;
+    border-radius: 32px;
+}
+
+.login-container .logo{
+    width: 155px;
+    justify-self: center;
+    margin-bottom: 3rem;
+}
+
+.login-container input{
+    font-size: 13px;
+    height: 48px;
+    background: #F7FBFF;
+    border-radius: 12px;
+    border: 1px solid #D4D7E3;
+}
+
+.login-container input:focus-visible{
+    outline: none;
+}
+
+.login-container p{
+    font-size: 16px;
+}
+
+.login-container .submit{
+    font-size: 20px;
+    font-weight: 400;
+    background: #403A92;
+    border-radius: 12px;
+}
+
+.login-container .recovery-password{
+    font-size: 14px;
+    background: transparent;
+    color: #20232B;
+    padding: 0.6rem 0;
+    align-self: end;
+    font-weight: 400;
+    text-decoration: underline;
+}
+
+.login-container .wrap-fondo{
+    display: flex;
+}
+
+.login-container .fondo{
+    border-radius: 14px;
+    margin: 2rem;
+}

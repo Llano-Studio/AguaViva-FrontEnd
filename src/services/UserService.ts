@@ -1,17 +1,26 @@
-import { User } from "../interfaces/User";
+import { data } from "react-router-dom";
+import { User, UsersResponse } from "../interfaces/User";
 import { CreateUserDTO } from "../interfaces/User";
 import { apiFetch } from "../utils/apiFetch";
 
 export class UserService {
-  private usersUrl = "/api/auth/users";
-  private registerUrl = "/api/auth/register";
+  private usersUrl = "/auth/users";
+  private registerUrl = "/auth/register";
 
-  async getUsers(): Promise<User[]> {
+  async getUsers(): Promise<UsersResponse> {
     try {
-      return await apiFetch<User[]>(this.usersUrl);
+      return await apiFetch<UsersResponse>(this.usersUrl);
     } catch (error) {
       console.error("Error en getUsers:", error);
-      return [];
+      return {
+        data: [],
+        meta: {
+        limit: 0,
+        page: 0,
+        total: 0,
+        totalPage: 0,
+        }
+      }
     }
   }
 

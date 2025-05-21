@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import "./LoginPage.css";
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -32,37 +33,57 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">Iniciar sesión</h1>
-      <form onSubmit={handleSubmit} className="mb-6">
-        <input
-          type="email"
-          placeholder="Correo electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-2 p-2 border border-gray-300 rounded"
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-2 p-2 border border-gray-300 rounded"
-        />
-        {error && <p className="text-red-500">{error}</p>}
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          disabled={loading} // Desactivar el botón mientras se carga
-        >
-          {loading ? "Iniciando sesión..." : "Iniciar sesión"}
-        </button>
-      </form>
+    <>
+      <div className="login-container flex min-h-screen relative">
+      
+        <div className="absolute left-0 top-0 h-full w-[50%] bg-transparent flex items-center justify-center z-10">
+          <div className="w-full max-w-md px-8 bg-white wrap-form">
+            <img src="/assets/imagenes/logo.svg" alt="Logo" className="w-32 h-auto logo" />
+            <form onSubmit={handleSubmit} className="mb-6 flex flex-col">
+              <p>Email</p>
+              <input
+                type="email"
+                placeholder="Ejemplo@mail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mb-2 p-2 border border-gray-300 rounded"
+              />
+              <p>Contraseña</p>
+              <input
+                type="password"
+                placeholder="Escribí tu contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mb-2 p-2 border border-gray-300 rounded"
+              />
+              {error && <p className="text-red-500">{error}</p>}
+              <button onClick={goToPasswordRecovery} className="text-blue-500 recovery-password">
+              ¿Olvidaste tu contraseña?
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 submit"
+                disabled={loading}
+              >
+                {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+              </button>
+            </form>
 
-      <button onClick={goToPasswordRecovery} className="text-blue-500">
-        ¿Olvidaste tu contraseña?
-      </button>
+            
+          </div>
+        </div>
+
+        {/* Imagen fondo izquierda (70%) */}
+        <div className="absolute right-0 w-[70%] wrap-fondo">
+          <img
+            src="/assets/imagenes/login-img.svg"
+            alt="Fondo"
+            className="w-full h-full object-cover fondo"
+          />
+        </div>
     </div>
+
+    </>
   );
 };
 

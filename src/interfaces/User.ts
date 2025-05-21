@@ -13,3 +13,13 @@ export interface CreateUserDTO {
     email: string;
     password: string;
   }
+
+export interface UsersResponse {
+    data: User[];
+    meta: {
+      limit: number;
+      page: number;
+      total: number;
+      totalPage: number;
+    };
+  }

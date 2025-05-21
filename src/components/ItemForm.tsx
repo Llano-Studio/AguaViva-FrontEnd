@@ -12,6 +12,7 @@ export interface Field<T> {
   label: string;
   type?: string;
   validation?: FieldValidation;
+  options?: { label: string; value: string | number }[]; // Para selects
 }
 
 interface ItemFormProps<T> {
@@ -28,9 +29,14 @@ export function ItemForm<T extends Record<string, any>>({
   const [values, setValues] = useState<T>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const newValue =
+      type === "checkbox" && e.target instanceof HTMLInputElement
+        ? e.target.checked
+        : value;
 
     setValues((prev) => ({
       ...prev,
@@ -75,42 +81,63 @@ export function ItemForm<T extends Record<string, any>>({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-4 bg-gray-500 p-4 rounded-xl shadow-md max-w-xl">
       {fields.map((field) => {
         const inputType = field.type || "text";
         const name = String(field.name);
         const value = values[field.name];
 
         return (
-          <div key={name} style={{ marginBottom: "1rem" }}>
-            <label>
+          <div key={name} className="flex flex-col">
+            <label htmlFor={name} className="mb-1 font-medium text-gray-700">
               {field.label}
-              {inputType === "checkbox" ? (
-                <input
-                  type="checkbox"
-                  name={name}
-                  checked={value}
-                  onChange={handleChange}
-                />
-              ) : (
-                <input
-                  type={inputType}
-                  name={name}
-                  value={value}
-                  onChange={handleChange}
-                />
-              )}
             </label>
+
+            {inputType === "select" && field.options ? (
+              <select
+                name={name}
+                value={value}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Seleccionar...</option>
+                {field.options.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            ) : inputType === "checkbox" ? (
+              <input
+                type="checkbox"
+                name={name}
+                checked={value}
+                onChange={handleChange}
+                className="h-4 w-4"
+              />
+            ) : (
+              <input
+                type={inputType}
+                name={name}
+                value={value}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            )}
+
             {errors[field.name] && (
-              <div style={{ color: "red", fontSize: "0.85rem" }}>
-                {errors[field.name]}
-              </div>
+              <span className="text-red-600 text-sm mt-1">{errors[field.name]}</span>
             )}
           </div>
         );
       })}
 
-      <button type="submit">Guardar</button>
+      <button
+        type="submit"
+        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        Guardar
+      </button>
     </form>
   );
 }

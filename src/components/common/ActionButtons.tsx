@@ -1,0 +1,13 @@
+import IconButton from "./IconButton";
+
+export const BackButton = ({ onClick }: { onClick: () => void }) => (
+  <IconButton onClick={onClick} icon="/assets/icons/back.svg" alt="Volver" />
+);
+
+export const EditButton = ({ onClick }: { onClick: () => void }) => (
+  <IconButton onClick={onClick} icon="/assets/icons/edit.svg" alt="Editar" />
+);
+
+export const DeleteButton = ({ onClick }: { onClick: () => void }) => (
+  <IconButton onClick={onClick} icon="/assets/icons/delete.svg" alt="Eliminar" />
+);

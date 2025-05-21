@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { ItemList } from "../components/ItemList";
-import { ItemForm, Field } from "../components/ItemForm";
+import UserForm from "../components/users/UserForm";
+import UserList from "../components/users/UserList";
+import UserDetailModal from "../components/users/UserDetailModal";
 import { User, CreateUserDTO } from "../interfaces/User";
 import { UserService } from "../services/UserService";
+import { BackButton } from "../components/common/ActionButtons";
 
 const userService = new UserService();
 
 const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   const emptyUser: User = {
@@ -22,8 +25,8 @@ const UsersPage: React.FC = () => {
   };
 
   const fetchUsers = async () => {
-    const data = await userService.getUsers();
-    setUsers(data);
+    const response = await userService.getUsers();
+    setUsers(response.data);
   };
 
   useEffect(() => {
@@ -36,19 +39,16 @@ const UsersPage: React.FC = () => {
         alert("La contraseña es obligatoria para nuevos usuarios.");
         return;
       }
-
       const newUser: CreateUserDTO = {
         name: user.name,
         email: user.email,
         password: user.password,
       };
-
       await userService.createUser(newUser);
     } else {
       const { name, email, role, isActive } = user;
       await userService.updateUser(user.id, { name, email, role, isActive });
     }
-
     setEditingUser(null);
     setShowForm(false);
     fetchUsers();
@@ -59,61 +59,68 @@ const UsersPage: React.FC = () => {
     fetchUsers();
   };
 
-  const handleEdit = (user: User) => {
-    setEditingUser(user);
-    setShowForm(true);
-  };
-
-  const handleNewUser = () => {
+  const handleBack = () => {
     setEditingUser(null);
-    setShowForm(true);
+    setShowForm(false);
   };
-
-  const baseFields: Field<User>[] = [
-    { name: "name", label: "Nombre", validation: { required: true } },
-    { name: "email", label: "Email", type: "email", validation: { required: true, isEmail: true } },
-    { name: "role", label: "Rol", validation: { required: true } },
-    { name: "isActive", label: "Activo", type: "checkbox" },
-  ];
-
-  const fields: Field<User & { password?: string }>[] = editingUser?.id
-    ? baseFields
-    : [
-        ...baseFields,
-        {
-          name: "password",
-          label: "Contraseña",
-          type: "password",
-          validation: { required: true, minLength: 6 },
-        },
-      ];
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1 style={{ marginBottom: "1rem" }}>Gestión de Usuarios</h1>
+    <div className="relative overflow-hidden min-h-[400px] h-full p-4">
+      <div>
+        <h1 className="text-2xl font-bold mb-4">Gestión de Usuarios</h1>
+      </div>
 
-      <button onClick={handleNewUser} style={{ marginBottom: "1rem" }}>
-        Nuevo Usuario
-      </button>
-
-      {showForm && (
-        <ItemForm<User & { password?: string }>
+      <div>
+      {/* FORMULARIO */}
+      <div
+        className={`absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out z-10 bg-white p-4 shadow-lg rounded-lg
+        ${showForm ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <div className="mt-4">
+          <BackButton onClick={handleBack} />
+        </div>
+        <UserForm
           initialValues={
             editingUser ? { ...editingUser } : { ...emptyUser, password: "" }
           }
           onSubmit={handleSubmit}
-          fields={fields}
+          onCancel={handleBack}
+          isEditing={!!editingUser}
         />
-      )}
+        
+      </div>
 
-      <hr style={{ margin: "2rem 0" }} />
+      {/* LISTA */}
+      <div
+        className={`absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out
+        ${showForm ? "-translate-x-full" : "translate-x-0"}`}
+      >
+        <button
+          onClick={() => {
+            setEditingUser(null);
+            setShowForm(true);
+          }}
+          className="mb-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+        >
+          Nuevo Usuario
+        </button>
 
-      <ItemList<User>
-        items={users}
-        itemType="usuario"
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+        <UserList
+          users={users}
+          onEdit={(user) => {
+            setEditingUser(user);
+            setShowForm(true);
+          }}
+          onDelete={handleDelete}
+          onView={setSelectedUser}
+        />
+
+        <UserDetailModal
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+        />
+      </div>
+      </div>
     </div>
   );
 };

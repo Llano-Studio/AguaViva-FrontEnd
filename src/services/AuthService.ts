@@ -33,7 +33,7 @@ export class AuthService implements IAuthService {
 
   async recoverPassword(email: string): Promise<{ success: boolean }> {
     try {
-      const response = await fetch(`${this.apiUrl}/api/recover-password`, {
+      const response = await fetch(`${this.apiUrl}/recover-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import DashboardLayout from "../components/dashboard/DashboardLayout";
 import LoginPage from "../pages/LoginPage";
 import PasswordRecovery from "../pages/PasswordRecoveryPage";
 import PrivateRoute from "./PrivateRoute";
+import ZonesPage from "../pages/ZonesPage";
 
 // Lazy loaded pages
 const Dashboard = React.lazy(() => import("../pages/Dashboard"));
@@ -39,6 +40,7 @@ const AppRouter: React.FC = () => {
             <Route path="articulos" element={<ArticlesPage />} />
             <Route path="moviles" element={<MobilesPage />} />
             <Route path="entregas" element={<DeliveriesPage />} />
+            <Route path="zonas" element={<ZonesPage />} />
             <Route path="*" element={<div>Página no encontrada</div>} />
           </Route>
         </Routes>
