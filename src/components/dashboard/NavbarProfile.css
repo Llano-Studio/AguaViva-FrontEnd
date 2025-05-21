@@ -1,0 +1,36 @@
+.navbar-img-profile{
+    background: green;
+    width: 60px;
+    height: 60px;
+    border-radius: 100%;
+    border: 2px solid #FFFFFF;
+    z-index: 11;
+}
+
+.navbar-profile{
+    display: flex;
+}
+
+.navbar-datos-profile{
+    background: #403A92;
+    height: 51px;
+    align-self: center;
+    width: 197px;
+    padding: 7px 10px 10px 45px;
+    transform: translate(-30px, 0px);
+    border-radius: 7px;
+}
+
+.navbar-name{
+    text-transform: capitalize;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.navbar-role{
+    text-transform: capitalize;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 400;
+}

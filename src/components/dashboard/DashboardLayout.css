@@ -59,4 +59,16 @@
     padding: 2rem;
     overflow-y: auto;
   }
+
+  .main-container{
+    width: 100%;
+  }
   
+  .navbar-container{
+    height: 78px;
+    background: #F8F8F8;
+    box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
