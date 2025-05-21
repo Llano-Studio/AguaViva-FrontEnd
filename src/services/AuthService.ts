@@ -1,6 +1,11 @@
 import { API_URL } from "../config";
 import { IAuthService } from "../interfaces/IAuthService";
 
+export interface PasswordRecoveryResponse {
+  success: boolean;
+  message?: string;
+}
+
 export class AuthService implements IAuthService {
   private apiUrl: string;
 
@@ -31,9 +36,9 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async recoverPassword(email: string): Promise<{ success: boolean }> {
+  async recoverPassword(email: string): Promise<PasswordRecoveryResponse> {
     try {
-      const response = await fetch(`${this.apiUrl}/recover-password`, {
+      const response = await fetch(`${this.apiUrl}/auth/recover-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,10 +47,15 @@ export class AuthService implements IAuthService {
       });
 
       const data = await response.json();
-      return { success: !!data.success };
-    } catch (error) {
+      return { success: !!data.success, message: data.message };
+      
+    } catch (error: any) {
       console.error("Error al intentar recuperar la contraseña:", error);
-      return { success: false };
+      let errorMessage = "Error de red o servidor";
+      if (error.message === "Failed to fetch") {
+        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
+      }
+      return { success: false, message: errorMessage };
     }
   }
 }
