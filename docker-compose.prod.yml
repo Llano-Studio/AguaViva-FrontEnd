@@ -6,6 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
+      args:
+        VITE_API_URL: http://sgarav-backend:3000/api
     container_name: sgarav-frontend
     ports:
       - "80:80"
@@ -13,6 +15,7 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+      - sgarav-network
     environment:
       - NODE_ENV=production
       - NGINX_HOST=${DOMAIN_NAME:-localhost}
@@ -50,7 +53,17 @@ services:
     networks:
       - app-network
     profiles:
-            - monitoringnetworks:  app-network:    driver: bridge    ipam:      config:        - subnet: 172.20.0.0/16  sgarav-network:    name: sgarav-network    external: true
+      - monitoring
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+  sgarav-network:
+    name: sgarav-network
+    external: true
 
 volumes:
   logs:

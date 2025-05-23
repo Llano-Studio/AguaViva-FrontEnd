@@ -13,6 +13,10 @@ RUN npm ci && npm cache clean --force
 # Copy source code
 COPY . .
 
+# Set build-time environment variables
+ARG VITE_API_URL=http://localhost:3000/api
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build the application
 RUN npm run build
 
