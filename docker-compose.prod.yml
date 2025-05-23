@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: sgarav-frontend
+    ports:
+      - "80:80"
+      - "443:443"  # Para SSL futuro
+    restart: unless-stopped
+    networks:
+      - app-network
+    environment:
+      - NODE_ENV=production
+      - NGINX_HOST=${DOMAIN_NAME:-localhost}
+    volumes:
+      # Logs persistentes
+      - ./logs:/var/log/nginx
+      # SSL certificates (si usas certbot)
+      - ./ssl:/etc/nginx/ssl:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1024M  # Aumentado para gestión de datos
+          cpus: '1.0'
+        reservations:
+          memory: 512M   # Más memoria base para aplicación de gestión
+          cpus: '0.5'
+
+  # Watchtower para actualizaciones automáticas (opcional)
+  watchtower:
+    image: containrrr/watchtower
+    container_name: sgarav-watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_INCLUDE_STOPPED=true
+    restart: unless-stopped
+    networks:
+      - app-network
+    profiles:
+            - monitoringnetworks:  app-network:    driver: bridge    ipam:      config:        - subnet: 172.20.0.0/16  sgarav-network:    name: sgarav-network    external: true
+
+volumes:
+  logs:
+    driver: local 

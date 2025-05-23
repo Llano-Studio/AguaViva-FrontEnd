@@ -23,8 +23,7 @@ const AppRouter: React.FC = () => {
           {/* Rutas públicas */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/recuperar-clave" element={<PasswordRecovery />} />
-          <Route path="/password-recovery" element={<PasswordRecovery />} />
-          <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/restablecer-clave" element={<ResetPasswordPage />} />
 
           {/* Rutas privadas con layout */}
           <Route
