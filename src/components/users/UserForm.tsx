@@ -1,50 +1,76 @@
 import React from "react";
-import { ItemForm, Field } from "../../components/ItemForm";
+import { ItemForm, Field } from "../common/ItemForm";
 import { User } from "../../interfaces/User";
+import useUsers from "../../hooks/useUsers";
+import { userFields, passwordField } from "../../config/UserFields";
 
 interface UserFormProps {
-  initialValues: User & { password?: string };
-  onSubmit: (values: User & { password?: string }) => void;
+  onCancel: () => void;
   isEditing: boolean;
+  userToEdit?: User;
+  refreshUsers: () => Promise<any>;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ initialValues, onSubmit, isEditing }) => {
-  const baseFields: Field<User>[] = [
-    { name: "name", label: "Nombre", validation: { required: true } },
-    {
-      name: "email",
-      label: "Email",
-      type: "email",
-      validation: { required: true, isEmail: true },
-    },
-    { name: "role", label: "Rol", validation: { required: true } },
-    { name: "isActive", label: "Activo", type: "checkbox" },
-  ];
+const UserForm: React.FC<UserFormProps> = ({ onCancel, isEditing, userToEdit, refreshUsers }) => {
+  const { createUser, updateUser } = useUsers();
 
+  const emptyUser: User & { password?: string } = {
+    id: 0,
+    name: "",
+    email: "",
+    role: "USER",
+    isActive: true,
+    createdAt: "",
+    updatedAt: "",
+    password: ""
+  };
+
+  const initialValues = isEditing && userToEdit 
+    ? { ...userToEdit, password: "" }
+    : emptyUser;
+
+  // Usa los campos configurados
   const fields: Field<User & { password?: string }>[] = isEditing
-    ? baseFields
-    : [
-        ...baseFields,
-        {
-          name: "password",
-          label: "Contraseña",
-          type: "password",
-          validation: { required: true, minLength: 6 },
-        },
-      ];
+    ? userFields
+    : [...userFields, passwordField];
+
+  const handleSubmit = async (values: User & { password?: string }) => {
+    try {
+      let success = false;
+      if (isEditing && userToEdit) {
+        success = await updateUser(userToEdit.id, {
+          name: values.name,
+          email: values.email,
+          role: values.role,
+          isActive: values.isActive
+        });
+      } else {
+        if (!values.password) {
+          throw new Error("La contraseña es requerida para nuevos usuarios");
+        }
+        success = await createUser({
+          name: values.name,
+          email: values.email,
+          password: values.password
+        });
+      }
+
+      if (success) {
+        await refreshUsers();
+        onCancel();
+      }
+    } catch (error) {
+      console.error('Error al guardar usuario:', error);
+    }
+  };
 
   return (
-    <div
-      className="animate-slide-in-right-reverse bg-white p-4 rounded-xl shadow-md max-w-xl mx-auto relative"
-    >
-      <h2 className="text-xl font-bold mb-4">{isEditing ? "Editar Usuario" : "Nuevo Usuario"}</h2>
-
-      <ItemForm<User & { password?: string }>
-        initialValues={initialValues}
-        onSubmit={onSubmit}
-        fields={fields}
-      />
-    </div>
+    <ItemForm<User & { password?: string }>
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      onCancel={onCancel}
+      fields={fields}
+    />
   );
 };
 

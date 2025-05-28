@@ -41,6 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     const result = await authService.login(email, password);
+    console.log("Resultado del login: ", result);
     if (result && result.accessToken && result.user) {
       setUser(result.user); // Aquí guardamos el usuario que tiene la propiedad 'role'
       AuthStorage.saveToken(result.accessToken);

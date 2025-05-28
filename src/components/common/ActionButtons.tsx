@@ -11,3 +11,8 @@ export const EditButton = ({ onClick }: { onClick: () => void }) => (
 export const DeleteButton = ({ onClick }: { onClick: () => void }) => (
   <IconButton onClick={onClick} icon="/assets/icons/delete.svg" alt="Eliminar" />
 );
+
+export const ViewButton = ({ onClick }: { onClick: () => void }) => (
+  <IconButton onClick={onClick} icon="/assets/icons/view.svg" alt="Ver" />
+);
+

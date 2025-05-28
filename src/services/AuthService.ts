@@ -19,6 +19,7 @@ export class AuthService implements IAuthService {
   }
 
   async login(email: string, password: string): Promise<{ user: any; accessToken: string } | null>  {
+    console.log("datos desde AuthService: ", email, password);
     try {
       const response = await fetch(`${this.apiUrl}/auth/login`, {
         method: "POST",

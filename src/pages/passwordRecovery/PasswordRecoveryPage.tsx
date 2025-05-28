@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthService, PasswordRecoveryResponse } from "../services/AuthService";
+import { AuthService, PasswordRecoveryResponse } from "../../services/AuthService";
 import "./PasswordRecoveryPage.css"; 
 
 const PasswordRecoveryPage: React.FC = () => {

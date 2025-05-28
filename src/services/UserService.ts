@@ -1,4 +1,3 @@
-import { data } from "react-router-dom";
 import { User, UsersResponse } from "../interfaces/User";
 import { CreateUserDTO } from "../interfaces/User";
 import { apiFetch } from "../utils/apiFetch";
@@ -7,22 +6,46 @@ export class UserService {
   private usersUrl = "/auth/users";
   private registerUrl = "/auth/register";
 
-  async getUsers(): Promise<UsersResponse> {
-    try {
-      return await apiFetch<UsersResponse>(this.usersUrl);
-    } catch (error) {
-      console.error("Error en getUsers:", error);
-      return {
-        data: [],
-        meta: {
+  // Ahora acepta parámetros de paginación, búsqueda y filtros dinámicos
+async getUsers(params?: { page?: number; limit?: number; search?: string; [key: string]: any }): Promise<UsersResponse> {
+  try {
+    let query = "";
+    if (params) {
+      const searchParams = new URLSearchParams();
+      if (params.page) searchParams.append("page", String(params.page));
+      if (params.limit) searchParams.append("limit", String(params.limit));
+      if (params.search) searchParams.append("search", params.search);
+
+      Object.keys(params).forEach(key => {
+        if (!["page", "limit", "search"].includes(key) && params[key] !== undefined && params[key] !== "") {
+          const value = params[key];
+          // Solo agrega el filtro si el array tiene al menos un valor
+          if (Array.isArray(value)) {
+            if (value.length > 0) {
+              value.forEach(v => searchParams.append(key, v));
+            }
+          } else {
+            searchParams.append(key, String(value));
+          }
+        }
+      });
+
+      query = `?${searchParams.toString()}`;
+    }
+    return await apiFetch<UsersResponse>(this.usersUrl + query);
+  } catch (error) {
+    console.error("Error en getUsers:", error);
+    return {
+      data: [],
+      meta: {
         limit: 0,
         page: 0,
         total: 0,
-        totalPage: 0,
-        }
+        totalPages: 0,
       }
     }
   }
+}
 
   async getUserById(id: number): Promise<User | null> {
     try {
@@ -53,9 +76,6 @@ export class UserService {
         role: user.role,
         isActive: user.isActive,
       };
-
-      console.log("Body PUT updateUser: ", filteredUser);
-
       return await apiFetch<User>(`${this.usersUrl}/${id}`, {
         method: "PUT",
         body: JSON.stringify(filteredUser),

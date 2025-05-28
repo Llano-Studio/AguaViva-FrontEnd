@@ -20,6 +20,6 @@ export interface UsersResponse {
       limit: number;
       page: number;
       total: number;
-      totalPage: number;
+      totalPages: number;
     };
   }
