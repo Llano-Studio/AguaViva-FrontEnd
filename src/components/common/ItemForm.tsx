@@ -23,6 +23,7 @@ interface ItemFormProps<T> {
   onSubmit: (values: T) => void;
   onCancel?: () => void; 
   fields: Field<T>[];
+  class?: string;
 }
 
 export function ItemForm<T extends Record<string, any>>({
@@ -30,6 +31,7 @@ export function ItemForm<T extends Record<string, any>>({
   onSubmit,
   onCancel,
   fields,
+  class: classForm
 }: ItemFormProps<T>) {
   const { register, handleSubmit, formState: { errors } } = useForm<T>({
     defaultValues: initialValues as DefaultValues<T>
@@ -59,7 +61,7 @@ export function ItemForm<T extends Record<string, any>>({
         return (
           <select
             {...register(field.name as any, validationRules)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${classForm+"-form"}`}
           >
             {field.options?.map(option => (
               <option key={option.value} value={option.value}>
@@ -73,7 +75,7 @@ export function ItemForm<T extends Record<string, any>>({
           <input
             type="checkbox"
             {...register(field.name as any)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className={`h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ${classForm+"-form-input"}`}
           />
         );
       default:
@@ -81,24 +83,24 @@ export function ItemForm<T extends Record<string, any>>({
           <input
             type={field.type || 'text'}
             {...register(field.name as any, validationRules)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${classForm+"-form-input"}`}
           />
         );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className={`space-y-4 ${classForm+"-form"}`}>
       {fields.map((field) => {
         const fieldName = String(field.name);
         return (
-          <div key={fieldName} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+          <div key={fieldName} className={`space-y-1 ${classForm+"-form-field"}`}>
+            <label className={`block text-sm font-medium text-gray-700 ${classForm+"-form-field-label"}`}>
               {field.label}
             </label>
             {renderField(field)}
             {errors[fieldName] && (
-              <p className="text-red-500 text-sm">
+              <p className={`text-red-500 text-sm ${classForm+"-form-field-error"}`}>
                 {/* @ts-ignore */}
                 {errors[fieldName]?.message as string}
               </p>
@@ -106,11 +108,11 @@ export function ItemForm<T extends Record<string, any>>({
           </div>
         );
       })}
-      <div className="flex justify-end space-x-2 pt-4">
+      <div className={`flex justify-end space-x-2 pt-4 ${classForm+"-form-actions"}`}>
         {onCancel && (
           <button
             type="button"
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+            className={`bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 ${classForm+"-form-cancel"}`}
             onClick={onCancel}
           >
             Cancelar
@@ -118,7 +120,7 @@ export function ItemForm<T extends Record<string, any>>({
         )}
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${classForm+"-form-submit"}`}
         >
           Guardar
         </button>

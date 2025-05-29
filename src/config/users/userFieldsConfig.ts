@@ -1,6 +1,6 @@
-import { Field } from "../components/common/ItemForm";
-import { User } from "../interfaces/User";
-import { Column } from "../components/common/DataTable";
+import { Field } from "../../components/common/ItemForm";
+import { User } from "../../interfaces/User";
+import { Column } from "../../components/common/DataTable";
 
 // Campos del formulario de usuario
 export const userFields: Field<User & { password?: string }>[] = [

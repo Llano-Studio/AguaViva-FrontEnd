@@ -2,16 +2,17 @@ import React from "react";
 import { ItemForm, Field } from "../common/ItemForm";
 import { User } from "../../interfaces/User";
 import useUsers from "../../hooks/useUsers";
-import { userFields, passwordField } from "../../config/UserFields";
+import { userFields, passwordField } from "../../config/users/userFieldsConfig";
 
 interface UserFormProps {
   onCancel: () => void;
   isEditing: boolean;
   userToEdit?: User;
   refreshUsers: () => Promise<any>;
+  class?: string;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ onCancel, isEditing, userToEdit, refreshUsers }) => {
+const UserForm: React.FC<UserFormProps> = ({ onCancel, isEditing, userToEdit, refreshUsers, class:classForm }) => {
   const { createUser, updateUser } = useUsers();
 
   const emptyUser: User & { password?: string } = {
@@ -70,6 +71,7 @@ const UserForm: React.FC<UserFormProps> = ({ onCancel, isEditing, userToEdit, re
       onSubmit={handleSubmit}
       onCancel={onCancel}
       fields={fields}
+      class={classForm}
     />
   );
 };

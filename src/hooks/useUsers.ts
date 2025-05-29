@@ -9,20 +9,30 @@ export const useUsers = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Paginación y filtros
+  // Paginación, filtros y ordenamiento múltiple
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<{ [key: string]: any }>({});
+  const [sortBy, setSortBy] = useState<string[]>([]);
+  const [sortDirection, setSortDirection] = useState<("asc" | "desc")[]>([]);
+
+  // Genera el string de sortBy para la API (ej: "name,-role")
+  const getSortParams = () => {
+    return sortBy
+      .map((field, idx) => (sortDirection[idx] === "desc" ? `-${field}` : field))
+      .join(",");
+  };
 
   const fetchUsers = useCallback(
     async (
       pageParam = page,
       limitParam = limit,
       searchParam = search,
-      filtersParam = filters
+      filtersParam = filters,
+      sortByParam = getSortParams()
     ) => {
       try {
         setIsLoading(true);
@@ -30,6 +40,7 @@ export const useUsers = () => {
           page: pageParam,
           limit: limitParam,
           search: searchParam,
+          sortBy: sortByParam, // string separado por coma
           ...filtersParam,
         });
         if (response?.data) {
@@ -49,20 +60,20 @@ export const useUsers = () => {
         setIsLoading(false);
       }
     },
-    [page, limit, search, filters]
+    [page, limit, search, filters, sortBy, sortDirection]
   );
 
   useEffect(() => {
-    fetchUsers(page, limit, search, filters);
+    fetchUsers(page, limit, search, filters, getSortParams());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, search, filters]);
+  }, [page, limit, search, filters, sortBy, sortDirection]);
 
   const createUser = async (userData: CreateUserDTO) => {
     try {
       setIsLoading(true);
       const newUser = await userService.createUser(userData);
       if (newUser) {
-        await fetchUsers(page, limit, search, filters);
+        await fetchUsers(page, limit, search, filters, getSortParams());
         return true;
       }
       return false;
@@ -80,7 +91,7 @@ export const useUsers = () => {
       setIsLoading(true);
       const updatedUser = await userService.updateUser(id, userData);
       if (updatedUser) {
-        await fetchUsers(page, limit, search, filters);
+        await fetchUsers(page, limit, search, filters, getSortParams());
         setSelectedUser(null);
         return true;
       }
@@ -98,7 +109,7 @@ export const useUsers = () => {
     try {
       setIsLoading(true);
       await userService.deleteUser(id);
-      await fetchUsers(page, limit, search, filters);
+      await fetchUsers(page, limit, search, filters, getSortParams());
       setSelectedUser(null);
       return true;
     } catch (err) {
@@ -119,7 +130,7 @@ export const useUsers = () => {
     handleDelete,
     updateUser,
     createUser,
-    refreshUsers: () => fetchUsers(page, limit, search, filters),
+    refreshUsers: () => fetchUsers(page, limit, search, filters, getSortParams()),
     page,
     setPage,
     limit,
@@ -131,6 +142,10 @@ export const useUsers = () => {
     setSearch,
     filters,
     setFilters,
+    sortBy,
+    setSortBy,
+    sortDirection,
+    setSortDirection,
   };
 };
 
