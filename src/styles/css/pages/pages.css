@@ -11,7 +11,9 @@
 }
 
 .page-title{
-  @apply text-2xl font-bold mb-4;
+  @apply mb-4;
+  font-size: 20px;
+  font-weight: 500;
 
 }
 
@@ -21,17 +23,36 @@
 }
 
 .page-filter-button{
-  @apply bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2;
+  @apply px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-color-2);
+  height: 28px;
+  width: 101px;
+  background: var(--acent-color-1);
+  border-radius: 6px;
+}
 
+.page-filter-button-icon{
+  @apply w-5 h-5;
 }
 
 .page-new-button{
-  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center gap-2;
-
+  @apply px-4 py-2 rounded hover:bg-blue-600 flex items-center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-color-2);
+  width: 115px;
+  height: 28px;
+  padding: 0px;
+  background: var(--acent-color-2);
+  border-radius: 6px;
+  padding: 5px;
 }
 
 .page-new-button-icon{
-  @apply w-5 h-5;
+  width: 17px;
+  height: 17px;
 
 }
 

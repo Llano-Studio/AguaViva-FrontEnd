@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+.icon-button{
+    @apply hover:opacity-80 transition-opacity;
+    padding: 0px;
+    margin-right: 5px;
+}
+
+.icon-button-img{
+    height: 19px;
+    width: 22px;
+}

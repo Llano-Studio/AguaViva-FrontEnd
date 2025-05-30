@@ -1,4 +1,5 @@
 import React from "react";
+import "../../styles/css/components/common/sortBy.css";
 
 interface SortByProps {
   active: boolean;
@@ -10,18 +11,18 @@ const SortBy: React.FC<SortByProps> = ({ active, direction, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`button ${active ? "text-blue-600" : "text-gray-400"}`}
+    className={`sortBy-button`}
     tabIndex={-1}
     aria-label="Ordenar"
   >
     {direction === "asc" && (
-      <img src="/assets/icons/sort-asc.svg" alt="Ascendente" title="Ascendente" className="icon icon-1" />
+      <img src="/assets/icons/sort-asc.svg" alt="Ascendente" title="Ascendente" className="sortBy-icon sortBy-icon-1" />
     )}
     {direction === "desc" && (
-      <img src="/assets/icons/sort-desc.svg" alt="Descendente" title="Descendente" className="icon icon-2" />
+      <img src="/assets/icons/sort-desc.svg" alt="Descendente" title="Descendente" className="sortBy-icon sortBy-icon-2" />
     )}
     {direction === null && (
-      <img src="/assets/icons/sort-neutro.svg" alt="Sin orden" title="Sin orden" className="icon icon-3" />
+      <img src="/assets/icons/sort-neutro.svg" alt="Sin orden" title="Sin orden" className="sortBy-icon sortBy-icon-3" />
     )}
   </button>
 );

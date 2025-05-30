@@ -150,7 +150,7 @@ const UsersPage: React.FC = () => {
             <img
               src="/assets/icons/filter-icon.svg"
               alt="Filtros"
-              className="w-5 h-5"
+              className={`page-filter-button-icon ${titlePage+"-page-filter-button-icon"}`}
               style={{ display: "inline-block" }}
             />
             Filtros

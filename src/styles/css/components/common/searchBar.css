@@ -1,17 +1,29 @@
 @import "tailwindcss";
 
 .search-bar{
-    @apply relative w-full max-w-xs;
+    @apply relative w-full;
+    width: fit-content;
+    display: flex;
 
 }
 
 .search-bar-input{
     @apply border px-3 py-2 rounded w-full pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500;
-
+    width: 475px;
+    height: 28px;
+    border: solid 1.5px var(--bg-color-2);
+    border-radius: 8px 0px 0px 8px;
+    border-right: none;
+    font-size: 11px;
+    font-style: italic;
+    font-family: 'Inter', sans-serif;
 }
 
 .search-bar-img{
-    @apply absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none;
+    @apply pointer-events-none;
+    width: 34px;
+    height: 28px;
+    transform: translate(-3px, 0px);
 
 }
 

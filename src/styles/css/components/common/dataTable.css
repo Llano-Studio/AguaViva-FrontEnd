@@ -14,14 +14,19 @@
 
 .table-th{
     @apply px-4 py-2 text-left;
+    justify-items: center;
 }
 
 .table-span{
     @apply flex items-center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color-1);
 }
 
 .table-th-acciones{
-    @apply px-4 py-2 text-left 
+    @apply px-4 py-2 text-left;
+    display: none;
 }
 
 .table-tr{
@@ -30,6 +35,11 @@
 
 .table-td-1{
     @apply px-4 py-2;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+    text-transform: capitalize;
+    text-align: center;
 }
 
 .table-td-2{
