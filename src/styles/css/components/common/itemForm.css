@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+.form-select{
+    @apply w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.form-checkbox{
+    @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+}
+
+.form-input{
+    @apply w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.form{
+    @apply space-y-4;
+}
+
+.form-field{
+    @apply space-y-1;
+}
+
+.form-field-label{
+    @apply block text-sm font-medium text-gray-700;
+}
+
+.form-field-error{
+    @apply text-red-500 text-sm;
+}
+
+.form-actions{
+    @apply flex justify-end space-x-2 pt-4;
+}
+
+.form-cancel{
+    @apply bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400;
+}
+
+.form-submit{
+    @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
+}

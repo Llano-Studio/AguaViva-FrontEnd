@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService, PasswordRecoveryResponse } from "../../services/AuthService";
-import "./PasswordRecoveryPage.css"; 
+import "../../styles/css/pages/passwordRecovery/passwordRecoveryPage.css";
 
 const PasswordRecoveryPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");

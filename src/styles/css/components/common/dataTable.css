@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+.table-container{
+    @apply overflow-x-auto;
+}
+
+.table{
+    @apply min-w-full border border-gray-300;
+}
+
+.table-thead{
+    @apply bg-gray-100;
+}
+
+.table-th{
+    @apply px-4 py-2 text-left;
+}
+
+.table-span{
+    @apply flex items-center;
+}
+
+.table-th-acciones{
+    @apply px-4 py-2 text-left 
+}
+
+.table-tr{
+    @apply border-t border-gray-200;
+}
+
+.table-td-1{
+    @apply px-4 py-2;
+}
+
+.table-td-2{
+    @apply px-4 py-2 space-x-2;
+}
+

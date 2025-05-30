@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+.search-bar{
+    @apply relative w-full max-w-xs;
+
+}
+
+.search-bar-input{
+    @apply border px-3 py-2 rounded w-full pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500;
+
+}
+
+.search-bar-img{
+    @apply absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none;
+
+}
+

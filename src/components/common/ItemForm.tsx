@@ -1,5 +1,6 @@
 import React from 'react';
 import { useForm, RegisterOptions, DefaultValues } from 'react-hook-form';
+import '../../styles/css/components/common/itemForm.css'
 
 // Validaciones opcionales
 interface FieldValidation {
@@ -61,7 +62,7 @@ export function ItemForm<T extends Record<string, any>>({
         return (
           <select
             {...register(field.name as any, validationRules)}
-            className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${classForm+"-form"}`}
+            className={`form-select ${classForm+"-form-select"}`}
           >
             {field.options?.map(option => (
               <option key={option.value} value={option.value}>
@@ -75,7 +76,7 @@ export function ItemForm<T extends Record<string, any>>({
           <input
             type="checkbox"
             {...register(field.name as any)}
-            className={`h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ${classForm+"-form-input"}`}
+            className={`form-checkbox ${classForm+"-form-checkbox"}`}
           />
         );
       default:
@@ -83,24 +84,24 @@ export function ItemForm<T extends Record<string, any>>({
           <input
             type={field.type || 'text'}
             {...register(field.name as any, validationRules)}
-            className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${classForm+"-form-input"}`}
+            className={`form-input ${classForm+"-form-input"}`}
           />
         );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={`space-y-4 ${classForm+"-form"}`}>
+    <form onSubmit={handleSubmit(onSubmit)} className={`form ${classForm+"-form"}`}>
       {fields.map((field) => {
         const fieldName = String(field.name);
         return (
-          <div key={fieldName} className={`space-y-1 ${classForm+"-form-field"}`}>
-            <label className={`block text-sm font-medium text-gray-700 ${classForm+"-form-field-label"}`}>
+          <div key={fieldName} className={`form-field ${classForm+"-form-field"}`}>
+            <label className={`form-field-label ${classForm+"-form-field-label"}`}>
               {field.label}
             </label>
             {renderField(field)}
             {errors[fieldName] && (
-              <p className={`text-red-500 text-sm ${classForm+"-form-field-error"}`}>
+              <p className={`form-field-error ${classForm+"-form-field-error"}`}>
                 {/* @ts-ignore */}
                 {errors[fieldName]?.message as string}
               </p>
@@ -108,11 +109,11 @@ export function ItemForm<T extends Record<string, any>>({
           </div>
         );
       })}
-      <div className={`flex justify-end space-x-2 pt-4 ${classForm+"-form-actions"}`}>
+      <div className={`form-actions ${classForm+"-form-actions"}`}>
         {onCancel && (
           <button
             type="button"
-            className={`bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 ${classForm+"-form-cancel"}`}
+            className={`form-cancel ${classForm+"-form-cancel"}`}
             onClick={onCancel}
           >
             Cancelar
@@ -120,7 +121,7 @@ export function ItemForm<T extends Record<string, any>>({
         )}
         <button
           type="submit"
-          className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${classForm+"-form-submit"}`}
+          className={`form-submit ${classForm+"-form-submit"}`}
         >
           Guardar
         </button>

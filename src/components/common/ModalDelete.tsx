@@ -1,4 +1,5 @@
 import React from "react";
+import '../../styles/css/components/common/modalDelete.css'
 
 interface ModalDeleteProps {
   isOpen: boolean;
@@ -21,25 +22,25 @@ const ModalDelete: React.FC<ModalDeleteProps> = ({
   const eliminar = `eliminar ${content}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded shadow-lg p-6 w-full max-w-sm">
-        <h2 className="text-lg font-bold mb-4 text-red-600 capitalize">{eliminar}</h2>
-        <p className="mb-2">
+    <div className="modal-container">
+      <div className="modal">
+        <h2 className="modal-title">{eliminar}</h2>
+        <p className="modal-legend-1">
           ¿Quieres eliminar {articulo} {content}?
         </p>
-        <p className="mb-6">
+        <p className="modal-legend-2">
           Al eliminar {articulo} {content} se perderán los datos ingresados
         </p>
-        <div className="flex justify-end gap-2">
+        <div className="modal-actions">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
+            className="modal-button-cancel"
           >
             Cancelar
           </button>
           <button
             onClick={onDelete}
-            className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white capitalize"
+            className="modal-button-delete"
           >
             {eliminar}
           </button>

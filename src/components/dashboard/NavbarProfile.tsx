@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import "./NavbarProfile.css";
+import "../../styles/css/components/dashboard/navbarProfile.css";
 
 
 const NavbarProfile: React.FC = () => {

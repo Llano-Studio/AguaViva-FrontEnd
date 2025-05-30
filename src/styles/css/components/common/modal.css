@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+.modal-container{
+    @apply fixed inset-0 bg-black flex items-center justify-center z-15; 
+}
+
+.modal-wrapper{
+    @apply bg-white rounded-lg p-6 max-w-2xl w-full mx-4;
+}
+
+.modal-header{
+    @apply flex justify-between items-center mb-4;
+}
+
+.modal-title{
+    @apply text-xl font-bold;
+}
+
+.modal{
+    @apply text-gray-500 hover:text-gray-700;
+}
+
+.modal-content{
+    @apply space-y-4;
+}
+
+.modal-label{
+    @apply font-bold;
+}

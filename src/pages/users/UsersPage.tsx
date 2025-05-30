@@ -11,6 +11,7 @@ import FilterDrawer from "../../components/common/FilterDrawer";
 import { userFilters } from "../../config/users/userFiltersConfig";
 import { userModalConfig } from "../../config/users/userModalConfig";
 import ModalDelete from "../../components/common/ModalDelete";
+import '../../styles/css/pages/pages.css';
 
 const UsersPage: React.FC = () => {
   const { 
@@ -124,15 +125,17 @@ const UsersPage: React.FC = () => {
   const titlePage = "users";
 
   return (
-    <div className={`p-4 relative overflow-hidden min-h-[500px] h-[100%] ${titlePage+"-page-container"}`}>
+    <div className={`page-container ${titlePage+"-page-container"}`}>
       {/* Panel de la tabla */}
       <div
-        className={`
-          absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out z-10 bg-[#F5F6FA] ${titlePage+"-page-content1"}
+        className={`page-content ${titlePage+"-page-content"}
           ${showForm ? "-translate-x-full" : "translate-x-0"}
         `}
       >
-        <div className={`flex justify-between items-center mb-4 ${titlePage+"-page-header"}`}>
+        <div>
+          <h1 className={`page-title ${titlePage+"-page-title"}`}>Usuarios</h1>
+        </div>
+        <div className={`page-header ${titlePage+"-page-header"}`}>
           <SearchBar
             ref={searchInputRef}
             value={search}
@@ -142,7 +145,7 @@ const UsersPage: React.FC = () => {
           />
           <button
             onClick={() => setShowFilters(true)}
-            className={`bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2 ${titlePage+"-page-filter-button"}`}
+            className={`page-filter-button ${titlePage+"-page-filter-button"}`}
           >
             <img
               src="/assets/icons/filter-icon.svg"
@@ -154,12 +157,12 @@ const UsersPage: React.FC = () => {
           </button>
           <button
             onClick={() => navigate("/usuarios/nuevo-usuario")}
-            className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center gap-2 ${titlePage+"-page-new-user-button"}`}
+            className={`page-new-button ${titlePage+"-page-new-button"}`}
           >
             <img
               src="/assets/icons/huge-icon.svg"
               alt="Nuevo usuario"
-              className="w-5 h-5"
+              className={`page-new-button-icon ${titlePage+"-page-new-button-icon"}`}
               style={{ display: "inline-block" }}
             />
             Nuevo Usuario
@@ -180,15 +183,15 @@ const UsersPage: React.FC = () => {
           onSort={handleSort}
         />
         {/* Controles de paginación y leyenda */}
-        <div className={`flex justify-between items-center mt-4 ${titlePage+"-page-pagination"}`}>
+        <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
           {/* Leyenda de cantidad */}
-          <div className={`text-sm text-gray-600 ${titlePage+"-page-pagination-legend"}`}>
+          <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
             Mostrando {end > total ? total : end} de {total} usuarios
           </div>
           {/* Paginación numerada */}
-          <div className={`flex space-x-1 ${titlePage+"-page-pagination-controls"}`}>
+          <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
             <button
-              className={`px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 ${titlePage+"-page-pagination-botton-prev"}`}
+              className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
               onClick={() => setPage(page - 1)}
               disabled={page <= 1}
             >
@@ -197,7 +200,7 @@ const UsersPage: React.FC = () => {
             {Array.from({ length: totalPages }, (_, i) => (
               <button
                 key={i + 1}
-                className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'} ${titlePage+"-page-pagination-button"}`}
+                className={`${page === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
                 onClick={() => setPage(i + 1)}
                 disabled={page === i + 1}
               >
@@ -205,7 +208,7 @@ const UsersPage: React.FC = () => {
               </button>
             ))}
             <button
-              className={`px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 ${titlePage+"-page-pagination-button-next"}`}
+              className={`page-pagination-button-next ${titlePage+"-page-pagination-button-next"}`}
               onClick={() => setPage(page + 1)}
               disabled={page >= totalPages}
             >
@@ -230,18 +233,17 @@ const UsersPage: React.FC = () => {
 
       {/* Panel del formulario */}
       <div
-        className={`
-          absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out ${titlePage+"-form-container"}
+        className={`form-container ${titlePage+"-form-container"}
           ${showForm ? "translate-x-0" : "translate-x-full"}
         `}
         style={{ maxWidth: 500, minHeight: 500 }}
       >
-        <div className={`p-6 h-full flex flex-col bg-white shadow-lg ${titlePage+"-form-wrapper"}`}>
-          <div className={`flex justify-between items-center mb-4 ${titlePage+"-form-header"}`}>
-            <h2 className={`text-xl font-bold ${titlePage+"-form-title"}`}>Editar Usuario</h2>
+        <div className={`form-wrapper ${titlePage+"-form-wrapper"}`}>
+          <div className={`form-header ${titlePage+"-form-header"}`}>
+            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Usuario</h2>
             <button
               onClick={handleCloseForm}
-              className={`text-gray-500 hover:text-gray-700 text-2xl ${titlePage+"-form-close-button"}`}
+              className={`form-close-button ${titlePage+"-form-close-button"}`}
             >
               ×
             </button>

@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useModulesByRole } from "../../hooks/useModulesByRole";
-import "./DashboardLayout.css";
+import "../../styles/css/components/dashboard/dashboardLayout.css";
 import NavbarProfile from "./NavbarProfile";
 
 
@@ -16,43 +16,43 @@ const DashboardLayout: React.FC = () => {
     <div className="dashboard-layout">
       <div>
         <div className="logo-container">
-          <img src="/assets/imagenes/logo.svg" alt="Logo" className="w-32 h-auto logo" />
+          <img src="/assets/imagenes/logo.svg" alt="Logo" className="logo" />
         </div>
         <aside className="sidebar">
           <nav>
             <ul>
               {modules.includes("zones") && (
                 <li><NavLink to="/usuarios">
-                  <img src="/assets/icons/clientes.svg" alt="Usuarios" className="w-5 h-5" />
+                  <img src="/assets/icons/clientes.svg" alt="Usuarios" className="sidebar-li" />
                   Usuarios
                   </NavLink></li>
               )}
               {modules.includes("persons") && (
                 <li><NavLink to="/clientes">
-                  <img src="/assets/icons/clientes.svg" alt="Usuarios" className="w-5 h-5" />
+                  <img src="/assets/icons/clientes.svg" alt="Usuarios" className="sidebar-li" />
                   Clientes
                   </NavLink></li>
               )}
               {modules.includes("articles") && (
                 <li><NavLink to="/articulos">
-                  <img src="/assets/icons/articulos.svg" alt="Usuarios" className="w-5 h-5" />
+                  <img src="/assets/icons/articulos.svg" alt="Usuarios" className="sidebar-li" />
                   Artículos
                   </NavLink></li>
               )}
               {modules.includes("mobiles") && (
                 <li><NavLink to="/moviles">
-                  <img src="/assets/icons/entregas.svg" alt="Usuarios" className="w-5 h-5" />
+                  <img src="/assets/icons/entregas.svg" alt="Usuarios" className="sidebar-li" />
                   Móviles</NavLink></li>
               )}
               {modules.includes("zones") && (
                 <li><NavLink to="/zonas">
-                  <img src="/assets/icons/zonas.svg" alt="Usuarios" className="w-5 h-5" />
+                  <img src="/assets/icons/zonas.svg" alt="Usuarios" className="sidebar-li" />
                   Zonas
                   </NavLink></li>
               )}
               {modules.includes("deliveries") && (
                 <li><NavLink to="/entregas">
-                  <img src="/assets/icons/entregas.svg" alt="Usuarios" className="w-5 h-5" />
+                  <img src="/assets/icons/entregas.svg" alt="Usuarios" className="sidebar-li" />
                   Entregas
                   </NavLink></li>
               )}

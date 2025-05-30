@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+.page-container{
+  @apply p-4 relative overflow-hidden min-h-[500px] h-[100%];
+  
+}
+
+.page-content{
+  @apply absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out z-10 bg-[#F5F6FA];
+
+}
+
+.page-title{
+  @apply text-2xl font-bold mb-4;
+
+}
+
+.page-header{
+  @apply flex justify-between items-center mb-4;
+
+}
+
+.page-filter-button{
+  @apply bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2;
+
+}
+
+.page-new-button{
+  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center gap-2;
+
+}
+
+.page-new-button-icon{
+  @apply w-5 h-5;
+
+}
+
+.page-pagination{
+  @apply flex justify-between items-center mt-4;
+
+}
+
+.page-pagination-legend{
+  @apply text-sm text-gray-600;
+
+}
+
+.page-pagination-controls{
+  @apply flex space-x-1;
+
+}
+
+.page-pagination-botton-prev{
+  @apply px-3 py-1 rounded bg-gray-200 hover:bg-gray-300;
+
+}
+
+.page-pagination-button{
+  @apply px-3 py-1 rounded;
+
+}
+
+.page-pagination-button-next{
+  @apply px-3 py-1 rounded bg-gray-200 hover:bg-gray-300;
+
+}
+
+.form-container{
+  @apply absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out;
+
+}
+
+.form-wrapper{
+  @apply p-6 h-full flex flex-col bg-white shadow-lg;
+
+}
+
+.form-header{
+  @apply flex justify-between items-center mb-4;
+
+}
+
+.form-title{
+  @apply text-xl font-bold;
+
+}
+
+.form-close-button{
+  @apply text-gray-500 hover:text-gray-700 text-2xl;
+}
+

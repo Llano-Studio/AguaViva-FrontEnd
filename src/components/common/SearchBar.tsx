@@ -1,4 +1,5 @@
 import React, { useState, useEffect, forwardRef } from "react";
+import '../../styles/css/components/common/searchBar.css';
 
 interface SearchBarProps {
   value: string;
@@ -24,19 +25,19 @@ const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
     }, [inputValue, onChange, debounceMs]);
 
     return (
-      <div className={`relative w-full max-w-xs ${classSearchBar ? classSearchBar + "search-bar" : ""}`}>
+      <div className={`search-bar ${classSearchBar ? classSearchBar + "search-bar" : ""}`}>
         <input
           ref={ref}
           type="text"
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           placeholder={placeholder || "Buscar..."}
-          className="border px-3 py-2 rounded w-full pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 search-bar"
+          className={`search-bar-input ${classSearchBar+'-search-bar-input'}`}
         />
         <img
           src="/assets/icons/search-icon.svg"
           alt="Buscar"
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+          className={`search-bar-img ${classSearchBar+'-search-bar-img'}`}
         />
       </div>
     );

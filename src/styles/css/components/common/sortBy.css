@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.button{
+    @apply ml-1 focus:outline-none;
+}
+
+.icon{
+    @apply w-4 h-4;
+}

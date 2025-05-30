@@ -1,5 +1,5 @@
 import React from "react";
-
+import '../../styles/css/components/common/filterDrawer.css'
 interface FilterField {
   name: string;
   label: string;
@@ -42,22 +42,19 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
 
   return (
     <div
-      className={`
-        fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-50 transition-transform duration-300
-        translate-x-0 filter-container
-      `}
+      className={`filter-container`}
     >
-      <div className="flex justify-between items-center p-4 border-b filter-header">
-        <h2 className="text-lg font-bold flex items-center gap-2 filter-title">
+      <div className="filter-header">
+        <h2 className="filter-title">
           <img
             src="/assets/icons/filter-icon2.svg"
             alt="Filtrar"
-            className="w-5 h-5"
+            className="filter-title-img"
             style={{ display: "inline-block" }}
           />
           Filtrar
         </h2>
-        <button onClick={onClose} className="text-2xl filter-button-close flex items-center justify-center p-1">
+        <button onClick={onClose} className="filter-button-close">
           <img
             src="/assets/icons/filter-close.svg"
             alt="Cerrar"
@@ -66,14 +63,14 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
           />
         </button>
       </div>
-      <div className="p-4 space-y-4 filter-content">
+      <div className="filter-content">
         {fields.map(field => (
           <div key={field.name}>
-            <label className="block mb-1 font-medium filter-label">{field.label}</label>
+            <label className="filter-label">{field.label}</label>
             {field.type === "checkbox" && field.options && (
-              <div className="flex flex-col gap-1 filter-checkbox-group">
+              <div className="filter-checkbox-group">
                 {field.options.map(opt => (
-                  <label key={String(opt.value)} className="flex items-center gap-2 filter-checkbox-label">
+                  <label key={String(opt.value)} className="filter-checkbox-label">
                     <input
                       type="checkbox"
                       checked={Array.isArray(values[field.name]) ? values[field.name].includes(opt.value) : false}
@@ -86,9 +83,9 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             )}
           </div>
         ))}
-        <div className="flex justify-between pt-2 filter-actions">
-          <button onClick={onClear} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 filter-button-clear">Limpiar</button>
-          <button onClick={onApply} className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 filter-button-apply">Aplicar</button>
+        <div className="filter-actions">
+          <button onClick={onClear} className="filter-button-clear">Limpiar</button>
+          <button onClick={onApply} className="filter-button-apply">Aplicar</button>
         </div>
       </div>
     </div>
