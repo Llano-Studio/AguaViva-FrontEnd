@@ -22,8 +22,13 @@
 
 }
 
+.page-header-div-2{
+  display: flex;
+  gap: 15px;
+}
+
 .page-filter-button{
-  @apply px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2;
+  @apply px-4 py-2 rounded flex items-center gap-2;
   font-size: 11px;
   font-weight: 600;
   color: var(--text-color-2);
@@ -33,12 +38,16 @@
   border-radius: 6px;
 }
 
+.page-filter-button:hover{
+  opacity: 0.8;
+}
+
 .page-filter-button-icon{
   @apply w-5 h-5;
 }
 
 .page-new-button{
-  @apply px-4 py-2 rounded hover:bg-blue-600 flex items-center;
+  @apply px-4 py-2 rounded flex items-center;
   font-size: 11px;
   font-weight: 600;
   color: var(--text-color-2);
@@ -50,6 +59,10 @@
   padding: 5px;
 }
 
+.page-new-button:hover{
+  opacity: 0.8;
+}
+
 .page-new-button-icon{
   width: 17px;
   height: 17px;
@@ -58,32 +71,44 @@
 
 .page-pagination{
   @apply flex justify-between items-center mt-4;
-
+  margin-top: 15px;
 }
 
 .page-pagination-legend{
-  @apply text-sm text-gray-600;
-
+  font-size: 12px;
+  font-weight: 200;
+  color: var(--text-color-1);
+  margin-left: 20px;
 }
 
 .page-pagination-controls{
   @apply flex space-x-1;
-
-}
-
-.page-pagination-botton-prev{
-  @apply px-3 py-1 rounded bg-gray-200 hover:bg-gray-300;
+  background: var(--bg-color-3);
+  border: solid 1px var(--bg-color-2);
+  border-radius: 3px;
+  padding: 2px;
 
 }
 
 .page-pagination-button{
-  @apply px-3 py-1 rounded;
-
+  font-size: 13px;
+  padding: 3px 13px;
+  border-radius: 3px;
 }
 
-.page-pagination-button-next{
-  @apply px-3 py-1 rounded bg-gray-200 hover:bg-gray-300;
 
+.page-pagination-button-next,
+.page-pagination-botton-prev{
+  color: white;
+  background: var(--acent-color-1);
+  border-radius: 3px;
+  font-size: 13px;
+  padding: 3px 13px;
+}
+
+.page-pagination-button-next:hover,
+.page-pagination-botton-prev:hover{
+  opacity: 0.8;
 }
 
 .form-container{

@@ -136,37 +136,41 @@ const UsersPage: React.FC = () => {
           <h1 className={`page-title ${titlePage+"-page-title"}`}>Usuarios</h1>
         </div>
         <div className={`page-header ${titlePage+"-page-header"}`}>
-          <SearchBar
-            ref={searchInputRef}
-            value={search}
-            onChange={setSearch}
-            placeholder="Buscar usuarios..."
-            class={titlePage}
-          />
-          <button
-            onClick={() => setShowFilters(true)}
-            className={`page-filter-button ${titlePage+"-page-filter-button"}`}
-          >
-            <img
-              src="/assets/icons/filter-icon.svg"
-              alt="Filtros"
-              className={`page-filter-button-icon ${titlePage+"-page-filter-button-icon"}`}
-              style={{ display: "inline-block" }}
+          <div className={`page-header-div-1 ${titlePage+"-page-header-div-1"}`}>
+            <SearchBar
+              ref={searchInputRef}
+              value={search}
+              onChange={setSearch}
+              placeholder="Buscar usuarios..."
+              class={titlePage}
             />
-            Filtros
-          </button>
-          <button
-            onClick={() => navigate("/usuarios/nuevo-usuario")}
-            className={`page-new-button ${titlePage+"-page-new-button"}`}
-          >
-            <img
-              src="/assets/icons/huge-icon.svg"
-              alt="Nuevo usuario"
-              className={`page-new-button-icon ${titlePage+"-page-new-button-icon"}`}
-              style={{ display: "inline-block" }}
-            />
-            Nuevo Usuario
-          </button>
+          </div>
+          <div className={`page-header-div-2 ${titlePage+"-page-header-div-2"}`}>
+            <button
+              onClick={() => setShowFilters(true)}
+              className={`page-filter-button ${titlePage+"-page-filter-button"}`}
+            >
+              <img
+                src="/assets/icons/filter-icon.svg"
+                alt="Filtros"
+                className={`page-filter-button-icon ${titlePage+"-page-filter-button-icon"}`}
+                style={{ display: "inline-block" }}
+              />
+              Filtros
+            </button>
+            <button
+              onClick={() => navigate("/usuarios/nuevo-usuario")}
+              className={`page-new-button ${titlePage+"-page-new-button"}`}
+            >
+              <img
+                src="/assets/icons/huge-icon.svg"
+                alt="Nuevo usuario"
+                className={`page-new-button-icon ${titlePage+"-page-new-button-icon"}`}
+                style={{ display: "inline-block" }}
+              />
+              Nuevo Usuario
+            </button>
+          </div>
         </div>
         <DataTable
           data={users}
@@ -195,12 +199,12 @@ const UsersPage: React.FC = () => {
               onClick={() => setPage(page - 1)}
               disabled={page <= 1}
             >
-              Anterior
+              &lt;
             </button>
             {Array.from({ length: totalPages }, (_, i) => (
               <button
                 key={i + 1}
-                className={`${page === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
+                className={`${page === i + 1 ? 'bg-[#403A92] text-white' : 'bg-[#FFFFFF] hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
                 onClick={() => setPage(i + 1)}
                 disabled={page === i + 1}
               >
@@ -212,7 +216,7 @@ const UsersPage: React.FC = () => {
               onClick={() => setPage(page + 1)}
               disabled={page >= totalPages}
             >
-              Siguiente
+              &gt;
             </button>
           </div>
         </div>

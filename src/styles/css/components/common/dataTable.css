@@ -2,19 +2,29 @@
 
 .table-container{
     @apply overflow-x-auto;
+    border: solid 1.5px var(--bg-color-2);
+    border-radius: 8px;
 }
 
 .table{
-    @apply min-w-full border border-gray-300;
+    @apply min-w-full;
 }
 
 .table-thead{
     @apply bg-gray-100;
 }
 
+.table-thead tr:first-child{
+    justify-items: start !important
+}
+
 .table-th{
     @apply px-4 py-2 text-left;
     justify-items: center;
+}
+
+.table-thead tr :nth-child(1) {
+    justify-items: start;
 }
 
 .table-span{
@@ -33,16 +43,24 @@
     @apply border-t border-gray-200;
 }
 
+.table-tr :nth-child(n) {
+    text-align: center;
+}
+
+.table-tr :nth-child(1){
+    text-align: start !important;
+}
+
 .table-td-1{
     @apply px-4 py-2;
     font-size: 12px;
     font-weight: 400;
     color: var(--text-color-1);
     text-transform: capitalize;
-    text-align: center;
 }
 
 .table-td-2{
     @apply px-4 py-2 space-x-2;
+    text-align: end !important;
 }
 

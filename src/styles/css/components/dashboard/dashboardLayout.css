@@ -47,6 +47,7 @@
     text-decoration: none;
     display: flex;
     padding: 1rem 1rem 1rem 2rem;
+        border-bottom: solid 1px var(--bg-color-2);
   }
   
   .sidebar a.active {
