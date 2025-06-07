@@ -1,11 +1,16 @@
 @import "tailwindcss";
 
 .modal-container{
-    @apply fixed inset-0 bg-black flex items-center justify-center z-15; 
+    @apply fixed inset-0 flex items-center justify-center z-15; 
+    background: rgb(0 0 0 / 80%);
 }
 
 .modal-wrapper{
-    @apply bg-white rounded-lg p-6 max-w-2xl w-full mx-4;
+    background: var(--bg-color-3);
+    border-radius: 10px;
+    padding: 25px 50px;
+    width: 862px;
+    min-height: 359px;
 }
 
 .modal-header{
@@ -16,14 +21,29 @@
     @apply text-xl font-bold;
 }
 
-.modal{
-    @apply text-gray-500 hover:text-gray-700;
+.modal-button-close{
+    padding: 0;
 }
 
 .modal-content{
-    @apply space-y-4;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: space-between;
+    justify-content: space-between;
+}
+
+.modal-content div {
+    width: 25%;
+    padding-right: 3%;
 }
 
 .modal-label{
-    @apply font-bold;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.modal-label-value{
+    font-size: 12px;
+    font-weight: 400;
 }

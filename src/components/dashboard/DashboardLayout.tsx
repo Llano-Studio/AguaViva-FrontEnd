@@ -63,7 +63,7 @@ const DashboardLayout: React.FC = () => {
 
       <div className="main-container">
         <div className="navbar-container">
-              <h1>buscador</h1>
+              <h1></h1>
               <NavbarProfile/>
         </div>        
       

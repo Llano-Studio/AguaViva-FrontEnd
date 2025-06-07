@@ -35,10 +35,13 @@ export const Modal: React.FC<ModalProps> = ({
         <div className={`modal-header ${classModal ? classModal+"-modal-header" : ""}`}>
           <h2 className={`modal-title ${classModal ? classModal+"-modal-title" : ""}`}>{title}</h2>
           <button 
-            onClick={onClose}
-            className={`modal ${classModal ? classModal+"-modal" : ""}`}
-          >
-            ×
+            onClick={onClose} className={`modal-button-close ${classModal ? classModal+"-modal-button-close" : ""}`}>
+            <img
+            src="/assets/icons/filter-close.svg"
+            alt="Cerrar"
+            className="modal-icon-close"
+            style={{ display: "inline-block" }}
+            />
           </button>
         </div>
         {config && data ? (
@@ -46,7 +49,7 @@ export const Modal: React.FC<ModalProps> = ({
             {config.map((item, idx) => (
               <div key={item.accessor} className={item.className ? `${classModal ? classModal+"-" : ""}${item.className}` : ""}>
                 <label className={`modal-label`}>{item.label}:</label>
-                <p>
+                <p className={`modal-label-value`}>
                   {item.render
                     ? item.render(data[item.accessor], data)
                     : String(data[item.accessor] ?? "")

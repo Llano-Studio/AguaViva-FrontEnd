@@ -220,37 +220,22 @@ const UsersPage: React.FC = () => {
             </button>
           </div>
         </div>
-        {/* Drawer de filtros */}
-        <FilterDrawer
-          isOpen={showFilters}
-          onClose={() => setShowFilters(false)}
-          fields={userFilters.map(f => ({
-            ...f,
-            options: f.options ? [...f.options] : undefined
-          }))}  
-          values={filters}
-          onChange={handleFilterChange}
-          onApply={handleApplyFilters}
-          onClear={handleClearFilters}
-        />
+
       </div>
 
       {/* Panel del formulario */}
       <div
         className={`form-container ${titlePage+"-form-container"}
           ${showForm ? "translate-x-0" : "translate-x-full"}
-        `}
-        style={{ maxWidth: 500, minHeight: 500 }}
-      >
+        `}>
         <div className={`form-wrapper ${titlePage+"-form-wrapper"}`}>
           <div className={`form-header ${titlePage+"-form-header"}`}>
-            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Usuario</h2>
             <button
               onClick={handleCloseForm}
-              className={`form-close-button ${titlePage+"-form-close-button"}`}
-            >
-              ×
+              className={`form-close-button ${titlePage+"-form-close-button"}`}>
+              <img src="/assets/icons/back.svg" alt="Volver" className={`form-icon-cancel ${titlePage+"-form-icon-cancel"}`} />
             </button>
+            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Usuario</h2>
           </div>
           {/* Solo renderiza el formulario si hay usuario seleccionado */}
           {selectedUser && (
@@ -286,6 +271,20 @@ const UsersPage: React.FC = () => {
         content="usuario"
         genere="M"
       />
+
+              {/* Drawer de filtros */}
+        <FilterDrawer
+          isOpen={showFilters}
+          onClose={() => setShowFilters(false)}
+          fields={userFilters.map(f => ({
+            ...f,
+            options: f.options ? [...f.options] : undefined
+          }))}  
+          values={filters}
+          onChange={handleFilterChange}
+          onApply={handleApplyFilters}
+          onClear={handleClearFilters}
+        />
     </div>
   );
 };

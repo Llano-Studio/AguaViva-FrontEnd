@@ -22,25 +22,24 @@ const ModalDelete: React.FC<ModalDeleteProps> = ({
   const eliminar = `eliminar ${content}`;
 
   return (
-    <div className="modal-container">
-      <div className="modal">
-        <h2 className="modal-title">{eliminar}</h2>
-        <p className="modal-legend-1">
+    <div className="modal-delete-container">
+      <div className="modal-delete">
+        <p className="modal-delete-legend-1">
           ¿Quieres eliminar {articulo} {content}?
         </p>
-        <p className="modal-legend-2">
+        <p className="modal-delete-legend-2">
           Al eliminar {articulo} {content} se perderán los datos ingresados
         </p>
-        <div className="modal-actions">
+        <div className="modal-delete-actions">
           <button
             onClick={onClose}
-            className="modal-button-cancel"
+            className="modal-delete-button-cancel"
           >
             Cancelar
           </button>
           <button
             onClick={onDelete}
-            className="modal-button-delete"
+            className="modal-delete-button-delete"
           >
             {eliminar}
           </button>

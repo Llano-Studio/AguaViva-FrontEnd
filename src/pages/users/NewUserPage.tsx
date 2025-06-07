@@ -1,22 +1,21 @@
 import React from "react";
 import UserForm from "../../components/users/UserForm";
 import { useNavigate } from "react-router-dom";
+import "../../styles/css/pages/users/newUserPage.css";
 
 const NewUserPage: React.FC = () => {
   const navigate = useNavigate();
   const titlePage = "new-user";
 
   return (
-    <div className={`p-4 max-w-xl mx-auto ${titlePage+"-page-container"}`}>
-      <div className={`flex items-center mb-4 ${titlePage+"-page-header"}`}>
+    <div className={`new-page-container ${titlePage+"-page-container"}`}>
+      <div className={`new-page-header ${titlePage+"-page-header"}`}>
         <button
           onClick={() => navigate(-1)}
-          className={`flex items-center text-gray-600 hover:text-blue-600 mr-2 ${titlePage+"-page-button-cancel"}`}
-        >
-          <img src="/assets/icons/back.svg" alt="Volver" className={`w-5 h-5 mr-1 ${titlePage+"-page-icon-cancel"}`} />
-          Cancelar
+          className={`new-page-button-cancel ${titlePage+"-page-button-cancel"}`}>
+          <img src="/assets/icons/back.svg" alt="Volver" className={`new-page-icon-cancel ${titlePage+"-page-icon-cancel"}`} />
         </button>
-        <h2 className={`text-2xl font-bold ml-2 ${titlePage+"-page-title"}`}>Nuevo Usuario</h2>
+        <h2 className={`new-page-title ${titlePage+"-page-title"}`}>Nuevo Usuario</h2>
       </div>
       <UserForm
         onCancel={() => navigate("/usuarios")}

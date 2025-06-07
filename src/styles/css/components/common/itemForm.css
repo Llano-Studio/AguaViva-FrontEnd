@@ -1,27 +1,50 @@
 @import "tailwindcss";
 
-.form-select{
-    @apply w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500;
-}
-
 .form-checkbox{
     @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
 }
 
-.form-input{
-    @apply w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500;
+.form-input,
+.form-select{
+    @apply w-full focus:outline-none;
+    height: 30px;
+    border: solid 1px var(--bg-color-2);
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.form-select option{
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+    padding-left: 7px
 }
 
 .form{
     @apply space-y-4;
+    background: var(--bg-color-3);
+    border-radius: 12px;
+    border: solid 1.5px var(--bg-color-2);
+    padding: 30px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2%;
 }
 
 .form-field{
-    @apply space-y-1;
+    width: 23.5%;
 }
 
 .form-field-label{
-    @apply block text-sm font-medium text-gray-700;
+    @apply block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color-1);
 }
 
 .form-field-error{
@@ -29,13 +52,28 @@
 }
 
 .form-actions{
-    @apply flex justify-end space-x-2 pt-4;
+    @apply flex justify-start space-x-2 pt-4;
+    width: 100%;
+}
+
+.form-cancel,
+.form-submit{
+    font-size: 11px;
+    font-weight: 600;
+    width: 129px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .form-cancel{
-    @apply bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400;
+    color: var(--text-color-3);
+    border: solid 1px var(--acent-color-1);
 }
 
 .form-submit{
-    @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
+    color: var(--text-color-2);
+    background: var(--acent-color-1);
 }

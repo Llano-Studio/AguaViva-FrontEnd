@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 .page-container{
-  @apply p-4 relative overflow-hidden min-h-[500px] h-[100%];
-  
+  @apply relative overflow-hidden min-h-[500px] h-[100%];
 }
 
 .page-content{
-  @apply absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out z-10 bg-[#F5F6FA];
-
+  @apply absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out z-10;
+  background: var(--bg-color-1);
+  height: 100%;
+  
 }
 
 .page-title{
@@ -112,26 +113,31 @@
 }
 
 .form-container{
-  @apply absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out;
-
+  @apply absolute top-0 left-0 transition-transform duration-500 ease-in-out;
+  width: 100%;
 }
 
 .form-wrapper{
-  @apply p-6 h-full flex flex-col bg-white shadow-lg;
+  @apply h-full flex flex-col;
 
 }
 
 .form-header{
-  @apply flex justify-between items-center mb-4;
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
 
 }
 
 .form-title{
-  @apply text-xl font-bold;
-
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .form-close-button{
-  @apply text-gray-500 hover:text-gray-700 text-2xl;
+  display: flex;
+  align-items: center;
+  padding: 0px;
+  margin-right: 5px;
 }
 

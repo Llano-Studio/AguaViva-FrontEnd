@@ -45,6 +45,14 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
       className={`filter-container`}
     >
       <div className="filter-header">
+        <button onClick={onClose} className="filter-button-close">
+          <img
+            src="/assets/icons/filter-close.svg"
+            alt="Cerrar"
+            className="filter-title-icon-close"
+            style={{ display: "inline-block" }}
+          />
+        </button>
         <h2 className="filter-title">
           <img
             src="/assets/icons/filter-icon2.svg"
@@ -54,18 +62,10 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
           />
           Filtrar
         </h2>
-        <button onClick={onClose} className="filter-button-close">
-          <img
-            src="/assets/icons/filter-close.svg"
-            alt="Cerrar"
-            className="w-5 h-5"
-            style={{ display: "inline-block" }}
-          />
-        </button>
       </div>
       <div className="filter-content">
         {fields.map(field => (
-          <div key={field.name}>
+          <div key={field.name} className="filter-label-container">
             <label className="filter-label">{field.label}</label>
             {field.type === "checkbox" && field.options && (
               <div className="filter-checkbox-group">
@@ -84,8 +84,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
           </div>
         ))}
         <div className="filter-actions">
-          <button onClick={onClear} className="filter-button-clear">Limpiar</button>
           <button onClick={onApply} className="filter-button-apply">Aplicar</button>
+          <button onClick={onClear} className="filter-button-clear">Limpiar</button>
         </div>
       </div>
     </div>
