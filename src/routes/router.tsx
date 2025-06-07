@@ -1,11 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
-import LoginPage from "../pages/login/LoginPage";
-import PasswordRecovery from "../pages/passwordRecovery/PasswordRecoveryPage";
-import ResetPasswordPage from "../pages/resetPassword/ResetPasswordPage";
 import PrivateRoute from "./PrivateRoute";
-import ZonesPage from "../pages/zones/ZonesPage";
 
 // Lazy loaded pages
 const Dashboard = React.lazy(() => import("../pages/dashboard/Dashboard"));
@@ -15,6 +11,15 @@ const ArticlesPage = React.lazy(() => import("../pages/articles/ArticlesPage"));
 const MobilesPage = React.lazy(() => import("../pages/mobiles/MobilesPage"));
 const DeliveriesPage = React.lazy(() => import("../pages/deliveries/DeliveriesPage"));
 const NewUserPage = React.lazy(() => import("../pages/users/NewUserPage"));
+const LoginPage = React.lazy(() => import("../pages/login/LoginPage"));
+const PasswordRecovery = React.lazy(() => import("../pages/passwordRecovery/PasswordRecoveryPage"));
+const ResetPasswordPage = React.lazy(() => import("../pages/resetPassword/ResetPasswordPage"));
+const ZonesPage = React.lazy(() => import("../pages/zones/ZonesPage"));
+const OrdersPage = React.lazy(() => import("../pages/orders/OrdersPage"));
+const SuscriptionsPage = React.lazy(() => import("../pages/subscriptions/SubscriptionsPage"));
+const PriceLists = React.lazy(() => import("../pages/priceLists/PriceLists"));
+const ProfilePage = React.lazy(() => import("../pages/profile/ProfilePage"));
+
 
 const AppRouter: React.FC = () => {
   return (
@@ -38,13 +43,17 @@ const AppRouter: React.FC = () => {
           >
             <Route index element={<Navigate to="/dashboard" />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="pedidos" element={<OrdersPage />} />
+            <Route path="clientes" element={<ClientsPage />} />
+            <Route path="entregas" element={<DeliveriesPage />} />
+            <Route path="moviles" element={<MobilesPage />} />
+            <Route path="zonas" element={<ZonesPage />} />
+            <Route path="articulos" element={<ArticlesPage />} />
+            <Route path="listas-precios" element={<PriceLists />} />
+            <Route path="abonos" element={<SuscriptionsPage />} />
             <Route path="usuarios" element={<UsersPage />} />
             <Route path="usuarios/nuevo-usuario" element={<NewUserPage />} />
-            <Route path="clientes" element={<ClientsPage />} />
-            <Route path="articulos" element={<ArticlesPage />} />
-            <Route path="moviles" element={<MobilesPage />} />
-            <Route path="entregas" element={<DeliveriesPage />} />
-            <Route path="zonas" element={<ZonesPage />} />
+            <Route path="perfil" element={<ProfilePage />} />
             <Route path="*" element={<div>Página no encontrada</div>} />
           </Route>
         </Routes>

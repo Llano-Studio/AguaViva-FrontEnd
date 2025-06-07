@@ -11,7 +11,7 @@ const NavbarProfile: React.FC = () => {
 
   return (
     <>
-      <NavLink to="/zonas" className="navbar-profile">
+      <NavLink to="/perfil" className="navbar-profile">
         <img src="/assets/imagenes/profile-img.png" alt="Usuarios" className="navbar-img-profile" />
         <div className="navbar-datos-profile">
             <p className="navbar-name">{usuario?.name}</p>

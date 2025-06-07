@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 
-const ClientsPage: React.FC = () => {
+const OrdersPage: React.FC = () => {
   
 
   return (
     <div>
-      CLIENTSPAGE
+      ODERSPAGE
     </div>
   );
 };
 
-export default ClientsPage;
+export default OrdersPage;
