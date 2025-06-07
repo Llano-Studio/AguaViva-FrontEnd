@@ -38,6 +38,14 @@ export const httpAdapter = {
     });
   },
 
+  async patch<T>(data: any, url: string, options?: { params?: Params }): Promise<T> {
+    const query = buildQuery(options?.params);
+    return apiFetch<T>(url + query, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
   async delete<T>(url: string, options?: { params?: Params }): Promise<T> {
     const query = buildQuery(options?.params);
     return apiFetch<T>(url + query, { method: "DELETE" });

@@ -5,7 +5,7 @@ import '../../styles/css/components/common/dataTable.css';
 
 export interface Column<T> {
   header: string;
-  accessor: keyof T;
+  accessor: keyof T | string;
   render?: (value: any, row: T) => React.ReactNode;
 }
 
@@ -19,6 +19,11 @@ interface DataTableProps<T extends { id: number }> {
   sortBy?: string[];
   sortDirection?: ("asc" | "desc")[];
   onSort?: (column: keyof T) => void;
+}
+
+function getNestedValue(obj: any, path: string | number) {
+  if (typeof path === "number") return obj[path];
+  return path.split('.').reduce((acc, key) => acc && acc[key], obj);
 }
 
 export function DataTable<T extends { id: number }>({ 
@@ -62,9 +67,9 @@ export function DataTable<T extends { id: number }>({
             <tr key={item.id} className={`table-tr ${classTable ? classTable+"-table-tr" : ""}`}>
               {columns.map((column) => (
                 <td key={String(column.accessor)} className={`table-td-1 ${classTable ? classTable+"-table-td-1" : ""}`}>
-                  {column.render 
-                    ? column.render(item[column.accessor], item)
-                    : String(item[column.accessor])}
+                  {column.render
+                    ? column.render(getNestedValue(item, String(column.accessor)), item)
+                    : String(getNestedValue(item, String(column.accessor)))}
                 </td>
               ))}
               <td className={`table-td-2 ${classTable ? classTable+"-table-td-2" : ""}`}>

@@ -1,29 +1,16 @@
-import { Client, ClientsResponse, CreateClientDTO } from "../interfaces/Client";
-import { apiFetch } from "../utils/apiFetch";
+import { Client, CreateClientDTO, ClientsResponse } from "../interfaces/Client";
+import { httpAdapter } from "./httpAdapter";
 
 export class ClientService {
   private clientsUrl = "/persons";
 
-  async getClients(): Promise<ClientsResponse> {
-    try {
-      return await apiFetch<ClientsResponse>(this.clientsUrl);
-    } catch (error) {
-      console.error("Error en getClients:", error);
-      return {
-        data: [],
-        meta: {
-          total: 0,
-          page: 0,
-          limit: 0,
-          totalPage: 0,
-        },
-      };
-    }
+  async getClients(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<ClientsResponse> {
+    return await httpAdapter.get<ClientsResponse>(this.clientsUrl, { params });
   }
 
   async getClientById(id: number): Promise<Client | null> {
     try {
-      return await apiFetch<Client>(`${this.clientsUrl}/${id}`);
+      return await httpAdapter.get<Client>(`${this.clientsUrl}/${id}`);
     } catch (error) {
       console.error("Error en getClientById:", error);
       return null;
@@ -32,10 +19,7 @@ export class ClientService {
 
   async createClient(client: CreateClientDTO): Promise<Client | null> {
     try {
-      return await apiFetch<Client>(this.clientsUrl, {
-        method: "POST",
-        body: JSON.stringify(client),
-      });
+      return await httpAdapter.post<Client>(client, this.clientsUrl);
     } catch (error) {
       console.error("Error en createClient:", error);
       return null;
@@ -44,10 +28,7 @@ export class ClientService {
 
   async updateClient(id: number, client: Partial<CreateClientDTO>): Promise<Client | null> {
     try {
-      return await apiFetch<Client>(`${this.clientsUrl}/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(client),
-      });
+      return await httpAdapter.patch<Client>(client, `${this.clientsUrl}/${id}`);
     } catch (error) {
       console.error("Error en updateClient:", error);
       return null;
@@ -56,9 +37,7 @@ export class ClientService {
 
   async deleteClient(id: number): Promise<boolean> {
     try {
-      await apiFetch(`${this.clientsUrl}/${id}`, {
-        method: "DELETE",
-      });
+      await httpAdapter.delete(`${this.clientsUrl}/${id}`);
       return true;
     } catch (error) {
       console.error("Error en deleteClient:", error);

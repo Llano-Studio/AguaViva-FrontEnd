@@ -7,6 +7,7 @@ import PrivateRoute from "./PrivateRoute";
 const Dashboard = React.lazy(() => import("../pages/dashboard/Dashboard"));
 const UsersPage = React.lazy(() => import("../pages/users/UsersPage"));
 const ClientsPage = React.lazy(() => import("../pages/clients/ClientsPage"));
+const NewClientPage = React.lazy(() => import("../pages/clients/NewClientPage"));
 const ArticlesPage = React.lazy(() => import("../pages/articles/ArticlesPage"));
 const MobilesPage = React.lazy(() => import("../pages/mobiles/MobilesPage"));
 const DeliveriesPage = React.lazy(() => import("../pages/deliveries/DeliveriesPage"));
@@ -45,6 +46,7 @@ const AppRouter: React.FC = () => {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="pedidos" element={<OrdersPage />} />
             <Route path="clientes" element={<ClientsPage />} />
+            <Route path="clientes/nuevo-cliente" element={<NewClientPage/>} />
             <Route path="entregas" element={<DeliveriesPage />} />
             <Route path="moviles" element={<MobilesPage />} />
             <Route path="zonas" element={<ZonesPage />} />

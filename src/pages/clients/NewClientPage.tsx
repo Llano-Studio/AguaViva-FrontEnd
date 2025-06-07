@@ -1,11 +1,11 @@
 import React from "react";
-import UserForm from "../../components/users/UserForm";
+import ClientForm from "../../components/clients/ClientForm";
 import { useNavigate } from "react-router-dom";
 import "../../styles/css/pages/newPages.css";
 
-const NewUserPage: React.FC = () => {
+const NewClientPage: React.FC = () => {
   const navigate = useNavigate();
-  const titlePage = "new-user";
+  const titlePage = "new-client";
 
   return (
     <div className={`new-page-container ${titlePage+"-page-container"}`}>
@@ -15,16 +15,16 @@ const NewUserPage: React.FC = () => {
           className={`new-page-button-cancel ${titlePage+"-page-button-cancel"}`}>
           <img src="/assets/icons/back.svg" alt="Volver" className={`new-page-icon-cancel ${titlePage+"-page-icon-cancel"}`} />
         </button>
-        <h2 className={`new-page-title ${titlePage+"-page-title"}`}>Nuevo Usuario</h2>
+        <h2 className={`new-page-title ${titlePage+"-page-title"}`}>Nuevo Cliente</h2>
       </div>
-      <UserForm
-        onCancel={() => navigate("/usuarios")}
+      <ClientForm
+        onCancel={() => navigate("/clientes")}
         isEditing={false}
-        refreshUsers={async () => {}}
+        refreshClients={async () => {}}
         class={titlePage}
       />
     </div>
   );
 };
 
-export default NewUserPage;
+export default NewClientPage;

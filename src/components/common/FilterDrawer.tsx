@@ -1,6 +1,7 @@
 import React from "react";
 import '../../styles/css/components/common/filterDrawer.css'
-interface FilterField {
+
+export interface FilterField {
   name: string;
   label: string;
   type: "select" | "checkbox";

@@ -13,7 +13,7 @@ interface FieldValidation {
 export interface Field<T> {
   name: keyof T;
   label: string;
-  type?: 'text' | 'email' | 'password' | 'select' | 'checkbox';
+  type?: 'text' | 'email' | 'password' | 'select' | 'checkbox' | 'number' | 'date' | 'textarea';
   options?: { label: string; value: string }[];
   validation?: FieldValidation;
 }
@@ -62,7 +62,7 @@ export function ItemForm<T extends Record<string, any>>({
         return (
           <select
             {...register(field.name as any, validationRules)}
-            className={`form-select ${classForm+"-form-select"}`}
+            className={`form-select ${classForm ? classForm+"-form-select" : ""}`}
           >
             {field.options?.map(option => (
               <option key={option.value} value={option.value}>
@@ -76,7 +76,30 @@ export function ItemForm<T extends Record<string, any>>({
           <input
             type="checkbox"
             {...register(field.name as any)}
-            className={`form-checkbox ${classForm+"-form-checkbox"}`}
+            className={`form-checkbox ${classForm ? classForm+"-form-checkbox" : ""}`}
+          />
+        );
+      case 'number':
+        return (
+          <input
+            type="number"
+            {...register(field.name as any, validationRules)}
+            className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+          />
+        );
+      case 'date':
+        return (
+          <input
+            type="date"
+            {...register(field.name as any, validationRules)}
+            className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+          />
+        );
+      case 'textarea':
+        return (
+          <textarea
+            {...register(field.name as any, validationRules)}
+            className={`form-textarea ${classForm ? classForm+"-form-textarea" : ""}`}
           />
         );
       default:
@@ -84,24 +107,24 @@ export function ItemForm<T extends Record<string, any>>({
           <input
             type={field.type || 'text'}
             {...register(field.name as any, validationRules)}
-            className={`form-input ${classForm+"-form-input"}`}
+            className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
           />
         );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={`form ${classForm+"-form"}`}>
+    <form onSubmit={handleSubmit(onSubmit)} className={`form ${classForm ? classForm+"-form" : ""}`}>
       {fields.map((field) => {
         const fieldName = String(field.name);
         return (
-          <div key={fieldName} className={`form-field ${classForm+"-form-field"}`}>
-            <label className={`form-field-label ${classForm+"-form-field-label"}`}>
+          <div key={fieldName} className={`form-field ${classForm ? classForm+"-form-field" : ""}`}>
+            <label className={`form-field-label ${classForm ? classForm+"-form-field-label" : ""}`}>
               {field.label}
             </label>
             {renderField(field)}
             {errors[fieldName] && (
-              <p className={`form-field-error ${classForm+"-form-field-error"}`}>
+              <p className={`form-field-error ${classForm ? classForm+"-form-field-error" : ""}`}>
                 {/* @ts-ignore */}
                 {errors[fieldName]?.message as string}
               </p>
@@ -109,11 +132,11 @@ export function ItemForm<T extends Record<string, any>>({
           </div>
         );
       })}
-      <div className={`form-actions ${classForm+"-form-actions"}`}>
+      <div className={`form-actions ${classForm ? classForm+"-form-actions" : ""}`}>
         {onCancel && (
           <button
             type="button"
-            className={`form-cancel ${classForm+"-form-cancel"}`}
+            className={`form-cancel ${classForm ? classForm+"-form-cancel" : ""}`}
             onClick={onCancel}
           >
             Cancelar
@@ -121,7 +144,7 @@ export function ItemForm<T extends Record<string, any>>({
         )}
         <button
           type="submit"
-          className={`form-submit ${classForm+"-form-submit"}`}
+          className={`form-submit ${classForm ? classForm+"-form-submit" : ""}`}
         >
           Guardar
         </button>
