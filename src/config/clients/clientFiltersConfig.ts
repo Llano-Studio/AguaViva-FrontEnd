@@ -1,35 +1,44 @@
-import { FilterField } from "../../components/common/FilterDrawer"; // Ajusta la ruta si es necesario
+type FilterField = {
+  name: string;
+  label: string;
+  type: "select" | "checkbox";
+  order: number;
+  options?: { label: string; value: string }[];
+};
 
 export const clientFilters: FilterField[] = [
   {
     name: "type",
     label: "Tipo",
-    type: "checkbox",
+    type: "select" as const,
+    order: 1,
     options: [
       { label: "Individual", value: "INDIVIDUAL" },
-      { label: "Empresa", value: "COMPANY" },
+      { label: "Abono", value: "PLAN" }
     ],
   },
   {
     name: "zoneId",
     label: "Zona",
-    type: "select",
-    options: [], // Llena dinámicamente si es necesario
+    type: "select" as const,
+    order: 2,
+    // Puedes agregar options dinámicamente si lo necesitas
   },
   {
     name: "localityId",
     label: "Localidad",
-    type: "select",
-    options: [], // Llena dinámicamente si es necesario
+    type: "select" as const,
+    order: 3,
+    // Puedes agregar options dinámicamente si lo necesitas
   },
   {
-    name: "payment_semaphore_status",
-    label: "Semáforo de pago",
-    type: "checkbox",
+    name: "isActive",
+    label: "Activo",
+    type: "checkbox" as const,
+    order: 4,
     options: [
-      { label: "Verde", value: "GREEN" },
-      { label: "Amarillo", value: "YELLOW" },
-      { label: "Rojo", value: "RED" },
+      { label: "Sí", value: "true" },
+      { label: "No", value: "false" },
     ],
   },
-];
+].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));

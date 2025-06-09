@@ -22,19 +22,19 @@ export const httpAdapter = {
     return apiFetch<T>(url + query, { method: "GET" });
   },
 
-  async post<T>(data: any, url: string, options?: { params?: Params }): Promise<T> {
-    const query = buildQuery(options?.params);
-    return apiFetch<T>(url + query, {
+  async post<T>(data: any, url: string, options?: { isFormData?: boolean }): Promise<T> {
+    const headers = options?.isFormData ? undefined : { "Content-Type": "application/json" };
+    return apiFetch<T>(url, {
       method: "POST",
-      body: JSON.stringify(data),
+      body: data,
+      headers: headers,
     });
   },
-
-  async put<T>(data: any, url: string, options?: { params?: Params }): Promise<T> {
-    const query = buildQuery(options?.params);
-    return apiFetch<T>(url + query, {
+  async put<T>(data: any, url: string, options?: { isFormData?: boolean }): Promise<T> {
+    return apiFetch<T>(url, {
       method: "PUT",
-      body: JSON.stringify(data),
+      body: data,
+      headers: options?.isFormData ? undefined : { "Content-Type": "application/json" },
     });
   },
 

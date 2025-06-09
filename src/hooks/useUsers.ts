@@ -19,7 +19,6 @@ export const useUsers = () => {
   const [sortBy, setSortBy] = useState<string[]>([]);
   const [sortDirection, setSortDirection] = useState<("asc" | "desc")[]>([]);
 
-  // Genera el string de sortBy para la API (ej: "name,-role")
   const getSortParams = () => {
     return sortBy
       .map((field, idx) => (sortDirection[idx] === "desc" ? `-${field}` : field))
@@ -40,7 +39,7 @@ export const useUsers = () => {
           page: pageParam,
           limit: limitParam,
           search: searchParam,
-          sortBy: sortByParam, // string separado por coma
+          sortBy: sortByParam,
           ...filtersParam,
         });
         if (response?.data) {
@@ -49,6 +48,7 @@ export const useUsers = () => {
           setTotalPages(response.meta.totalPages || 1);
           setPage(response.meta.page || 1);
           setLimit(response.meta.limit || 10);
+          console.log("Usuarios cargados:", response.data);
           return true;
         }
         return false;
@@ -68,10 +68,12 @@ export const useUsers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, search, filters, sortBy, sortDirection]);
 
-  const createUser = async (userData: CreateUserDTO) => {
+  // Ahora acepta FormData o DTO
+  const createUser = async (userData: CreateUserDTO | FormData, isFormData = false) => {
+    console.log("userData en createUser:", userData);
     try {
       setIsLoading(true);
-      const newUser = await userService.createUser(userData);
+      const newUser = await userService.createUser(userData as any, isFormData);
       if (newUser) {
         await fetchUsers(page, limit, search, filters, getSortParams());
         return true;
@@ -86,10 +88,11 @@ export const useUsers = () => {
     }
   };
 
-  const updateUser = async (id: number, userData: Partial<User>) => {
+  // Ahora acepta FormData o Partial<User>
+  const updateUser = async (id: number, userData: Partial<User> | FormData, isFormData = false) => {
     try {
       setIsLoading(true);
-      const updatedUser = await userService.updateUser(id, userData);
+      const updatedUser = await userService.updateUser(id, userData as any, isFormData);
       if (updatedUser) {
         await fetchUsers(page, limit, search, filters, getSortParams());
         setSelectedUser(null);

@@ -6,6 +6,7 @@ interface ModalConfigItem {
   accessor: string;
   className?: string;
   render?: (value: any, data?: any) => React.ReactNode;
+  isImage?: boolean; // Nuevo: indica si es una imagen
 }
 
 interface ModalProps {
@@ -50,7 +51,13 @@ export const Modal: React.FC<ModalProps> = ({
               <div key={item.accessor} className={item.className ? `${classModal ? classModal+"-" : ""}${item.className}` : ""}>
                 <label className={`modal-label`}>{item.label}:</label>
                 <p className={`modal-label-value`}>
-                  {item.render
+                  {item.isImage && data[item.accessor] ? (
+                    <img
+                      src={data[item.accessor]}
+                      alt={item.label}
+                      style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover" }}
+                    />
+                  ) : item.render
                     ? item.render(data[item.accessor], data)
                     : String(data[item.accessor] ?? "")
                   }

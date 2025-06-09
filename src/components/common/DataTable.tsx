@@ -7,6 +7,7 @@ export interface Column<T> {
   header: string;
   accessor: keyof T | string;
   render?: (value: any, row: T) => React.ReactNode;
+  order?: number;
 }
 
 interface DataTableProps<T extends { id: number }> {

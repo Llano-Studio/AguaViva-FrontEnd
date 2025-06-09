@@ -9,7 +9,7 @@ import { userColumns } from "../../config/users/userFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { userFilters } from "../../config/users/userFiltersConfig";
-import { userModalConfig } from "../../config/users/userModalConfig";
+import {userModalConfig}  from "../../config/users/userModalConfig";
 import ModalDelete from "../../components/common/ModalDelete";
 import '../../styles/css/pages/pages.css';
 

@@ -19,24 +19,28 @@ export class UserService {
     }
   }
 
-  async createUser(user: CreateUserDTO): Promise<User | null> {
+  async createUser(user: FormData, isFormData = false): Promise<User | null> {
     try {
-      return await httpAdapter.post<User>(user, this.registerUrl);
+      return await httpAdapter.post<User>(user, this.registerUrl, isFormData ? { isFormData: true } : undefined);
     } catch (error) {
       console.error("Error en createUser:", error);
       return null;
     }
   }
 
-  async updateUser(id: number, user: Partial<User>): Promise<User | null> {
+  async updateUser(id: number, user: Partial<User> | FormData, isFormData = false): Promise<User | null> {
     try {
-      const filteredUser = {
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        isActive: user.isActive,
-      };
-      return await httpAdapter.put<User>(filteredUser, `${this.usersUrl}/${id}`);
+      if (user instanceof FormData) {
+        return await httpAdapter.put<User>(user, `${this.usersUrl}/${id}`, isFormData ? { isFormData: true } : undefined);
+      } else {
+        const filteredUser = {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          isActive: user.isActive,
+        };
+        return await httpAdapter.put<User>(filteredUser, `${this.usersUrl}/${id}`);
+      }
     } catch (error) {
       console.error("Error en updateUser:", error);
       return null;

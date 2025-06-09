@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useForm, RegisterOptions, DefaultValues } from 'react-hook-form';
 import '../../styles/css/components/common/itemForm.css'
 
@@ -13,15 +13,16 @@ interface FieldValidation {
 export interface Field<T> {
   name: keyof T;
   label: string;
-  type?: 'text' | 'email' | 'password' | 'select' | 'checkbox' | 'number' | 'date' | 'textarea';
+  type?: 'text' | 'email' | 'password' | 'select' | 'checkbox' | 'number' | 'date' | 'textarea' | 'file';
   options?: { label: string; value: string }[];
   validation?: FieldValidation;
+  order?: number;
 }
 
 // Props del componente
 interface ItemFormProps<T> {
   initialValues: T;
-  onSubmit: (values: T) => void;
+  onSubmit: (values: T | FormData) => void;
   onCancel?: () => void; 
   fields: Field<T>[];
   class?: string;
@@ -34,9 +35,20 @@ export function ItemForm<T extends Record<string, any>>({
   fields,
   class: classForm
 }: ItemFormProps<T>) {
-  const { register, handleSubmit, formState: { errors } } = useForm<T>({
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<T>({
     defaultValues: initialValues as DefaultValues<T>
   });
+
+  // Para preview de imagen (opcional)
+  const filePreviews = fields
+    .filter(f => f.type === "file")
+    .reduce((acc, f) => {
+      const file = watch(f.name as any) as FileList | undefined;
+      acc[f.name as string] = file && file[0] ? URL.createObjectURL(file[0]) : null;
+      return acc;
+    }, {} as Record<string, string | null>);
 
   const renderField = (field: Field<T>) => {
     const validationRules: RegisterOptions<T, any> = {};
@@ -102,6 +114,24 @@ export function ItemForm<T extends Record<string, any>>({
             className={`form-textarea ${classForm ? classForm+"-form-textarea" : ""}`}
           />
         );
+      case 'file':
+        return (
+          <>
+            <input
+              type="file"
+              {...register(field.name as any)}
+              className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+              accept="image/*"
+            />
+            {filePreviews[field.name as string] && (
+              <img
+                src={filePreviews[field.name as string] as string}
+                alt="preview"
+                style={{ width: 80, height: 80, borderRadius: "50%", marginTop: 8 }}
+              />
+            )}
+          </>
+        );
       default:
         return (
           <input
@@ -113,8 +143,26 @@ export function ItemForm<T extends Record<string, any>>({
     }
   };
 
+  // Si hay algún campo file, usamos FormData
+  const hasFileField = fields.some(f => f.type === "file");
+
+  const customSubmit = (data: any) => {
+    if (hasFileField) {
+      if (!formRef.current) return;
+      const formData = new FormData(formRef.current);
+      onSubmit(formData);
+    } else {
+      onSubmit(data);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={`form ${classForm ? classForm+"-form" : ""}`}>
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit(customSubmit)}
+      className={`form ${classForm ? classForm+"-form" : ""}`}
+      encType={hasFileField ? "multipart/form-data" : undefined}
+    >
       {fields.map((field) => {
         const fieldName = String(field.name);
         return (

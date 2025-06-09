@@ -38,14 +38,19 @@ const ClientForm: React.FC<ClientFormProps> = ({
 
   const fields: Field<CreateClientDTO>[] = clientFields;
 
-  const handleSubmit = async (values: CreateClientDTO) => {
+  const handleSubmit = async (values: CreateClientDTO | FormData) => {
     try {
-      // Convertir a número si es string
-      const dataToSend = {
-        ...values,
-        localityId: typeof values.localityId === "string" ? parseInt(values.localityId, 10) : values.localityId,
-        zoneId: typeof values.zoneId === "string" ? parseInt(values.zoneId, 10) : values.zoneId,
-      };
+      let dataToSend: any;
+      if (values instanceof FormData) {
+        // Si algún día agregas archivos, aquí puedes enviar el FormData directamente
+        dataToSend = values;
+      } else {
+        dataToSend = {
+          ...values,
+          localityId: typeof values.localityId === "string" ? parseInt(values.localityId, 10) : values.localityId,
+          zoneId: typeof values.zoneId === "string" ? parseInt(values.zoneId, 10) : values.zoneId,
+        };
+      }
       let success = false;
       if (isEditing && clientToEdit) {
         success = await updateClient(clientToEdit.person_id, dataToSend);
@@ -60,6 +65,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
       console.error("Error al guardar cliente:", error);
     }
   };
+
 
   return (
     <ItemForm<CreateClientDTO>

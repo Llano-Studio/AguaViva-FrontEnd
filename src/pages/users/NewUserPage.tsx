@@ -1,12 +1,15 @@
 import React from "react";
 import UserForm from "../../components/users/UserForm";
 import { useNavigate } from "react-router-dom";
+import useUsers from "../../hooks/useUsers";
 import "../../styles/css/pages/newPages.css";
 
 const NewUserPage: React.FC = () => {
   const navigate = useNavigate();
   const titlePage = "new-user";
+  const { createUser, refreshUsers } = useUsers();
 
+  // El UserForm ya soporta imagen y FormData, solo pasamos las props necesarias
   return (
     <div className={`new-page-container ${titlePage+"-page-container"}`}>
       <div className={`new-page-header ${titlePage+"-page-header"}`}>
@@ -20,7 +23,7 @@ const NewUserPage: React.FC = () => {
       <UserForm
         onCancel={() => navigate("/usuarios")}
         isEditing={false}
-        refreshUsers={async () => {}}
+        refreshUsers={refreshUsers}
         class={titlePage}
       />
     </div>

@@ -47,6 +47,7 @@ export const useClients = () => {
         setPage(response.page);
         setLimit(response.limit);
         setTotalPages(response.totalPages);
+        console.log("fetchClients useClients", response);
         return true;
       } catch (err: any) {
         setError(err.message || "Error al obtener clientes");

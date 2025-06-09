@@ -59,7 +59,7 @@ export interface LoanedProduct {
 
 export enum ClientType {
   INDIVIDUAL = "INDIVIDUAL",
-  COMPANY = "COMPANY",
+  ABONO = "PLAN",
 }
 
 export enum PaymentSemaphoreStatus {
