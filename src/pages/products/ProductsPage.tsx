@@ -1,27 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DataTable } from '../../components/common/DataTable';
 import { Modal } from '../../components/common/Modal';
-import { User } from '../../interfaces/User';
-import useUsers from '../../hooks/useUsers';
-import UserForm from '../../components/users/UserForm';
+import { Product } from '../../interfaces/Product';
+import useProducts from '../../hooks/useProducts';
+import ProductForm from '../../components/products/ProductForm';
 import { useNavigate } from "react-router-dom";
-import { userColumns } from "../../config/users/userFieldsConfig";
+import { productColumns } from "../../config/products/productFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
-import { userFilters } from "../../config/users/userFiltersConfig";
-import {userModalConfig}  from "../../config/users/userModalConfig";
+import { productFilters } from "../../config/products/productFiltersConfig";
+import { productModalConfig } from "../../config/products/productModalConfig";
 import ModalDelete from "../../components/common/ModalDelete";
 import '../../styles/css/pages/pages.css';
 
-const UsersPage: React.FC = () => {
-  const { 
-    users, 
-    selectedUser, 
-    setSelectedUser, 
-    handleDelete, 
+const ProductsPage: React.FC = () => {
+  const {
+    products,
+    selectedProduct,
+    setSelectedProduct,
+    handleDelete,
     isLoading,
     error,
-    refreshUsers,
+    refreshProducts,
     page,
     setPage,
     totalPages,
@@ -34,13 +34,13 @@ const UsersPage: React.FC = () => {
     setSortBy,
     sortDirection,
     setSortDirection
-  } = useUsers();
-  
+  } = useProducts();
+
   const [showViewModal, setShowViewModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,29 +48,29 @@ const UsersPage: React.FC = () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
-  }, [users]);
+  }, [products]);
 
   const handleDeleteClick = (id: number) => {
-    const user = users.find(u => u.id === id);
-    setUserToDelete(user || null);
+    const product = products.find(p => p.product_id === id);
+    setProductToDelete(product || null);
     setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (userToDelete) {
-      await handleDelete(userToDelete.id);
+    if (productToDelete) {
+      await handleDelete(productToDelete.product_id);
       setShowDeleteModal(false);
-      setUserToDelete(null);
+      setProductToDelete(null);
     }
   };
 
-  const handleEditClick = (user: User) => {
-    setSelectedUser(user);
+  const handleEditClick = (product: Product) => {
+    setSelectedProduct(product);
     setShowForm(true);
   };
 
   const handleCloseForm = () => {
-    setSelectedUser(null);
+    setSelectedProduct(null);
     setShowForm(false);
   };
 
@@ -94,16 +94,13 @@ const UsersPage: React.FC = () => {
   const handleSort = (column: string) => {
     const idx = sortBy.indexOf(column);
     if (idx === -1) {
-      // Agrega nuevo campo ascendente
       setSortBy([...sortBy, column]);
       setSortDirection([...sortDirection, "asc"]);
     } else if (sortDirection[idx] === "asc") {
-      // Cambia a descendente
       const newDirections = [...sortDirection];
       newDirections[idx] = "desc";
       setSortDirection(newDirections);
     } else if (sortDirection[idx] === "desc") {
-      // Quita el campo de orden
       setSortBy(sortBy.filter((_, i) => i !== idx));
       setSortDirection(sortDirection.filter((_, i) => i !== idx));
     }
@@ -118,11 +115,10 @@ const UsersPage: React.FC = () => {
     return <div className="p-4">Cargando...</div>;
   }
 
-  // Calcular el rango mostrado
-  const start = (page - 1) * (users.length || 1) + (users.length > 0 ? 1 : 0);
-  const end = (page - 1) * (users.length || 1) + users.length;
+  const start = (page - 1) * (products.length || 1) + (products.length > 0 ? 1 : 0);
+  const end = (page - 1) * (products.length || 1) + products.length;
 
-  const titlePage = "users";
+  const titlePage = "products";
 
   return (
     <div className={`page-container ${titlePage+"-page-container"}`}>
@@ -133,7 +129,7 @@ const UsersPage: React.FC = () => {
         `}
       >
         <div>
-          <h1 className={`page-title ${titlePage+"-page-title"}`}>Usuarios</h1>
+          <h1 className={`page-title ${titlePage+"-page-title"}`}>Artículos</h1>
         </div>
         <div className={`page-header ${titlePage+"-page-header"}`}>
           <div className={`page-header-div-1 ${titlePage+"-page-header-div-1"}`}>
@@ -141,7 +137,7 @@ const UsersPage: React.FC = () => {
               ref={searchInputRef}
               value={search}
               onChange={setSearch}
-              placeholder="Buscar usuarios..."
+              placeholder="Buscar artículos..."
               class={titlePage}
             />
           </div>
@@ -159,24 +155,24 @@ const UsersPage: React.FC = () => {
               Filtros
             </button>
             <button
-              onClick={() => navigate("/usuarios/nuevo-usuario")}
+              onClick={() => navigate("/articulos/nuevo-articulo")}
               className={`page-new-button ${titlePage+"-page-new-button"}`}
             >
               <img
                 src="/assets/icons/huge-icon.svg"
-                alt="Nuevo usuario"
+                alt="Nuevo artículo"
                 className={`page-new-button-icon ${titlePage+"-page-new-button-icon"}`}
                 style={{ display: "inline-block" }}
               />
-              Nuevo Usuario
+              Nuevo Artículo
             </button>
           </div>
         </div>
         <DataTable
-          data={users}
-          columns={userColumns}
-          onView={(user) => {
-            setSelectedUser(user);
+          data={products.map(p => ({ ...p, id: p.product_id }))}
+          columns={productColumns}
+          onView={(product) => {
+            setSelectedProduct(product);
             setShowViewModal(true);
           }}
           onEdit={handleEditClick}
@@ -188,11 +184,9 @@ const UsersPage: React.FC = () => {
         />
         {/* Controles de paginación y leyenda */}
         <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          {/* Leyenda de cantidad */}
           <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} usuarios
+            Mostrando {end > total ? total : end} de {total} artículos
           </div>
-          {/* Paginación numerada */}
           <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
             <button
               className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
@@ -220,7 +214,6 @@ const UsersPage: React.FC = () => {
             </button>
           </div>
         </div>
-
       </div>
 
       {/* Panel del formulario */}
@@ -235,15 +228,14 @@ const UsersPage: React.FC = () => {
               className={`form-close-button ${titlePage+"-form-close-button"}`}>
               <img src="/assets/icons/back.svg" alt="Volver" className={`form-icon-cancel ${titlePage+"-form-icon-cancel"}`} />
             </button>
-            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Usuario</h2>
+            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Artículo</h2>
           </div>
-          {/* Solo renderiza el formulario si hay usuario seleccionado */}
-          {selectedUser && (
-            <UserForm
+          {selectedProduct && (
+            <ProductForm
               onCancel={handleCloseForm}
-              isEditing={!!selectedUser}
-              userToEdit={selectedUser}
-              refreshUsers={refreshUsers}
+              isEditing={!!selectedProduct}
+              productToEdit={selectedProduct}
+              refreshProducts={refreshProducts}
               class={titlePage}
             />
           )}
@@ -255,12 +247,12 @@ const UsersPage: React.FC = () => {
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
-          setSelectedUser(null);
+          setSelectedProduct(null);
         }}
-        title="Detalles del Usuario"
+        title="Detalles del Artículo"
         class={titlePage}
-        config={userModalConfig}
-        data={selectedUser}
+        config={productModalConfig}
+        data={selectedProduct}
       />
 
       {/* Modal de Eliminar */}
@@ -268,22 +260,22 @@ const UsersPage: React.FC = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}
-        content="usuario"
+        content="artículo"
         genere="M"
       />
 
-              {/* Drawer de filtros */}
-        <FilterDrawer
-          isOpen={showFilters}
-          onClose={() => setShowFilters(false)}
-          fields={userFilters}
-          values={filters}
-          onChange={handleFilterChange}
-          onApply={handleApplyFilters}
-          onClear={handleClearFilters}
-        />
+      {/* Drawer de filtros */}
+      <FilterDrawer
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        fields={productFilters}
+        values={filters}
+        onChange={handleFilterChange}
+        onApply={handleApplyFilters}
+        onClear={handleClearFilters}
+      />
     </div>
   );
 };
 
-export default UsersPage;
+export default ProductsPage;

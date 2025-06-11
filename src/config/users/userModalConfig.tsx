@@ -1,4 +1,5 @@
 import React from "react";
+import ImageProfile from "../../components/common/ImageProfile";
 
 export const userModalConfig = [
   {
@@ -7,15 +8,11 @@ export const userModalConfig = [
     className: "modal-item-image",
     order: 1,
     render: (value: string) =>
-      value ? (
-        <img
-          src={value}
-          alt="Imagen de perfil"
-          style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover" }}
-        />
-      ) : (
-        "Sin imagen"
-      ),
+      <ImageProfile 
+        src={value}
+        alt="Imagen de perfil"
+        style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover" }}
+      />
   },
   {
     label: "Nombre",

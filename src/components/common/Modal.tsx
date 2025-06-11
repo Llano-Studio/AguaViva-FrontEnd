@@ -30,6 +30,7 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  console.log("Modal data:", data);
   return (
     <div className={`modal-container ${classModal ? classModal+"-modal-container" : ""}`}>
       <div className={`modal-wrapper ${classModal ? classModal+"-modal-wrapper" : ""}`}>

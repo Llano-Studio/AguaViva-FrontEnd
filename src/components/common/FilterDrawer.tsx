@@ -4,7 +4,7 @@ import '../../styles/css/components/common/filterDrawer.css'
 export interface FilterField {
   name: string;
   label: string;
-  type: "select" | "checkbox";
+  type: "select" | "checkbox" | "text";
   options?: { label: string; value: string | boolean }[];
 }
 

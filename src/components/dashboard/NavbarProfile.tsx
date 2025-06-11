@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "../../styles/css/components/dashboard/navbarProfile.css";
+import ImageProfile from "../common/ImageProfile";
 
 
 const NavbarProfile: React.FC = () => {
@@ -12,7 +13,7 @@ const NavbarProfile: React.FC = () => {
   return (
     <>
       <NavLink to="/perfil" className="navbar-profile">
-        <img src="/assets/imagenes/profile-img.png" alt="Usuarios" className="navbar-img-profile" />
+        <ImageProfile src={usuario?.profileImageUrl} alt="Usuarios" className="navbar-img-profile" />
         <div className="navbar-datos-profile">
             <p className="navbar-name">{usuario?.name}</p>
             <p className="navbar-role">{usuario?.role}</p>

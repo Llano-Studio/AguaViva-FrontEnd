@@ -2,7 +2,7 @@ export const userFilters = [
   {
     name: "role",
     label: "Rol",
-    type: "checkbox",
+    type: "checkbox" as const,
     order: 1,
     options: [
       { label: "Usuario", value: "USER" },
@@ -12,7 +12,7 @@ export const userFilters = [
   {
     name: "isActive",
     label: "Activo",
-    type: "checkbox",
+    type: "checkbox" as const,
     order: 2,
     options: [
       { label: "Sí", value: "true" },

@@ -8,7 +8,8 @@ const Dashboard = React.lazy(() => import("../pages/dashboard/Dashboard"));
 const UsersPage = React.lazy(() => import("../pages/users/UsersPage"));
 const ClientsPage = React.lazy(() => import("../pages/clients/ClientsPage"));
 const NewClientPage = React.lazy(() => import("../pages/clients/NewClientPage"));
-const ArticlesPage = React.lazy(() => import("../pages/articles/ArticlesPage"));
+const ProductsPage = React.lazy(() => import("../pages/products/ProductsPage"));
+const NewProductPage = React.lazy(() => import("../pages/products/NewProductPage"));
 const MobilesPage = React.lazy(() => import("../pages/mobiles/MobilesPage"));
 const DeliveriesPage = React.lazy(() => import("../pages/deliveries/DeliveriesPage"));
 const NewUserPage = React.lazy(() => import("../pages/users/NewUserPage"));
@@ -50,7 +51,8 @@ const AppRouter: React.FC = () => {
             <Route path="entregas" element={<DeliveriesPage />} />
             <Route path="moviles" element={<MobilesPage />} />
             <Route path="zonas" element={<ZonesPage />} />
-            <Route path="articulos" element={<ArticlesPage />} />
+            <Route path="articulos" element={<ProductsPage />} />
+            <Route path="articulos/nuevo-articulo" element={<NewProductPage />} />
             <Route path="listas-precios" element={<PriceLists />} />
             <Route path="abonos" element={<SuscriptionsPage />} />
             <Route path="usuarios" element={<UsersPage />} />
