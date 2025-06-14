@@ -1,9 +1,10 @@
 import React from "react";
 import ImageProfile from "../../components/common/ImageProfile";
+import { sortByOrder } from "../../utils/sortByOrder";
 
-export const userModalConfig = [
+export const userModalConfig = sortByOrder([
   {
-    label: "Imagen de perfil",
+    label: "",
     accessor: "profileImageUrl",
     className: "modal-item-image",
     order: 1,
@@ -40,4 +41,4 @@ export const userModalConfig = [
     order: 5,
     render: (value: boolean) => value ? "Activo" : "Inactivo",
   },
-].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+]);

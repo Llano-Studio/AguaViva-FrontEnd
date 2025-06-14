@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { useForm, RegisterOptions, DefaultValues } from 'react-hook-form';
-import '../../styles/css/components/common/itemForm.css'
+import { UseFormReturn, FieldValues } from 'react-hook-form';
+import '../../styles/css/components/common/itemForm.css';
 
 // Validaciones opcionales
 interface FieldValidation {
@@ -10,36 +10,40 @@ interface FieldValidation {
 }
 
 // Definición de un campo del formulario
+export type FieldType = "text" | "number" | "select" | "checkbox" | "file" | "date" | "textarea" | "password" | "email";
+
 export interface Field<T> {
-  name: keyof T;
+  name: keyof T | string;
   label: string;
-  type?: 'text' | 'email' | 'password' | 'select' | 'checkbox' | 'number' | 'date' | 'textarea' | 'file';
-  options?: { label: string; value: string }[];
+  type?: FieldType;
+  options?: { label: string; value: string | number }[];
   validation?: FieldValidation;
   order?: number;
+  defaultValue?: any;
 }
 
 // Props del componente
-interface ItemFormProps<T> {
-  initialValues: T;
+interface ItemFormProps<T extends FieldValues> extends UseFormReturn<T> {
   onSubmit: (values: T | FormData) => void;
   onCancel?: () => void; 
   fields: Field<T>[];
   class?: string;
+  onFieldChange?: (fieldName: string, value: any) => void;
 }
 
-export function ItemForm<T extends Record<string, any>>({
-  initialValues,
+export function ItemForm<T extends FieldValues>({
   onSubmit,
   onCancel,
   fields,
-  class: classForm
+  class: classForm,
+  onFieldChange,
+  register,
+  handleSubmit,
+  formState: { errors },
+  setValue,
+  watch,
 }: ItemFormProps<T>) {
   const formRef = useRef<HTMLFormElement>(null);
-
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<T>({
-    defaultValues: initialValues as DefaultValues<T>
-  });
 
   // Para preview de imagen (opcional)
   const filePreviews = fields
@@ -51,7 +55,7 @@ export function ItemForm<T extends Record<string, any>>({
     }, {} as Record<string, string | null>);
 
   const renderField = (field: Field<T>) => {
-    const validationRules: RegisterOptions<T, any> = {};
+    const validationRules: any = {};
 
     if (field.validation?.required) {
       validationRules.required = 'Este campo es requerido';
@@ -70,19 +74,43 @@ export function ItemForm<T extends Record<string, any>>({
     }
 
     switch (field.type) {
-      case 'select':
+      case 'select': {
+        const isNumberSelect = field.options && typeof field.options[0]?.value === "number";
+        const selectValidationRules = { ...validationRules };
+        if (isNumberSelect) {
+          selectValidationRules.valueAsNumber = true;
+          if ('pattern' in selectValidationRules) {
+            delete selectValidationRules.pattern;
+          }
+        }
+
         return (
           <select
-            {...register(field.name as any, validationRules)}
+            {...register(field.name as any, selectValidationRules)}
             className={`form-select ${classForm ? classForm+"-form-select" : ""}`}
+            onChange={e => {
+              const value = isNumberSelect
+                ? (e.target.value === "" ? 0 : Number(e.target.value))
+                : e.target.value;
+              setValue(field.name as any, value as any, { shouldValidate: true, shouldDirty: true });
+              if (onFieldChange) {
+                onFieldChange(field.name as string, value);
+              }
+            }}
+            value={watch(field.name as any) ?? (isNumberSelect ? 0 : "")}
           >
+            <option value="">Seleccionar...</option>
             {field.options?.map(option => (
-              <option key={option.value} value={option.value}>
+              <option 
+                key={option.value} 
+                value={option.value}
+              >
                 {option.label}
               </option>
             ))}
           </select>
         );
+      }
       case 'checkbox':
         return (
           <input
@@ -116,21 +144,21 @@ export function ItemForm<T extends Record<string, any>>({
         );
       case 'file':
         return (
-          <>
+          <div>
             <input
               type="file"
-              {...register(field.name as any)}
-              className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
-              accept="image/*"
+              {...register(field.name as any, validationRules)}
+              className={`form-file ${classForm ? classForm+"-form-file" : ""}`}
             />
             {filePreviews[field.name as string] && (
-              <img
-                src={filePreviews[field.name as string] as string}
-                alt="preview"
-                style={{ width: 80, height: 80, borderRadius: "50%", marginTop: 8 }}
+              <img 
+                src={filePreviews[field.name as string] as string} 
+                alt="Preview" 
+                className="file-preview" 
+                style={{ maxWidth: '200px', marginTop: '10px' }}
               />
             )}
-          </>
+          </div>
         );
       default:
         return (
@@ -150,6 +178,14 @@ export function ItemForm<T extends Record<string, any>>({
     if (hasFileField) {
       if (!formRef.current) return;
       const formData = new FormData(formRef.current);
+
+      // Asegura que los checkboxes estén presentes como "true"/"false"
+      fields.forEach((field) => {
+        if (field.type === "checkbox") {
+          formData.set(field.name as string, data[field.name] ? "true" : "false");
+        }
+      });
+
       onSubmit(formData);
     } else {
       onSubmit(data);
@@ -162,20 +198,21 @@ export function ItemForm<T extends Record<string, any>>({
       onSubmit={handleSubmit(customSubmit)}
       className={`form ${classForm ? classForm+"-form" : ""}`}
       encType={hasFileField ? "multipart/form-data" : undefined}
+      autoComplete="off"
     >
       {fields.map((field) => {
         const fieldName = String(field.name);
         return (
           <div key={fieldName} className={`form-field ${classForm ? classForm+"-form-field" : ""}`}>
-            <label className={`form-field-label ${classForm ? classForm+"-form-field-label" : ""}`}>
+            <label className={`form-label ${classForm ? classForm+"-form-label" : ""}`}>
               {field.label}
+              {field.validation?.required && <span className="required-mark">*</span>}
             </label>
             {renderField(field)}
             {errors[fieldName] && (
-              <p className={`form-field-error ${classForm ? classForm+"-form-field-error" : ""}`}>
-                {/* @ts-ignore */}
+              <span className={`form-error ${classForm ? classForm+"-form-error" : ""}`}>
                 {errors[fieldName]?.message as string}
-              </p>
+              </span>
             )}
           </div>
         );

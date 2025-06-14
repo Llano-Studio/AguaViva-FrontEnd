@@ -1,3 +1,5 @@
+import { Locality, Zone, Province } from "./Locations";
+
 export interface Client {
   person_id: number;
   name: string;
@@ -21,6 +23,8 @@ export interface CreateClientDTO {
   phone: string;
   address: string;
   taxId: string;
+  countryId: number; 
+  provinceId: number; 
   localityId: number;
   zoneId: number;
   registrationDate: string;
@@ -35,22 +39,6 @@ export interface ClientsResponse {
   totalPages: number;
 }
 
-export interface Province {
-  province_id: number;
-  name: string;
-}
-
-export interface Locality {
-  locality_id: number;
-  name: string;
-  province: Province;
-}
-
-export interface Zone {
-  zone_id: number;
-  name: string;
-}
-
 export interface LoanedProduct {
   product_id: number;
   description: string;
@@ -59,7 +47,7 @@ export interface LoanedProduct {
 
 export enum ClientType {
   INDIVIDUAL = "INDIVIDUAL",
-  ABONO = "PLAN",
+  PLAN = "PLAN", // Usar solo PLAN para consistencia
 }
 
 export enum PaymentSemaphoreStatus {

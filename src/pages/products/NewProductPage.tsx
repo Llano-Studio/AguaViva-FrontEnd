@@ -1,5 +1,5 @@
 import React from "react";
-import ProductForm from "../../components/products/ProductForm";
+import {ProductForm} from "../../components/products/ProductForm";
 import { useNavigate } from "react-router-dom";
 import useProducts from "../../hooks/useProducts";
 import "../../styles/css/pages/newPages.css";

@@ -13,6 +13,8 @@ export interface CreateUserDTO {
     name: string;
     email: string;
     password: string;
+    isActive: boolean;
+    role: string; 
   }
 
 export interface UsersResponse {

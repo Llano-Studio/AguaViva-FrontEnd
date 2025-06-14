@@ -1,6 +1,8 @@
-export const productModalConfig = [
+import { sortByOrder } from "../../utils/sortByOrder";
+
+export const productModalConfig = sortByOrder([
   {
-    label: "Imagen",
+    label: "",
     accessor: "image_url",
     className: "modal-item-image",
     order: 1,
@@ -23,4 +25,4 @@ export const productModalConfig = [
   { label: "N° de serie", accessor: "serial_number", className: "modal-item-6", order: 7 },
   { label: "Notas", accessor: "notes", className: "modal-item-7", order: 8 },
   { label: "Stock", accessor: "total_stock", className: "modal-item-8", order: 9 },
-].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+]);

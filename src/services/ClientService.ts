@@ -17,14 +17,22 @@ export class ClientService {
     }
   }
 
-  async createClient(client: CreateClientDTO): Promise<Client | null> {
-    try {
-      return await httpAdapter.post<Client>(client, this.clientsUrl);
-    } catch (error) {
-      console.error("Error en createClient:", error);
-      return null;
+async createClient(client: CreateClientDTO): Promise<any | null> {
+  console.log("createClient: ", client);
+  try {
+    const response = await httpAdapter.post<any>(client, this.clientsUrl );
+    console.log("Respuesta de createClient:", response);
+    return response;
+  } catch (error: any) {
+    console.error("Error en createClient:", error);
+    // Registrar más detalles si están disponibles
+    if (error.response) {
+      console.error("Datos de respuesta:", error.response.data);
+      console.error("Estado de respuesta:", error.response.status);
     }
+    return null;
   }
+}
 
   async updateClient(id: number, client: Partial<CreateClientDTO>): Promise<Client | null> {
     try {

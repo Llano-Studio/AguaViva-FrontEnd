@@ -3,7 +3,7 @@ import { DataTable } from '../../components/common/DataTable';
 import { Modal } from '../../components/common/Modal';
 import { Product } from '../../interfaces/Product';
 import useProducts from '../../hooks/useProducts';
-import ProductForm from '../../components/products/ProductForm';
+import {ProductForm} from '../../components/products/ProductForm';
 import { useNavigate } from "react-router-dom";
 import { productColumns } from "../../config/products/productFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";

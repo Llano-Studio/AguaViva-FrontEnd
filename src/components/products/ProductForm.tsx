@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { CreateProductDTO, Product } from "../../interfaces/Product";
-import { Field } from "../../components/common/ItemForm";
+import { ProductService } from "../../services/ProductService";
+import { ItemForm } from "../../components/common/ItemForm";
 import { productFields } from "../../config/products/productFieldsConfig";
 import useProducts from "../../hooks/useProducts";
-import {ItemForm} from "../../components/common/ItemForm";
+import { useForm } from "react-hook-form";
 
 interface ProductFormProps {
   onCancel: () => void;
@@ -13,7 +14,7 @@ interface ProductFormProps {
   class?: string;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({
+export const ProductForm: React.FC<ProductFormProps> = ({
   onCancel,
   isEditing,
   productToEdit,
@@ -22,31 +23,49 @@ const ProductForm: React.FC<ProductFormProps> = ({
 }) => {
   const { createProduct, updateProduct } = useProducts();
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ label: string; value: number }[]>([]);
 
-  // Inicializa los valores del formulario
-  const initialValues: CreateProductDTO = isEditing && productToEdit
-    ? {
-        category_id: productToEdit.product_category.category_id,
-        description: productToEdit.description,
-        volume_liters: productToEdit.volume_liters,
-        price: productToEdit.price,
-        is_returnable: productToEdit.is_returnable,
-        serial_number: productToEdit.serial_number,
-        notes: productToEdit.notes,
-        productImage: null, // No se rellena la imagen en edición
-      }
-    : {
-        category_id: 0,
-        description: "",
-        volume_liters: 0,
-        price: 0,
-        is_returnable: false,
-        serial_number: "",
-        notes: "",
-        productImage: null,
-      };
+  // Cargar categorías al montar el componente
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const service = new ProductService();
+      const cats = await service.getCategories();
+      setCategories(cats.map(c => ({ label: c.name, value: c.category_id })));
+    };
+    fetchCategories();
+  }, []);
 
-  // Manejo de submit
+  // Memoiza los valores iniciales para evitar recrear el formulario en cada render
+  const initialValues: CreateProductDTO = useMemo(() => (
+    isEditing && productToEdit
+      ? {
+          category_id: productToEdit.product_category.category_id,
+          description: productToEdit.description,
+          volume_liters: productToEdit.volume_liters,
+          price: productToEdit.price,
+          is_returnable: productToEdit.is_returnable,
+          serial_number: productToEdit.serial_number,
+          notes: productToEdit.notes,
+          productImage: null,
+        }
+      : {
+          category_id: 0,
+          description: "",
+          volume_liters: 0,
+          price: 0,
+          is_returnable: false,
+          serial_number: "",
+          notes: "",
+          productImage: null,
+        }
+  ), [isEditing, productToEdit]);
+
+  // React Hook Form
+  const form = useForm<CreateProductDTO>({
+    defaultValues: initialValues,
+  });
+
+  // Submit handler
   const handleSubmit = async (values: CreateProductDTO | FormData) => {
     try {
       let success = false;
@@ -88,13 +107,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <ItemForm<CreateProductDTO>
-      initialValues={initialValues}
+      {...form}
       onSubmit={handleSubmit}
       onCancel={onCancel}
-      fields={productFields}
+      fields={productFields(categories, isEditing ? productToEdit?.product_category.category_id : undefined)}
       class={classForm}
     />
   );
 };
-
-export default ProductForm;

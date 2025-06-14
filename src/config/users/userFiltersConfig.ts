@@ -1,4 +1,6 @@
-export const userFilters = [
+import { sortByOrder } from "../../utils/sortByOrder";
+
+export const userFilters = sortByOrder([
   {
     name: "role",
     label: "Rol",
@@ -19,4 +21,4 @@ export const userFilters = [
       { label: "No", value: "false" },
     ],
   },
-].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+]);

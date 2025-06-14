@@ -1,32 +1,41 @@
 import { Field } from "../../components/common/ItemForm";
 import { CreateClientDTO, Client } from "../../interfaces/Client";
 import { Column } from "../../components/common/DataTable";
+import { sortByOrder } from "../../utils/sortByOrder";
 
-// Campos del formulario de cliente (con order)
-export const clientFields = ([
-  { name: "name", label: "Nombre", validation: { required: true }, order: 1 },
-  { name: "phone", label: "Teléfono", validation: { required: true }, order: 2 },
-  { name: "address", label: "Dirección", validation: { required: true }, order: 3 },
-  { name: "taxId", label: "CUIT/CUIL", validation: { required: true }, order: 4 },
-  { name: "localityId", label: "Localidad", type: "number", validation: { required: true }, order: 5 },
-  { name: "zoneId", label: "Zona", type: "number", validation: { required: true }, order: 6 },
-  { name: "registrationDate", label: "Fecha de alta", type: "date", validation: { required: true }, order: 7 },
-  { 
-    name: "type", 
-    label: "Tipo", 
-    type: "select", 
-    options: [
-      { label: "Individual", value: "INDIVIDUAL" },
-      { label: "Abono", value: "PLAN" }
-    ],
-    validation: { required: true },
-    order: 8
-  },
-] as Field<CreateClientDTO>[])
-.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+// Ahora recibe las opciones de país, provincia, localidad y zona
+export const clientFields = (
+  countries: { label: string; value: number }[],
+  provinces: { label: string; value: number }[],
+  localities: { label: string; value: number }[],
+  zones: { label: string; value: number }[]
+): Field<CreateClientDTO>[] => {
+  return sortByOrder([
+    { name: "name", label: "Nombre", validation: { required: true }, order: 1 },
+    { name: "phone", label: "Teléfono", validation: { required: true }, order: 2 },
+    { name: "address", label: "Dirección", validation: { required: true }, order: 3 },
+    { name: "taxId", label: "CUIT/CUIL", validation: { required: true }, order: 4 },
+    { name: "countryId", label: "País", type: "select", options: countries, validation: { required: true }, order: 5 },
+    { name: "provinceId", label: "Provincia", type: "select", options: provinces, validation: { required: true }, order: 6 },
+    { name: "localityId", label: "Localidad", type: "select", options: localities, validation: { required: true }, order: 7 },
+    { name: "zoneId", label: "Zona", type: "select", options: zones, validation: { required: true }, order: 8 },
+    { name: "registrationDate", label: "Fecha de alta", type: "date", validation: { required: true }, order: 9 },
+    { 
+      name: "type", 
+      label: "Tipo", 
+      type: "select", 
+      options: [
+        { label: "Individual", value: "INDIVIDUAL" },
+        { label: "Abono", value: "PLAN" }
+      ],
+      validation: { required: true },
+      order: 10
+    },
+  ] as Field<CreateClientDTO>[]);
+};
 
-// Columnas de la tabla de clientes (con order)
-export const clientColumns: Column<Client>[] = [
+// Columnas de la tabla de clientes (sin cambios)
+export const clientColumns: Column<Client>[] = sortByOrder([
   { header: 'Nombre', accessor: 'name', order: 1 },
   { header: 'Teléfono', accessor: 'phone', order: 2 },
   { header: 'Dirección', accessor: 'address', order: 3 },
@@ -51,4 +60,4 @@ export const clientColumns: Column<Client>[] = [
       return value;
     }
   }
-].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+]);

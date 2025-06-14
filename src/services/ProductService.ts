@@ -1,4 +1,4 @@
-import { Product, ProductsResponse, CreateProductDTO } from "../interfaces/Product";
+import { Product, ProductsResponse, CreateProductDTO, ProductCategory } from "../interfaces/Product";
 import { httpAdapter } from "./httpAdapter";
 
 export class ProductService {
@@ -18,6 +18,7 @@ export class ProductService {
   }
 
   async createProduct(product: FormData | CreateProductDTO, isFormData = false): Promise<Product | null> {
+    console.log("createProduct: ", product);
     try {
       return await httpAdapter.post<Product>(product, this.productsUrl, isFormData ? { isFormData: true } : undefined);
     } catch (error) {
@@ -58,4 +59,15 @@ export class ProductService {
       return false;
     }
   }
+
+  async getCategories(): Promise<ProductCategory[]> {
+    try {
+      const res = await httpAdapter.get<{ data: ProductCategory[] }>("/categories");
+      return res.data;
+    } catch (error) {
+      console.error("Error al obtener categorías:", error);
+      return [];
+    }
+  }
+
 }

@@ -20,6 +20,7 @@ export class UserService {
   }
 
   async createUser(user: FormData, isFormData = false): Promise<User | null> {
+    console.log("createUser: ", user);
     try {
       return await httpAdapter.post<User>(user, this.registerUrl, isFormData ? { isFormData: true } : undefined);
     } catch (error) {
@@ -29,6 +30,7 @@ export class UserService {
   }
 
   async updateUser(id: number, user: Partial<User> | FormData, isFormData = false): Promise<User | null> {
+    console.log("updateUser: ", user);
     try {
       if (user instanceof FormData) {
         return await httpAdapter.put<User>(user, `${this.usersUrl}/${id}`, isFormData ? { isFormData: true } : undefined);
@@ -48,6 +50,7 @@ export class UserService {
   }
 
   async deleteUser(id: number): Promise<boolean> {
+    console.log("deleteUser: ", id);
     try {
       await httpAdapter.delete(`${this.usersUrl}/${id}`);
       return true;

@@ -1,4 +1,6 @@
-export const productFilters = [
+import { sortByOrder } from "../../utils/sortByOrder";
+
+export const productFilters = sortByOrder([
   {
     name: "categoryId",
     label: "Categoría",
@@ -28,4 +30,4 @@ export const productFilters = [
     type: "text" as const,
     order: 4,
   },
-].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+]);

@@ -233,7 +233,7 @@ const ClientsPage: React.FC = () => {
               onCancel={handleCloseForm}
               isEditing={!!selectedClient}
               clientToEdit={selectedClient}
-              refreshClients={fetchClients}
+              refreshClients={async () => { await fetchClients(); }}
               class={titlePage}
             />
           )}

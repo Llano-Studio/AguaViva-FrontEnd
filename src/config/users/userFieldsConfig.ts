@@ -1,9 +1,11 @@
 import { Field } from "../../components/common/ItemForm";
 import { User } from "../../interfaces/User";
 import { Column } from "../../components/common/DataTable";
+import { sortByOrder } from "../../utils/sortByOrder";
+
 
 // Campos del formulario de usuario (ya ordenados por order)
-export const userFields = ([
+export const userFields = sortByOrder([
   { name: "name", label: "Nombre", validation: { required: true }, order: 1 },
   {
     name: "email",
@@ -23,15 +25,18 @@ export const userFields = ([
     validation: { required: true },
     order: 3,
   },
-  { name: "isActive", label: "Activo", type: "checkbox", order: 4 },
+  { name: "isActive", 
+    label: "Activo", 
+    type: "checkbox", 
+    order: 4 
+  },
   {
     name: "profileImage",
     label: "Imagen de perfil",
     type: "file",
     order: 4,
   },
-] as Field<User & { password?: string }>[])
-.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+] as Field<User & { password?: string }>[]);
 
 // Campo extra para creación
 export const passwordField: Field<User & { password?: string }> = {
@@ -43,7 +48,7 @@ export const passwordField: Field<User & { password?: string }> = {
 };
 
 // Columnas de la tabla de usuarios (agregando order)
-export const userColumns: Column<User>[] = [
+export const userColumns: Column<User>[] = sortByOrder([
   { header: 'Nombre', accessor: 'name', order: 1 },
   { header: 'Email', accessor: 'email', order: 2 },
   { 
@@ -58,4 +63,4 @@ export const userColumns: Column<User>[] = [
     order: 4,
     render: (value: boolean) => value ? 'Sí' : 'No'
   }
-].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+]);

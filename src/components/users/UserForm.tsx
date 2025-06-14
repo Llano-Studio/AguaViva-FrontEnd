@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { ItemForm, Field } from "../common/ItemForm";
 import { User } from "../../interfaces/User";
 import useUsers from "../../hooks/useUsers";
 import { userFields, passwordField } from "../../config/users/userFieldsConfig";
+import { useForm } from "react-hook-form";
 
 interface UserFormProps {
   onCancel: () => void;
@@ -11,6 +12,18 @@ interface UserFormProps {
   refreshUsers: () => Promise<any>;
   class?: string;
 }
+
+const emptyUser: User & { password?: string } = {
+  id: 0,
+  name: "",
+  email: "",
+  role: "USER",
+  isActive: true,
+  createdAt: "",
+  updatedAt: "",
+  password: "",
+  profileImageUrl: "",
+};
 
 const UserForm: React.FC<UserFormProps> = ({
   onCancel,
@@ -21,22 +34,13 @@ const UserForm: React.FC<UserFormProps> = ({
 }) => {
   const { createUser, updateUser } = useUsers();
 
-  const emptyUser: User & { password?: string } = {
-    id: 0,
-    name: "",
-    email: "",
-    role: "USER",
-    isActive: true,
-    createdAt: "",
-    updatedAt: "",
-    password: "",
-    profileImageUrl: "",
-  };
-
-  const initialValues =
-    isEditing && userToEdit
-      ? { ...userToEdit, password: "" }
-      : emptyUser;
+  const initialValues = useMemo(
+    () =>
+      isEditing && userToEdit
+        ? { ...userToEdit, password: "" }
+        : emptyUser,
+    [isEditing, userToEdit]
+  );
 
   // Usa los campos del config y agrega el de password solo si es creación
   const fields: Field<User & { password?: string }>[] = [
@@ -44,14 +48,15 @@ const UserForm: React.FC<UserFormProps> = ({
     ...(isEditing ? [] : [passwordField]),
   ];
 
+  // React Hook Form
+  const form = useForm<User & { password?: string }>({
+    defaultValues: initialValues,
+  });
+
   const handleSubmit = async (values: any) => {
     try {
       let success = false;
       if (values instanceof FormData) {
-        // Elimina isActive y role del FormData antes de enviarlo
-        values.delete("isActive");
-        values.delete("role");
-
         if (isEditing && userToEdit) {
           success = await updateUser(userToEdit.id, values, true);
         } else {
@@ -61,11 +66,7 @@ const UserForm: React.FC<UserFormProps> = ({
           success = await createUser(values, true);
         }
       } else {
-        // fallback por si no hay archivo
         const filtered = { ...values };
-        delete filtered.isActive;
-        delete filtered.role;
-
         if (isEditing && userToEdit) {
           success = await updateUser(userToEdit.id, filtered);
         } else {
@@ -76,6 +77,8 @@ const UserForm: React.FC<UserFormProps> = ({
             name: filtered.name,
             email: filtered.email,
             password: filtered.password,
+            isActive: filtered.isActive,
+            role: filtered.role,
           });
         }
       }
@@ -91,7 +94,7 @@ const UserForm: React.FC<UserFormProps> = ({
 
   return (
     <ItemForm<User & { password?: string }>
-      initialValues={initialValues}
+      {...form}
       onSubmit={handleSubmit}
       onCancel={onCancel}
       fields={fields}
