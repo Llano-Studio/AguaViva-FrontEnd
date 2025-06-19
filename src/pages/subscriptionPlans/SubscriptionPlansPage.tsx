@@ -1,26 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DataTable } from '../../components/common/DataTable';
 import { Modal } from '../../components/common/Modal';
-import { Zone } from '../../interfaces/Locations';
-import useZones from '../../hooks/useZones';
-import ZoneForm from '../../components/zones/ZoneForm';
+import { SubscriptionPlan } from '../../interfaces/SubscriptionPlan';
+import useSubscriptionPlans from '../../hooks/useSubscriptionPlans';
+import SubscriptionPlanForm from '../../components/subscriptionPlans/SubscriptionPlanForm';
 import { useNavigate } from "react-router-dom";
-import { zoneColumns } from "../../config/zones/zoneFieldsConfig";
+import { subscriptionPlanColumns } from "../../config/subscriptionPlans/subscriptionPlanFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
-import { zoneFilters } from "../../config/zones/zoneFilterConfig";
-import { zoneModalConfig } from "../../config/zones/zoneModalConfig";
+import { subscriptionPlanFilters } from "../../config/subscriptionPlans/subscriptionPlanFiltersConfig";
+import { subscriptionPlanModalConfig } from "../../config/subscriptionPlans/subscriptionPlanModalConfig";
 import ModalDelete from "../../components/common/ModalDelete";
 import '../../styles/css/pages/pages.css';
 
-const ZonesPage: React.FC = () => {
-  const { 
-    zones, 
-    selectedZone, 
-    setSelectedZone,
-    handleDelete, 
+const SubscriptionPlansPage: React.FC = () => {
+  const {
+    plans,
+    selectedPlan,
+    setSelectedPlan,
+    handleDelete,
     isLoading,
     error,
+    refreshPlans,
     page,
     setPage,
     totalPages,
@@ -32,15 +33,14 @@ const ZonesPage: React.FC = () => {
     sortBy,
     setSortBy,
     sortDirection,
-    setSortDirection,
-    fetchZones,
-  } = useZones();
-  
+    setSortDirection
+  } = useSubscriptionPlans();
+
   const [showViewModal, setShowViewModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [zoneToDelete, setZoneToDelete] = useState<Zone | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<SubscriptionPlan | null>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,32 +48,33 @@ const ZonesPage: React.FC = () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
-  }, [zones]);
+  }, [plans]);
 
   const handleDeleteClick = (id: number) => {
-    const zone = zones.find(z => z.zone_id === id);
-    setZoneToDelete(zone || null);
+    const plan = plans.find(p => p.subscription_plan_id === id);
+    setPlanToDelete(plan || null);
     setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (zoneToDelete) {
-      await handleDelete(zoneToDelete.zone_id);
+    if (planToDelete) {
+      await handleDelete(planToDelete.subscription_plan_id);
       setShowDeleteModal(false);
-      setZoneToDelete(null);
+      setPlanToDelete(null);
     }
   };
 
-  const handleEditClick = (zone: Zone) => {
-    setSelectedZone(zone);
+  const handleEditClick = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
     setShowForm(true);
   };
 
   const handleCloseForm = () => {
-    setSelectedZone(null);
+    setSelectedPlan(null);
     setShowForm(false);
   };
 
+  // Filtros
   const handleFilterChange = (name: string, value: any) => {
     setFilters((prev: any) => ({ ...prev, [name]: value }));
   };
@@ -89,6 +90,7 @@ const ZonesPage: React.FC = () => {
     setPage(1);
   };
 
+  // Multi-sort handler
   const handleSort = (column: string) => {
     const idx = sortBy.indexOf(column);
     if (idx === -1) {
@@ -113,10 +115,10 @@ const ZonesPage: React.FC = () => {
     return <div className="p-4">Cargando...</div>;
   }
 
-  const start = (page - 1) * (zones.length || 1) + (zones.length > 0 ? 1 : 0);
-  const end = (page - 1) * (zones.length || 1) + zones.length;
+  const start = (page - 1) * (plans.length || 1) + (plans.length > 0 ? 1 : 0);
+  const end = (page - 1) * (plans.length || 1) + plans.length;
 
-  const titlePage = "zones";
+  const titlePage = "subscriptionPlans";
 
   return (
     <div className={`page-container ${titlePage+"-page-container"}`}>
@@ -127,7 +129,7 @@ const ZonesPage: React.FC = () => {
         `}
       >
         <div>
-          <h1 className={`page-title ${titlePage+"-page-title"}`}>Zonas</h1>
+          <h1 className={`page-title ${titlePage+"-page-title"}`}>Abonos</h1>
         </div>
         <div className={`page-header ${titlePage+"-page-header"}`}>
           <div className={`page-header-div-1 ${titlePage+"-page-header-div-1"}`}>
@@ -135,7 +137,7 @@ const ZonesPage: React.FC = () => {
               ref={searchInputRef}
               value={search}
               onChange={setSearch}
-              placeholder="Buscar zonas..."
+              placeholder="Buscar abonos..."
               class={titlePage}
             />
           </div>
@@ -153,24 +155,24 @@ const ZonesPage: React.FC = () => {
               Filtros
             </button>
             <button
-              onClick={() => navigate("/zonas/nueva-zona")}
+              onClick={() => navigate("/abonos/nuevo-abono")}
               className={`page-new-button ${titlePage+"-page-new-button"}`}
             >
               <img
                 src="/assets/icons/huge-icon.svg"
-                alt="Nueva zona"
+                alt="Nuevo abono"
                 className={`page-new-button-icon ${titlePage+"-page-new-button-icon"}`}
                 style={{ display: "inline-block" }}
               />
-              Nueva Zona
+              Nuevo Abono
             </button>
           </div>
         </div>
         <DataTable
-          data={zones.map(z => ({ ...z, id: z.zone_id }))}
-          columns={zoneColumns}
-          onView={(zone) => {
-            setSelectedZone(zone);
+          data={plans.map(p => ({ ...p, id: p.subscription_plan_id }))}
+          columns={subscriptionPlanColumns}
+          onView={(plan) => {
+            setSelectedPlan(plan);
             setShowViewModal(true);
           }}
           onEdit={handleEditClick}
@@ -182,11 +184,9 @@ const ZonesPage: React.FC = () => {
         />
         {/* Controles de paginación y leyenda */}
         <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          {/* Leyenda de cantidad */}
           <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} zonas
+            Mostrando {end > total ? total : end} de {total} abonos
           </div>
-          {/* Paginación numerada */}
           <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
             <button
               className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
@@ -228,14 +228,14 @@ const ZonesPage: React.FC = () => {
               className={`form-close-button ${titlePage+"-form-close-button"}`}>
               <img src="/assets/icons/back.svg" alt="Volver" className={`form-icon-cancel ${titlePage+"-form-icon-cancel"}`} />
             </button>
-            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Zona</h2>
+            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Abono</h2>
           </div>
-          {selectedZone && (
-            <ZoneForm
+          {selectedPlan && (
+            <SubscriptionPlanForm
               onCancel={handleCloseForm}
-              isEditing={!!selectedZone}
-              zoneToEdit={selectedZone}
-              refreshZones={async () => { await fetchZones(); }}
+              isEditing={!!selectedPlan}
+              planToEdit={selectedPlan}
+              refreshPlans={async () => { await refreshPlans(); }}
               class={titlePage}
             />
           )}
@@ -247,12 +247,12 @@ const ZonesPage: React.FC = () => {
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
-          setSelectedZone(null);
+          setSelectedPlan(null);
         }}
-        title="Detalles de la Zona"
+        title="Detalles del Abono"
         class={titlePage}
-        config={zoneModalConfig}
-        data={selectedZone}
+        config={subscriptionPlanModalConfig}
+        data={selectedPlan}
       />
 
       {/* Modal de Eliminar */}
@@ -260,15 +260,15 @@ const ZonesPage: React.FC = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}
-        content="zona"
-        genere="F"
+        content="abono"
+        genere="M"
       />
 
       {/* Drawer de filtros */}
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        fields={zoneFilters}
+        fields={subscriptionPlanFilters}
         values={filters}
         onChange={handleFilterChange}
         onApply={handleApplyFilters}
@@ -278,4 +278,4 @@ const ZonesPage: React.FC = () => {
   );
 };
 
-export default ZonesPage;
+export default SubscriptionPlansPage;

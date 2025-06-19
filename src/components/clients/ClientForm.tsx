@@ -5,6 +5,7 @@ import { clientFields } from "../../config/clients/clientFieldsConfig";
 import useClients from "../../hooks/useClients";
 import { useDependentLocationFields } from "../../hooks/useDependentLocationFields";
 import { useForm } from "react-hook-form";
+import { getDependentLocationOptions, handleDependentLocationChange } from "../../config/common/dependentLocationLogic";
 
 interface ClientFormProps {
   onCancel: () => void;
@@ -79,36 +80,24 @@ const ClientForm: React.FC<ClientFormProps> = ({
   const watchedProvince = watch("provinceId");
   const watchedLocality = watch("localityId");
 
-  // Opciones filtradas según la selección actual
-  const countryOptions = countries.map(c => ({ label: c.name, value: c.country_id }));
-  const provinceOptions = provinces
-    .filter(p => p.country_id === watchedCountry)
-    .map(p => ({ label: p.name, value: p.province_id }));
-  const localityOptions = localities
-    .filter(l => l.province_id === watchedProvince)
-    .map(l => ({ label: l.name, value: l.locality_id }));
-  const zoneOptions = zones
-    .filter(z => z.locality && z.locality.locality_id === watchedLocality)
-    .map(z => ({ label: z.name, value: z.zone_id }));
+  // Opciones filtradas según la selección actual (ahora usando lógica reutilizable)
+  const {
+    countryOptions,
+    provinceOptions,
+    localityOptions,
+    zoneOptions
+  } = getDependentLocationOptions(
+    countries,
+    provinces,
+    localities,
+    zones,
+    watchedCountry,
+    watchedProvince,
+    watchedLocality
+  );
 
-  // Manejar selects dependientes dentro del formulario y sincronizar con React Hook Form
-  const handleFieldChange = (fieldName: string, value: number) => {
-    if (fieldName === "countryId") {
-      setValue("countryId", value as any);
-      setValue("provinceId", 0 as any);
-      setValue("localityId", 0 as any);
-      setValue("zoneId", 0 as any);
-    } else if (fieldName === "provinceId") {
-      setValue("provinceId", value as any);
-      setValue("localityId", 0 as any);
-      setValue("zoneId", 0 as any);
-    } else if (fieldName === "localityId") {
-      setValue("localityId", value as any);
-      setValue("zoneId", 0 as any);
-    } else if (fieldName === "zoneId") {
-      setValue("zoneId", value as any);
-    }
-  };
+  // Handler reutilizable
+  const handleFieldChange = handleDependentLocationChange<CreateClientDTO>(setValue);
 
   // Submit handler
   const handleSubmit = async (values: CreateClientDTO | FormData) => {
@@ -169,7 +158,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
         onCancel={onCancel}
         fields={clientFields(countryOptions, provinceOptions, localityOptions, zoneOptions)}
         class={classForm}
-        onFieldChange={handleFieldChange}
+        onFieldChange={handleFieldChange as (fieldName: string, value: any) => void}
       />
     </>
   );

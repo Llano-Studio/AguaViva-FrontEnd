@@ -2,8 +2,8 @@ import { Field } from "../../components/common/ItemForm";
 import { CreateClientDTO, Client } from "../../interfaces/Client";
 import { Column } from "../../components/common/DataTable";
 import { sortByOrder } from "../../utils/sortByOrder";
+import { dependentLocationFields } from "../common/dependentLocationFields";
 
-// Ahora recibe las opciones de país, provincia, localidad y zona
 export const clientFields = (
   countries: { label: string; value: number }[],
   provinces: { label: string; value: number }[],
@@ -15,10 +15,7 @@ export const clientFields = (
     { name: "phone", label: "Teléfono", validation: { required: true }, order: 2 },
     { name: "address", label: "Dirección", validation: { required: true }, order: 3 },
     { name: "taxId", label: "CUIT/CUIL", validation: { required: true }, order: 4 },
-    { name: "countryId", label: "País", type: "select", options: countries, validation: { required: true }, order: 5 },
-    { name: "provinceId", label: "Provincia", type: "select", options: provinces, validation: { required: true }, order: 6 },
-    { name: "localityId", label: "Localidad", type: "select", options: localities, validation: { required: true }, order: 7 },
-    { name: "zoneId", label: "Zona", type: "select", options: zones, validation: { required: true }, order: 8 },
+    ...dependentLocationFields<CreateClientDTO>(countries, provinces, localities, zones).map(f => ({ ...f, order: f.order! + 4 })),
     { name: "registrationDate", label: "Fecha de alta", type: "date", validation: { required: true }, order: 9 },
     { 
       name: "type", 
@@ -31,7 +28,7 @@ export const clientFields = (
       validation: { required: true },
       order: 10
     },
-  ] as Field<CreateClientDTO>[]);
+  ]);
 };
 
 // Columnas de la tabla de clientes (sin cambios)

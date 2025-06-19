@@ -1,26 +1,27 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { DataTable } from '../../components/common/DataTable';
-import { Modal } from '../../components/common/Modal';
-import { Zone } from '../../interfaces/Locations';
-import useZones from '../../hooks/useZones';
-import ZoneForm from '../../components/zones/ZoneForm';
+import React, { useState, useRef, useEffect } from "react";
+import { DataTable } from "../../components/common/DataTable";
+import { Modal } from "../../components/common/Modal";
+import { Vehicle } from "../../interfaces/Vehicle";
+import useVehicles from "../../hooks/useVehicles";
+import VehicleForm from "../../components/vehicles/VehicleForm";
 import { useNavigate } from "react-router-dom";
-import { zoneColumns } from "../../config/zones/zoneFieldsConfig";
+import { vehicleColumns } from "../../config/vehicles/vehicleFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
-import { zoneFilters } from "../../config/zones/zoneFilterConfig";
-import { zoneModalConfig } from "../../config/zones/zoneModalConfig";
+import { vehicleFilters } from "../../config/vehicles/vehicleFilterConfig";
+import { vehicleModalConfig } from "../../config/vehicles/vehicleModalConfig";
 import ModalDelete from "../../components/common/ModalDelete";
-import '../../styles/css/pages/pages.css';
+import "../../styles/css/pages/pages.css";
 
-const ZonesPage: React.FC = () => {
-  const { 
-    zones, 
-    selectedZone, 
-    setSelectedZone,
-    handleDelete, 
+const VehiclesPage: React.FC = () => {
+  const {
+    vehicles,
+    selectedVehicle,
+    setSelectedVehicle,
+    handleDelete,
     isLoading,
     error,
+    refreshVehicles,
     page,
     setPage,
     totalPages,
@@ -33,14 +34,13 @@ const ZonesPage: React.FC = () => {
     setSortBy,
     sortDirection,
     setSortDirection,
-    fetchZones,
-  } = useZones();
-  
+  } = useVehicles();
+
   const [showViewModal, setShowViewModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [zoneToDelete, setZoneToDelete] = useState<Zone | null>(null);
+  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,29 +48,29 @@ const ZonesPage: React.FC = () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
-  }, [zones]);
+  }, [vehicles]);
 
   const handleDeleteClick = (id: number) => {
-    const zone = zones.find(z => z.zone_id === id);
-    setZoneToDelete(zone || null);
+    const vehicle = vehicles.find(v => v.vehicle_id === id);
+    setVehicleToDelete(vehicle || null);
     setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (zoneToDelete) {
-      await handleDelete(zoneToDelete.zone_id);
+    if (vehicleToDelete) {
+      await handleDelete(vehicleToDelete.vehicle_id);
       setShowDeleteModal(false);
-      setZoneToDelete(null);
+      setVehicleToDelete(null);
     }
   };
 
-  const handleEditClick = (zone: Zone) => {
-    setSelectedZone(zone);
+  const handleEditClick = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
     setShowForm(true);
   };
 
   const handleCloseForm = () => {
-    setSelectedZone(null);
+    setSelectedVehicle(null);
     setShowForm(false);
   };
 
@@ -113,21 +113,20 @@ const ZonesPage: React.FC = () => {
     return <div className="p-4">Cargando...</div>;
   }
 
-  const start = (page - 1) * (zones.length || 1) + (zones.length > 0 ? 1 : 0);
-  const end = (page - 1) * (zones.length || 1) + zones.length;
+  const start = (page - 1) * (vehicles.length || 1) + (vehicles.length > 0 ? 1 : 0);
+  const end = (page - 1) * (vehicles.length || 1) + vehicles.length;
 
-  const titlePage = "zones";
+  const titlePage = "vehicles";
 
   return (
     <div className={`page-container ${titlePage+"-page-container"}`}>
-      {/* Panel de la tabla */}
       <div
         className={`page-content ${titlePage+"-page-content"}
           ${showForm ? "-translate-x-full" : "translate-x-0"}
         `}
       >
         <div>
-          <h1 className={`page-title ${titlePage+"-page-title"}`}>Zonas</h1>
+          <h1 className={`page-title ${titlePage+"-page-title"}`}>Móviles</h1>
         </div>
         <div className={`page-header ${titlePage+"-page-header"}`}>
           <div className={`page-header-div-1 ${titlePage+"-page-header-div-1"}`}>
@@ -135,7 +134,7 @@ const ZonesPage: React.FC = () => {
               ref={searchInputRef}
               value={search}
               onChange={setSearch}
-              placeholder="Buscar zonas..."
+              placeholder="Buscar vehículos..."
               class={titlePage}
             />
           </div>
@@ -153,24 +152,24 @@ const ZonesPage: React.FC = () => {
               Filtros
             </button>
             <button
-              onClick={() => navigate("/zonas/nueva-zona")}
+              onClick={() => navigate("/moviles/nuevo-movil")}
               className={`page-new-button ${titlePage+"-page-new-button"}`}
             >
               <img
                 src="/assets/icons/huge-icon.svg"
-                alt="Nueva zona"
+                alt="Nuevo vehículo"
                 className={`page-new-button-icon ${titlePage+"-page-new-button-icon"}`}
                 style={{ display: "inline-block" }}
               />
-              Nueva Zona
+              Nuevo Móvil
             </button>
           </div>
         </div>
         <DataTable
-          data={zones.map(z => ({ ...z, id: z.zone_id }))}
-          columns={zoneColumns}
-          onView={(zone) => {
-            setSelectedZone(zone);
+          data={vehicles.map(v => ({ ...v, id: v.vehicle_id }))}
+          columns={vehicleColumns}
+          onView={(vehicle) => {
+            setSelectedVehicle(vehicle);
             setShowViewModal(true);
           }}
           onEdit={handleEditClick}
@@ -180,13 +179,10 @@ const ZonesPage: React.FC = () => {
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        {/* Controles de paginación y leyenda */}
         <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          {/* Leyenda de cantidad */}
           <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} zonas
+            Mostrando {end > total ? total : end} de {total} Móviles
           </div>
-          {/* Paginación numerada */}
           <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
             <button
               className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
@@ -216,7 +212,6 @@ const ZonesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Panel del formulario */}
       <div
         className={`form-container ${titlePage+"-form-container"}
           ${showForm ? "translate-x-0" : "translate-x-full"}
@@ -228,47 +223,44 @@ const ZonesPage: React.FC = () => {
               className={`form-close-button ${titlePage+"-form-close-button"}`}>
               <img src="/assets/icons/back.svg" alt="Volver" className={`form-icon-cancel ${titlePage+"-form-icon-cancel"}`} />
             </button>
-            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Zona</h2>
+            <h2 className={`form-title ${titlePage+"-form-title"}`}>Editar Móvil</h2>
           </div>
-          {selectedZone && (
-            <ZoneForm
+          {selectedVehicle && (
+            <VehicleForm
               onCancel={handleCloseForm}
-              isEditing={!!selectedZone}
-              zoneToEdit={selectedZone}
-              refreshZones={async () => { await fetchZones(); }}
+              isEditing={!!selectedVehicle}
+              vehicleToEdit={selectedVehicle}
+              refreshVehicles={async () => { await refreshVehicles(); }}
               class={titlePage}
             />
           )}
         </div>
       </div>
 
-      {/* Modal de Vista */}
       <Modal
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
-          setSelectedZone(null);
+          setSelectedVehicle(null);
         }}
-        title="Detalles de la Zona"
+        title="Detalles del Móvil"
         class={titlePage}
-        config={zoneModalConfig}
-        data={selectedZone}
+        config={vehicleModalConfig}
+        data={selectedVehicle}
       />
 
-      {/* Modal de Eliminar */}
       <ModalDelete
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}
-        content="zona"
-        genere="F"
+        content="vehículo"
+        genere="M"
       />
 
-      {/* Drawer de filtros */}
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        fields={zoneFilters}
+        fields={vehicleFilters}
         values={filters}
         onChange={handleFilterChange}
         onApply={handleApplyFilters}
@@ -278,4 +270,4 @@ const ZonesPage: React.FC = () => {
   );
 };
 
-export default ZonesPage;
+export default VehiclesPage;

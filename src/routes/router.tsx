@@ -10,15 +10,18 @@ const ClientsPage = React.lazy(() => import("../pages/clients/ClientsPage"));
 const NewClientPage = React.lazy(() => import("../pages/clients/NewClientPage"));
 const ProductsPage = React.lazy(() => import("../pages/products/ProductsPage"));
 const NewProductPage = React.lazy(() => import("../pages/products/NewProductPage"));
-const MobilesPage = React.lazy(() => import("../pages/mobiles/MobilesPage"));
+const VehiclesPage = React.lazy(() => import("../pages/vehicles/VehiclesPage"));
+const NewVehiclePage = React.lazy(() => import("../pages/vehicles/NewVehiclePage"));
 const DeliveriesPage = React.lazy(() => import("../pages/deliveries/DeliveriesPage"));
 const NewUserPage = React.lazy(() => import("../pages/users/NewUserPage"));
 const LoginPage = React.lazy(() => import("../pages/login/LoginPage"));
 const PasswordRecovery = React.lazy(() => import("../pages/passwordRecovery/PasswordRecoveryPage"));
 const ResetPasswordPage = React.lazy(() => import("../pages/resetPassword/ResetPasswordPage"));
 const ZonesPage = React.lazy(() => import("../pages/zones/ZonesPage"));
+const NewZonePage = React.lazy(() => import("../pages/zones/NewZonePage"));
 const OrdersPage = React.lazy(() => import("../pages/orders/OrdersPage"));
-const SuscriptionsPage = React.lazy(() => import("../pages/subscriptions/SubscriptionsPage"));
+const SubscriptionPlansPage = React.lazy(() => import("../pages/subscriptionPlans/SubscriptionPlansPage"));
+const NewSubscriptionPlanPage = React.lazy(() => import("../pages/subscriptionPlans/NewSubscriptionPlanPage"));
 const PriceLists = React.lazy(() => import("../pages/priceLists/PriceLists"));
 const ProfilePage = React.lazy(() => import("../pages/profile/ProfilePage"));
 
@@ -49,12 +52,15 @@ const AppRouter: React.FC = () => {
             <Route path="clientes" element={<ClientsPage />} />
             <Route path="clientes/nuevo-cliente" element={<NewClientPage/>} />
             <Route path="entregas" element={<DeliveriesPage />} />
-            <Route path="moviles" element={<MobilesPage />} />
+            <Route path="moviles" element={<VehiclesPage />} />
+            <Route path="moviles/nuevo-movil" element={<NewVehiclePage />} />
             <Route path="zonas" element={<ZonesPage />} />
+            <Route path="zonas/nueva-zona" element={<NewZonePage />} />
             <Route path="articulos" element={<ProductsPage />} />
             <Route path="articulos/nuevo-articulo" element={<NewProductPage />} />
             <Route path="listas-precios" element={<PriceLists />} />
-            <Route path="abonos" element={<SuscriptionsPage />} />
+            <Route path="abonos" element={<SubscriptionPlansPage />} />
+            <Route path="abonos/nuevo-abono" element={<NewSubscriptionPlanPage />} />
             <Route path="usuarios" element={<UsersPage />} />
             <Route path="usuarios/nuevo-usuario" element={<NewUserPage />} />
             <Route path="perfil" element={<ProfilePage />} />
