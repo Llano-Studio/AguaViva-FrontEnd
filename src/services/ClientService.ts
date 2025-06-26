@@ -5,7 +5,12 @@ export class ClientService {
   private clientsUrl = "/persons";
 
   async getClients(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<ClientsResponse> {
-    return await httpAdapter.get<ClientsResponse>(this.clientsUrl, { params });
+    const safeParams = {
+      ...params,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 10,
+    };
+    return await httpAdapter.get<ClientsResponse>(this.clientsUrl, { params: safeParams });
   }
 
   async getClientById(id: number): Promise<Client | null> {

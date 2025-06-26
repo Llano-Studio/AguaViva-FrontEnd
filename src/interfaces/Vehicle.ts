@@ -18,3 +18,21 @@ export interface VehiclesResponse {
   limit: number;
   totalPages: number;
 }
+
+export interface VehicleZoneAssignment {
+  vehicle_zone_id: number;
+  vehicle_id: number;
+  zone_id: number;
+  assigned_at: string;
+  is_active: boolean;
+  notes: string;
+  zone: any; // Puedes tipar mejor si tienes la interfaz Zone
+}
+
+export interface VehicleUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+}

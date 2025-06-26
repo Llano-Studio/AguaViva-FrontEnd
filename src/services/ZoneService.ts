@@ -11,7 +11,12 @@ export class ZoneService {
   private zonesUrl = "/zones";
 
   async getZones(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<ZonesResponse> {
-    return await httpAdapter.get<ZonesResponse>(this.zonesUrl, { params });
+    const safeParams = {
+      ...params,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 10,
+    };
+    return await httpAdapter.get<ZonesResponse>(this.zonesUrl, { params: safeParams });
   }
 
   async getZoneById(id: number): Promise<Zone | null> {

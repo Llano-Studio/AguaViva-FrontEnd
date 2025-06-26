@@ -21,21 +21,21 @@ export const subscriptionPlanFields = sortByOrder([
     order: 3,
   },
   { 
-    name: "cycle_days",
+    name: "default_cycle_days",
     label: "Días por ciclo", 
     type: "number",
     validation: { required: true },
     order: 4,
   },
   { 
-    name: "deliveries_per_cycle",
+    name: "default_deliveries_per_cycle",
     label: "Entregas por ciclo", 
     type: "number",
     validation: { required: true },
     order: 5,
   },
   { 
-    name: "active", 
+    name: "is_active", 
     label: "Activo", 
     type: "checkbox", 
     order: 6 
@@ -47,11 +47,11 @@ export const subscriptionPlanColumns: Column<SubscriptionPlan>[] = sortByOrder([
   { header: 'Nombre', accessor: 'name', order: 1 },
   { header: 'Descripción', accessor: 'description', order: 2 },
   { header: 'Precio', accessor: 'price', order: 3 },
-  { header: 'Días por ciclo', accessor: 'cycle_days', order: 4 },
-  { header: 'Entregas/ciclo', accessor: 'deliveries_per_cycle', order: 5 },
+  { header: 'Días por ciclo', accessor: 'default_cycle_days', order: 4 },
+  { header: 'Entregas/ciclo', accessor: 'default_deliveries_per_cycle', order: 5 },
   { 
     header: 'Activo', 
-    accessor: 'active',
+    accessor: 'is_active',
     order: 6,
     render: (value: boolean) => value ? 'Sí' : 'No'
   }

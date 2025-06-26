@@ -68,13 +68,13 @@ export const useVehicles = () => {
       const newVehicle = await vehicleService.createVehicle(vehicleData);
       if (newVehicle) {
         await fetchVehicles(page, limit, search, filters, getSortParams());
-        return true;
+        return newVehicle; // <-- Retorna el objeto Vehicle
       }
-      return false;
+      return null;
     } catch (err) {
       setError('Error al crear vehículo');
       console.error(err);
-      return false;
+      return null;
     } finally {
       setIsLoading(false);
     }

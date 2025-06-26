@@ -7,7 +7,12 @@ export class UserService {
   private registerUrl = "/auth/register";
 
   async getUsers(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<UsersResponse> {
-    return await httpAdapter.get<UsersResponse>(this.usersUrl, { params });
+    const safeParams = {
+      ...params,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 10,
+    };
+    return await httpAdapter.get<UsersResponse>(this.usersUrl, { params: safeParams });
   }
 
   async getUserById(id: number): Promise<User | null> {
@@ -58,5 +63,20 @@ export class UserService {
       console.error("Error en deleteUser:", error);
       return false;
     }
+  }
+
+  // Asignar vehículos a un usuario
+  async assignVehiclesToUser(id: number, payload: { vehicleIds: number[]; notes?: string; isActive?: boolean }) {
+    return await httpAdapter.post<any[]>(payload, `/auth/users/${id}/vehicles`);
+  }
+
+  // Obtener vehículos asignados a un usuario
+  async getUserVehicles(id: number) {
+    return await httpAdapter.get<any[]>(`/auth/users/${id}/vehicles`);
+  }
+
+  // Remover vehículo de un usuario
+  async removeVehicleFromUser(userId: number, vehicleId: number) {
+    return await httpAdapter.delete(`/auth/users/${userId}/vehicles/${vehicleId}`);
   }
 }

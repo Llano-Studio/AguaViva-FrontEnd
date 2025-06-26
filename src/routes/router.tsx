@@ -23,6 +23,7 @@ const OrdersPage = React.lazy(() => import("../pages/orders/OrdersPage"));
 const SubscriptionPlansPage = React.lazy(() => import("../pages/subscriptionPlans/SubscriptionPlansPage"));
 const NewSubscriptionPlanPage = React.lazy(() => import("../pages/subscriptionPlans/NewSubscriptionPlanPage"));
 const PriceLists = React.lazy(() => import("../pages/priceLists/PriceLists"));
+const NewPriceListPage = React.lazy(() => import("../pages/priceLists/NewPriceListPage"));
 const ProfilePage = React.lazy(() => import("../pages/profile/ProfilePage"));
 
 
@@ -59,6 +60,7 @@ const AppRouter: React.FC = () => {
             <Route path="articulos" element={<ProductsPage />} />
             <Route path="articulos/nuevo-articulo" element={<NewProductPage />} />
             <Route path="listas-precios" element={<PriceLists />} />
+            <Route path="listas-precios/nueva-lista-precios" element={<NewPriceListPage />} />
             <Route path="abonos" element={<SubscriptionPlansPage />} />
             <Route path="abonos/nuevo-abono" element={<NewSubscriptionPlanPage />} />
             <Route path="usuarios" element={<UsersPage />} />

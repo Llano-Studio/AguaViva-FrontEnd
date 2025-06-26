@@ -5,7 +5,12 @@ export class ProductService {
   private productsUrl = "/products";
 
   async getProducts(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<ProductsResponse> {
-    return await httpAdapter.get<ProductsResponse>(this.productsUrl, { params });
+    const safeParams = {
+      ...params,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 10,
+    };
+    return await httpAdapter.get<ProductsResponse>(this.productsUrl, { params: safeParams });
   }
 
   async getProductById(id: number): Promise<Product | null> {

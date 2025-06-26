@@ -46,6 +46,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           is_returnable: productToEdit.is_returnable,
           serial_number: productToEdit.serial_number,
           notes: productToEdit.notes,
+          total_stock: productToEdit.total_stock, // <-- agregado
           productImage: null,
         }
       : {
@@ -56,6 +57,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           is_returnable: false,
           serial_number: "",
           notes: "",
+          total_stock: 0, // <-- agregado
           productImage: null,
         }
   ), [isEditing, productToEdit]);

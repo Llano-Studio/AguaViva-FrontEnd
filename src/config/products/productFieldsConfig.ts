@@ -21,10 +21,11 @@ export const productFields = (
     { name: "description", label: "Descripción", type: "text", validation: { required: true }, order: 2 },
     { name: "volume_liters", label: "Volumen (L)", type: "number", validation: { required: true }, order: 3 },
     { name: "price", label: "Precio", type: "number", validation: { required: true }, order: 4 },
-    { name: "is_returnable", label: "Retornable", type: "checkbox", validation: { required: true }, order: 5 },
-    { name: "serial_number", label: "N° de serie", type: "text", validation: {}, order: 6 },
-    { name: "notes", label: "Notas", type: "text", validation: {}, order: 7 },
-    { name: "productImage", label: "Imagen", type: "file", order: 8 },
+    { name: "total_stock", label: "Stock", type: "number", validation: { required: true }, order: 5 },
+    { name: "is_returnable", label: "Retornable", type: "checkbox", validation: { required: true }, order: 6 },
+    { name: "serial_number", label: "N° de serie", type: "text", validation: {}, order: 7 },
+    { name: "notes", label: "Notas", type: "text", validation: {}, order: 8 },
+    { name: "productImage", label: "Imagen", type: "file", order: 9 },
   ]) as Field<CreateProductDTO>[]; // Ordena los campos por la propiedad "order"
 };
 
@@ -35,6 +36,6 @@ export const productColumns: Column<Product>[] = sortByOrder([
   { header: 'Volumen (L)', accessor: 'volume_liters', order: 3 },
   { header: 'Precio', accessor: 'price', order: 4 },
   { header: 'Retornable', accessor: 'is_returnable', order: 5, render: (v: boolean) => v ? "Sí" : "No" },
-  { header: 'N° de serie', accessor: 'serial_number', order: 6 },
-  { header: 'Stock', accessor: 'total_stock', order: 7 },
+  { header: 'N° de serie', accessor: 'serial_number', order: 7 },
+  { header: 'Stock', accessor: 'total_stock', order: 8 },
 ]); // Ordena las columnas por la propiedad "order"

@@ -22,28 +22,40 @@ export const subscriptionPlanModalConfig = sortByOrder([
   },
   {
     label: "Días por ciclo",
-    accessor: "cycle_days",
+    accessor: "default_cycle_days",
     className: "modal-item-4",
     order: 4,
   },
   {
     label: "Entregas por ciclo",
-    accessor: "deliveries_per_cycle",
+    accessor: "default_deliveries_per_cycle",
     className: "modal-item-5",
     order: 5,
   },
   {
     label: "Estado",
-    accessor: "active",
+    accessor: "is_active",
     className: "modal-item-6",
     order: 6,
     render: (value: boolean) => value ? "Activo" : "Inactivo",
   },
   {
-    label: "Productos",
-    accessor: "products",
+    label: "Fecha de creación",
+    accessor: "created_at",
     className: "modal-item-7",
     order: 7,
+  },
+  {
+    label: "Fecha de modificación",
+    accessor: "updated_at",
+    className: "modal-item-8",
+    order: 8,
+  },
+  {
+    label: "Productos",
+    accessor: "products",
+    className: "modal-item-9",
+    order: 9,
     render: (products) => (
       <ul>
         {Array.isArray(products) && products.map((p: any) => (

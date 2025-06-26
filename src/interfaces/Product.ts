@@ -25,6 +25,7 @@ export interface CreateProductDTO {
   is_returnable: boolean;
   serial_number: string;
   notes: string;
+  total_stock: number;
   productImage?: File | null;
 }
 

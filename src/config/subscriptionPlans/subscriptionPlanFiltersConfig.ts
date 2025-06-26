@@ -2,7 +2,7 @@ import { sortByOrder } from "../../utils/sortByOrder";
 
 export const subscriptionPlanFilters = sortByOrder([
   {
-    name: "active",
+    name: "is_active",
     label: "Activo",
     type: "checkbox" as const,
     order: 1,

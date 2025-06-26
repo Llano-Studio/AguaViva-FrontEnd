@@ -11,6 +11,7 @@ import FilterDrawer from "../../components/common/FilterDrawer";
 import { vehicleFilters } from "../../config/vehicles/vehicleFilterConfig";
 import { vehicleModalConfig } from "../../config/vehicles/vehicleModalConfig";
 import ModalDelete from "../../components/common/ModalDelete";
+import useVehicleAssignments from "../../hooks/useVehicleAssignments";
 import "../../styles/css/pages/pages.css";
 
 const VehiclesPage: React.FC = () => {
@@ -36,11 +37,19 @@ const VehiclesPage: React.FC = () => {
     setSortDirection,
   } = useVehicles();
 
+  const {
+    assignedZones,
+    assignedUsers,
+    fetchVehicleZones,
+    fetchVehicleUsers,
+  } = useVehicleAssignments();
+
   const [showViewModal, setShowViewModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
+  const [modalVehicle, setModalVehicle] = useState<any>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -103,6 +112,18 @@ const VehiclesPage: React.FC = () => {
       setSortDirection(sortDirection.filter((_, i) => i !== idx));
     }
     setPage(1);
+  };
+
+  // Manejo para mostrar zonas y usuarios asignados en el modal
+  const handleViewVehicle = async (vehicle: Vehicle) => {
+    const zones = await fetchVehicleZones(vehicle.vehicle_id);
+    const users = await fetchVehicleUsers(vehicle.vehicle_id);
+    setModalVehicle({
+      ...vehicle,
+      assignedZones: zones || [],
+      assignedUsers: users || [],
+    });
+    setShowViewModal(true);
   };
 
   if (error) {
@@ -168,10 +189,7 @@ const VehiclesPage: React.FC = () => {
         <DataTable
           data={vehicles.map(v => ({ ...v, id: v.vehicle_id }))}
           columns={vehicleColumns}
-          onView={(vehicle) => {
-            setSelectedVehicle(vehicle);
-            setShowViewModal(true);
-          }}
+          onView={handleViewVehicle}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
           class={titlePage}
@@ -241,12 +259,12 @@ const VehiclesPage: React.FC = () => {
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
-          setSelectedVehicle(null);
+          setModalVehicle(null);
         }}
         title="Detalles del Móvil"
         class={titlePage}
         config={vehicleModalConfig}
-        data={selectedVehicle}
+        data={modalVehicle}
       />
 
       <ModalDelete

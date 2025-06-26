@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+.listItem-table{
+    width: 100%;
+}
+
+tbody .listItem-tr{
+    border: solid 1px var(--bg-color-2);
+    border-radius: 7px;
+    min-height: 64px;
+    padding: 5px 15px;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--text-color-1);
+    display: flex;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+thead .listItem-tr{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.listItem-table th{
+    font-size: 10px;
+    font-weight: 400;
+}
+
+
+.listItem-tr-thead th:first-child,
+.listItem-tr-tbody td:first-child{
+    width: 200px;
+    text-align: start;
+}
+
+.listItem-table thead th,
+.listItem-table tbody td{
+    min-width: 100px;
+}
+
+.listItem-table thead th:last-child,
+.listItem-table tbody td:last-child{
+  min-width: 48px;
+}
+
+.listItem-table tbody td{
+    text-align: center;
+}

@@ -20,6 +20,9 @@ export interface Field<T> {
   validation?: FieldValidation;
   order?: number;
   defaultValue?: any;
+  multiple?: boolean; // <-- agrega esto
+  value?: any;        // <-- opcional, para soportar value controlado
+  onChange?: (name: string, value: any) => void; // <-- opcional
 }
 
 // Props del componente

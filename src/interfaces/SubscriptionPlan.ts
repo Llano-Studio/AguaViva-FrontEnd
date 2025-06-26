@@ -10,9 +10,9 @@ export interface SubscriptionPlan {
   name: string;
   description: string;
   price: number;
-  cycle_days: number;
-  deliveries_per_cycle: number;
-  active: boolean;
+  default_cycle_days: number;
+  default_deliveries_per_cycle: number;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   products: SubscriptionPlanProduct[];
@@ -22,9 +22,9 @@ export interface CreateSubscriptionPlanDTO {
   name: string;
   description: string;
   price: number;
-  cycle_days: number;
-  deliveries_per_cycle: number;
-  active: boolean;
+  default_cycle_days: number;
+  default_deliveries_per_cycle: number;
+  is_active: boolean;
 }
 
 export interface SubscriptionPlansResponse {
@@ -33,4 +33,23 @@ export interface SubscriptionPlansResponse {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface AddProductToPlanDTO {
+  product_id: number;
+  product_quantity: number;
+}
+
+export interface UpdateProductQuantityDTO {
+  product_quantity: number;
+}
+
+export interface AdjustProductQuantitiesDTO {
+  products: { product_id: number; quantity: number }[];
+}
+
+export interface AdjustPricesDTO {
+  percentage?: number;
+  fixedAmount?: number;
+  reason: string;
 }

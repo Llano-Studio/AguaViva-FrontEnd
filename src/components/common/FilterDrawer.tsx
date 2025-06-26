@@ -4,7 +4,7 @@ import '../../styles/css/components/common/filterDrawer.css'
 export interface FilterField {
   name: string;
   label: string;
-  type: "select" | "checkbox" | "text";
+  type: "select" | "checkbox" | "text" | "date"; // <-- Agrega "date"
   options?: { label: string; value: string | boolean }[];
 }
 
@@ -27,9 +27,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   onApply,
   onClear,
 }) => {
-  if (!isOpen) return null; // <--- Esto oculta completamente el drawer
+  if (!isOpen) return null;
 
-  // Helper para manejar arrays de checkbox
   const handleCheckboxChange = (fieldName: string, optionValue: string | boolean, checked: boolean) => {
     const prev = Array.isArray(values[fieldName]) ? values[fieldName] : [];
     let newValue;
@@ -42,9 +41,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   };
 
   return (
-    <div
-      className={`filter-container`}
-    >
+    <div className={`filter-container`}>
       <div className="filter-header">
         <button onClick={onClose} className="filter-button-close">
           <img
@@ -82,6 +79,23 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                 ))}
               </div>
             )}
+            {field.type === "date" && (
+              <input
+                type="date"
+                value={values[field.name] || ""}
+                onChange={e => onChange(field.name, e.target.value)}
+                className="filter-input"
+              />
+            )}
+            {field.type === "text" && (
+              <input
+                type="text"
+                value={values[field.name] || ""}
+                onChange={e => onChange(field.name, e.target.value)}
+                className="filter-input"
+              />
+            )}
+            {/* Puedes agregar soporte para "select" aquí si lo necesitas */}
           </div>
         ))}
         <div className="filter-actions">
