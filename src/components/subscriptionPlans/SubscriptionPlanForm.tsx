@@ -199,6 +199,8 @@ const SubscriptionPlanForm: React.FC<SubscriptionPlanFormProps> = ({
             columns={subscriptionPlanProductListColumns}
             getKey={item => item.product_id}
             onRemove={handleRemoveProduct}
+            content="producto"
+            genere="M"
           />
         </div>
       )}

@@ -12,6 +12,7 @@ import { subscriptionPlanFilters } from "../../config/subscriptionPlans/subscrip
 import { subscriptionPlanModalConfig } from "../../config/subscriptionPlans/subscriptionPlanModalConfig";
 import ModalDelete from "../../components/common/ModalDelete";
 import '../../styles/css/pages/pages.css';
+import SubscriptionPlanUpdatePrice from "../../components/subscriptionPlans/SubscriptionPlanUpdatePrice";
 
 const SubscriptionPlansPage: React.FC = () => {
   const {
@@ -43,6 +44,8 @@ const SubscriptionPlansPage: React.FC = () => {
   const [planToDelete, setPlanToDelete] = useState<SubscriptionPlan | null>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [showUpdatePriceModal, setShowUpdatePriceModal] = useState(false);
+  
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -142,6 +145,19 @@ const SubscriptionPlansPage: React.FC = () => {
             />
           </div>
           <div className={`page-header-div-2 ${titlePage+"-page-header-div-2"}`}>
+            <button
+              type="button"
+              className="subscriptionPlans-update-prices-btn"
+              onClick={() => setShowUpdatePriceModal(true)}
+            >
+              Modificar precios
+            </button>
+            <SubscriptionPlanUpdatePrice
+              isOpen={showUpdatePriceModal}
+              onClose={() => setShowUpdatePriceModal(false)}
+              onUpdated={refreshPlans}
+              classForm={titlePage}
+            />
             <button
               onClick={() => setShowFilters(true)}
               className={`page-filter-button ${titlePage+"-page-filter-button"}`}

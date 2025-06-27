@@ -1,11 +1,18 @@
 @import "tailwindcss";
 
-.modal-delete-container{
-    @apply fixed inset-0 z-50 flex items-center justify-center;
+.modalDelete-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: rgb(0 0 0 / 80%);
 }
 
-.modal-delete{
+.modalDelete{
     @apply rounded shadow-lg;
     width: 400px;
     height: 144px;
@@ -18,17 +25,17 @@
     padding: 22px 20px 17px 20px;
 }
 
-.modal-delete-title{
+.modalDelete-title{
     @apply text-lg font-bold mb-4 text-red-600 capitalize;
 }
 
-.modal-delete-legend-1{
+.modalDelete-legend-1{
     font-size: 16px;
     font-weight: 500;
     color: var(--text-color-3);
 }
 
-.modal-delete-legend-2{
+.modalDelete-legend-2{
     font-size: 12px;
     font-weight: 400;
     color: var(--text-color-1);
@@ -36,11 +43,11 @@
     text-align: center;
 }
 
-.modal-delete-actions{
+.modalDelete-actions{
     @apply flex justify-center gap-2;
 }
 
-.modal-delete-button-cancel, .modal-delete-button-delete{
+.modalDelete-button-cancel, .modalDelete-button-delete{
     font-size: 11px;
     width: 146px;
     height: 28px;
@@ -50,12 +57,12 @@
     justify-content: center;
 }
 
-.modal-delete-button-delete{
+.modalDelete-button-delete{
     background: var(--acent-color-3);
     color: var(--text-color-2);
 }
 
-.modal-delete-button-cancel{
+.modalDelete-button-cancel{
     border: 1.5px solid var(--text-color-3);
     color: var(--text-color-3);
 }

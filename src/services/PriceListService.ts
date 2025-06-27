@@ -51,9 +51,9 @@ export class PriceListService {
   }
 
   // Extra: aplicar porcentaje a todos los items
-  async applyPercentage(id: number, payload: { percentage: number; reason: string; createdBy: string }) {
+  async applyPercentage(id: number, payload: { percentage: number; reason: string;}) {
     try {
-      return await httpAdapter.patch<any>(payload, `${this.priceListUrl}/${id}/apply-percentage`);
+      return await httpAdapter.post<any>(payload, `${this.priceListUrl}/${id}/apply-percentage`);
     } catch (error) {
       console.error("Error en applyPercentage:", error);
       return null;

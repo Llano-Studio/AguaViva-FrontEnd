@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import '../../styles/css/components/common/modalDelete.css'
 
 interface ModalDeleteProps {
@@ -21,31 +22,32 @@ const ModalDelete: React.FC<ModalDeleteProps> = ({
   const articulo = genere === "M" ? "este" : "esta";
   const eliminar = `eliminar ${content}`;
 
-  return (
-    <div className="modal-delete-container">
-      <div className="modal-delete">
-        <p className="modal-delete-legend-1">
+  return ReactDOM.createPortal(
+    <div className="modalDelete-container">
+      <div className="modalDelete">
+        <p className="modalDelete-legend-1">
           ¿Quieres eliminar {articulo} {content}?
         </p>
-        <p className="modal-delete-legend-2">
+        <p className="modalDelete-legend-2">
           Al eliminar {articulo} {content} se perderán los datos ingresados
         </p>
-        <div className="modal-delete-actions">
+        <div className="modalDelete-actions">
           <button
             onClick={onClose}
-            className="modal-delete-button-cancel"
+            className="modalDelete-button-cancel"
           >
             Cancelar
           </button>
           <button
             onClick={onDelete}
-            className="modal-delete-button-delete"
+            className="modalDelete-button-delete"
           >
             {eliminar}
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

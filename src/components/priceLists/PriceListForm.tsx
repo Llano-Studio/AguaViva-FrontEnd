@@ -9,6 +9,8 @@ import { ListItem } from "../common/ListItem";
 import { priceListItemListColumns } from "../../config/priceLists/priceListItemListColumns";
 import useProducts from "../../hooks/useProducts";
 import { usePriceListItems } from "../../hooks/usePriceListItem";
+import "../../styles/css/components/priceLists/priceListForm.css";
+import { PriceListUpdatePrice } from "./PriceListUpdatePrice";
 
 interface PriceListFormProps {
   onCancel: () => void;
@@ -54,9 +56,8 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
     fetchPriceListById,
   } = usePriceLists();
 
-  // Para agregar/eliminar items
   const { addItem, removeItem } = usePriceListItems(priceListToEdit?.price_list_id || 0);
-
+  const [showUpdatePriceModal, setShowUpdatePriceModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const initialValues = useMemo(
@@ -153,44 +154,64 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
           borderRadius: 12,
           border: "1px solid #DDDDDD"
         }}>
-        <AddItem<any, { unit_price: number }>
-          title="Agregar producto a la lista"
-          placeholder="Buscar producto..."
-          onSearch={handleSearchProducts}
-          onAdd={(product, data) => handleAddProduct(product, data.unit_price)}
-          selectedItems={selectedPriceListItems.map(i => ({
-            product_id: i.product?.product_id,
-            description: i.product?.description,
-            code: i.product?.code,
-            image_url: i.product?.image_url,
-          }))}
-          renderItem={item => (
-            <span>
-              {item.description} ({item.code ?? item.product_id})
-            </span>
-          )}
-          getKey={item => item.product_id}
-          getDisplayValue={item => item.description}
-          initialInputData={{ unit_price: 0 }}
-          renderInputs={(data, setData) => (
-            <>
-              <p className="addItem-quantity-label">Precio</p>
-              <input
-                type="number"
-                min={0}
-                value={data.unit_price}
-                onChange={e => setData({ ...data, unit_price: Number(e.target.value) })}
-                className="addItem-quantity-input"
-                placeholder="Precio"
-              />
-            </>
-          )}
-        />
+        <div className="priceListForm-actions-container">
+          <AddItem<any, { unit_price: number }>
+            title="Agregar producto a la lista"
+            placeholder="Buscar producto..."
+            onSearch={handleSearchProducts}
+            onAdd={(product, data) => handleAddProduct(product, data.unit_price)}
+            selectedItems={selectedPriceListItems.map(i => ({
+              product_id: i.product?.product_id,
+              description: i.product?.description,
+              code: i.product?.code,
+              image_url: i.product?.image_url,
+            }))}
+            renderItem={item => (
+              <span>
+                {item.description} ({item.code ?? item.product_id})
+              </span>
+            )}
+            getKey={item => item.product_id}
+            getDisplayValue={item => item.description}
+            initialInputData={{ unit_price: 0 }}
+            renderInputs={(data, setData) => (
+              <>
+                <p className="addItem-quantity-label">Precio</p>
+                <input
+                  type="number"
+                  min={0}
+                  value={data.unit_price}
+                  onChange={e => setData({ ...data, unit_price: Number(e.target.value) })}
+                  className="addItem-quantity-input"
+                  placeholder="Precio"
+                />
+              </>
+            )}
+          />
+
+          <button
+            type="button"
+            className="priceListForm-update-prices-btn"
+            onClick={() => setShowUpdatePriceModal(true)}
+          >
+            Modificar todos los precios
+          </button>
+          <PriceListUpdatePrice
+            isOpen={showUpdatePriceModal}
+            onClose={() => setShowUpdatePriceModal(false)}
+            priceListId={priceListToEdit.price_list_id}
+            classForm={classForm}
+            onUpdated={refreshPriceLists}
+          />
+
+        </div>
           <ListItem
             items={selectedPriceListItems}
             columns={priceListItemListColumns}
             getKey={item => item.price_list_item_id}
             onRemove={handleRemoveProduct}
+            content="Producto"
+            genere="M"
           />
         </div>
       )}

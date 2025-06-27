@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import "../../styles/css/components/common/modal.css";
 
 interface ModalConfigItem {
@@ -34,7 +35,8 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   if (!isOpen) return null;
   console.log("Modal data:", data);
-  return (
+
+  return ReactDOM.createPortal(
     <div className={`modal-container ${classModal ? classModal+"-modal-container" : ""}`}>
       <div className={`modal-wrapper ${classModal ? classModal+"-modal-wrapper" : ""}`}>
         <div className={`modal-header ${classModal ? classModal+"-modal-header" : ""}`}>
@@ -75,6 +77,7 @@ export const Modal: React.FC<ModalProps> = ({
           children
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -138,6 +138,21 @@ export const usePriceLists = () => {
     }
   };
 
+  const applyPercentage = async (id: number, payload: { percentage: number; reason: string }) => {
+    try {
+      setIsLoading(true);
+      const result = await priceListService.applyPercentage(id, payload);
+      // Opcional: refresca la lista seleccionada
+      await fetchPriceListById(id);
+      return result;
+    } catch (err: any) {
+      setError(err.message || "Error al aplicar porcentaje");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };  
+
   return {
     priceLists,
     selectedPriceList,
@@ -166,5 +181,6 @@ export const usePriceLists = () => {
     setSortBy,
     sortDirection,
     setSortDirection,
+    applyPercentage,
   };
 };

@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+.modalUpdate-container{
+    @apply fixed inset-0 flex items-center justify-center z-15; 
+    background: rgb(0 0 0 / 80%);
+}
+
+.modalUpdate-wrapper{
+    background: var(--bg-color-3);
+    border-radius: 10px;
+    padding: 25px 50px;
+    width: 862px;
+    min-height: 359px;
+}   
+
+.modalUpdate-header{
+    @apply flex justify-between items-center mb-4;
+}
+
+.modalUpdate-title{
+    @apply text-xl font-bold;
+}
+
+.modalUpdate-button-close{
+    padding: 0;
+}
+
+.modalUpdate-content{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: space-between;
+    justify-content: start;
+}
+
+.modalUpdate-content div {
+    width: 25%;
+    padding-right: 3%;
+    margin-bottom: 30px;
+}
+
+.modalUpdate-label{
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.modalUpdate-label-value{
+    font-size: 12px;
+    font-weight: 400;
+}
