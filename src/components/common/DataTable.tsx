@@ -1,6 +1,7 @@
 import React from 'react';
 import { EditButton, DeleteButton, ViewButton } from './ActionButtons';
 import SortBy from './SortBy';
+import { getSemaphoreStyle } from './SemaphoreStatus';
 import '../../styles/css/components/common/dataTable.css';
 
 export interface Column<T> {
@@ -20,6 +21,11 @@ interface DataTableProps<T extends { id: number }> {
   sortBy?: string[];
   sortDirection?: ("asc" | "desc")[];
   onSort?: (column: keyof T) => void;
+  // Nuevo: props opcionales para semáforo
+  useSemaphoreStatus?: boolean;
+  semaphoreField?: keyof T;
+  semaphoreColorMap?: Record<string, string>;
+  semaphoreActive?: boolean;
 }
 
 function getNestedValue(obj: any, path: string | number) {
@@ -36,7 +42,11 @@ export function DataTable<T extends { id: number }>({
   class: classTable,
   sortBy = [],
   sortDirection = [],
-  onSort
+  onSort,
+  useSemaphoreStatus = false,
+  semaphoreField,
+  semaphoreColorMap,
+  semaphoreActive = false,
 }: DataTableProps<T>) {
   return (
     <div className={`table-container ${classTable ? classTable+"-table-container" : ""}`} >
@@ -64,22 +74,37 @@ export function DataTable<T extends { id: number }>({
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id} className={`table-tr ${classTable ? classTable+"-table-tr" : ""}`}>
-              {columns.map((column) => (
-                <td key={String(column.accessor)} className={`table-td-1 ${classTable ? classTable+"-table-td-1" : ""}`}>
-                  {column.render
-                    ? column.render(getNestedValue(item, String(column.accessor)), item)
-                    : String(getNestedValue(item, String(column.accessor)))}
+          {data.map((item) => {
+            const trStyle =
+              useSemaphoreStatus && semaphoreField && semaphoreColorMap
+                ? getSemaphoreStyle({
+                    value: String(item[semaphoreField] ?? ""),
+                    colorMap: semaphoreColorMap,
+                    active: semaphoreActive,
+                  })
+                : {};
+
+            return (
+              <tr
+                key={item.id}
+                className={`table-tr ${classTable ? classTable + "-table-tr" : ""}`}
+                style={trStyle}
+              >
+                {columns.map((column) => (
+                  <td key={String(column.accessor)} className={`table-td-1 ${classTable ? classTable + "-table-td-1" : ""}`}>
+                    {column.render
+                      ? column.render(getNestedValue(item, String(column.accessor)), item)
+                      : String(getNestedValue(item, String(column.accessor)))}
+                  </td>
+                ))}
+                <td className={`table-td-2 ${classTable ? classTable + "-table-td-2" : ""}`}>
+                  {onView && <ViewButton onClick={() => onView(item)} />}
+                  {onEdit && <EditButton onClick={() => onEdit(item)} />}
+                  {onDelete && <DeleteButton onClick={() => onDelete(item.id)} />}
                 </td>
-              ))}
-              <td className={`table-td-2 ${classTable ? classTable+"-table-td-2" : ""}`}>
-                {onView && <ViewButton onClick={() => onView(item)} />}
-                {onEdit && <EditButton onClick={() => onEdit(item)} />}
-                {onDelete && <DeleteButton onClick={() => onDelete(item.id)} />}
-              </td>
-            </tr>
-          ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

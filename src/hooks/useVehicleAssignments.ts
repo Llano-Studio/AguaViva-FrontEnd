@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { VehicleService } from "../services/VehicleService";
 
 export const useVehicleAssignments = () => {
-  const vehicleService = new VehicleService();
+  const vehicleService = useMemo(() => new VehicleService(), []);
   const [assignedZones, setAssignedZones] = useState<any[]>([]);
   const [assignedUsers, setAssignedUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchVehicleZones = async (vehicleId: number) => {
+  const fetchVehicleZones = useCallback(async (vehicleId: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -21,8 +21,9 @@ export const useVehicleAssignments = () => {
     } finally {
       setLoading(false);
     }
-  };
-  const assignZonesToVehicle = async (vehicleId: number, zoneIds: number[], notes?: string, isActive?: boolean) => {
+  }, [vehicleService]);
+
+  const assignZonesToVehicle = useCallback(async (vehicleId: number, zoneIds: number[], notes?: string, isActive?: boolean) => {
     setLoading(true);
     setError(null);
     try {
@@ -35,9 +36,9 @@ export const useVehicleAssignments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [vehicleService, fetchVehicleZones]);
 
-  const removeZoneFromVehicle = async (vehicleId: number, zoneId: number) => {
+  const removeZoneFromVehicle = useCallback(async (vehicleId: number, zoneId: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -50,9 +51,9 @@ export const useVehicleAssignments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [vehicleService, fetchVehicleZones]);
 
-  const fetchVehicleUsers = async (vehicleId: number) => {
+  const fetchVehicleUsers = useCallback(async (vehicleId: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -65,7 +66,7 @@ export const useVehicleAssignments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [vehicleService]);
 
   return {
     assignedZones,

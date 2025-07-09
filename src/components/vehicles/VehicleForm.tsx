@@ -9,6 +9,7 @@ import { Zone } from "../../interfaces/Locations";
 import { User } from "../../interfaces/User";
 import { ZoneService } from "../../services/ZoneService";
 import { UserService } from "../../services/UserService";
+import VehicleZones from "./VehicleZones";
 
 interface VehicleFormProps {
   onCancel: () => void;
@@ -74,11 +75,11 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
 
   // Si editas, carga las asignaciones actuales
   useEffect(() => {
-    if (isEditing && vehicleToEdit) {
-      fetchVehicleZones(vehicleToEdit.vehicle_id);
-      fetchVehicleUsers(vehicleToEdit.vehicle_id);
-    }
-  }, [isEditing, vehicleToEdit, fetchVehicleZones, fetchVehicleUsers]);
+  if (isEditing && vehicleToEdit?.vehicle_id) {
+    fetchVehicleZones(vehicleToEdit.vehicle_id);
+    fetchVehicleUsers(vehicleToEdit.vehicle_id);
+  }
+}, [isEditing, vehicleToEdit?.vehicle_id, fetchVehicleZones, fetchVehicleUsers]);
 
   // Actualiza los seleccionados cuando se cargan las asignaciones
   useEffect(() => {
@@ -138,42 +139,9 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
         fields={vehicleFields}
         class={classForm}
       />
-      <div style={{ margin: "1rem 0" }}>
-        <label><b>Zonas asignadas:</b></label>
-        <select
-          multiple
-          value={selectedZoneIds.map(String)}
-          onChange={e => {
-            const options = Array.from(e.target.selectedOptions, o => Number(o.value));
-            setSelectedZoneIds(options);
-          }}
-          style={{ width: "100%", minHeight: "80px" }}
-        >
-          {allZones.map(zone => (
-            <option key={zone.zone_id} value={zone.zone_id}>
-              {zone.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div style={{ margin: "1rem 0" }}>
-        <label><b>Usuarios asignados:</b></label>
-        <select
-          multiple
-          value={selectedUserIds.map(String)}
-          onChange={e => {
-            const options = Array.from(e.target.selectedOptions, o => Number(o.value));
-            setSelectedUserIds(options);
-          }}
-          style={{ width: "100%", minHeight: "80px" }}
-        >
-          {allUsers.map(user => (
-            <option key={user.id} value={user.id}>
-              {user.name} ({user.email})
-            </option>
-          ))}
-        </select>
-      </div>
+      {isEditing && vehicleToEdit && (
+        <VehicleZones vehicleId={vehicleToEdit.vehicle_id} isEditing={isEditing} />
+      )}
     </>
   );
 };

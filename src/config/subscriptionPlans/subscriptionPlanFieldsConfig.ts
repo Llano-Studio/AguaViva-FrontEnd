@@ -44,7 +44,8 @@ export const subscriptionPlanFields = sortByOrder([
 
 // Columnas de la tabla de abonos
 export const subscriptionPlanColumns: Column<SubscriptionPlan>[] = sortByOrder([
-  { header: 'Nombre', accessor: 'name', order: 1 },
+  { header: 'Nombre', accessor: 'name', order: 0 },
+  { header: 'ID Abono', accessor: 'subscription_plan_id', order: 1 },
   { header: 'Descripción', accessor: 'description', order: 2 },
   { header: 'Precio', accessor: 'price', order: 3 },
   { header: 'Días por ciclo', accessor: 'default_cycle_days', order: 4 },

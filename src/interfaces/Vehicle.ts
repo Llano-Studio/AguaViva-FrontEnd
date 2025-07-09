@@ -36,3 +36,12 @@ export interface VehicleUser {
   role: string;
   isActive: boolean;
 }
+
+export interface VehicleZoneFormData {
+  countryId: number;
+  provinceId: number;
+  localityId: number;
+  zoneId: number;
+  notes?: string;
+  isActive: boolean;
+}

@@ -17,10 +17,12 @@ export interface Locality {
 
 export interface ZonesResponse {
   data: Zone[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  meta: {
+    limit: number;
+    page: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface Country {

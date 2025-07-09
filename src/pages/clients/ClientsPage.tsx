@@ -11,6 +11,7 @@ import FilterDrawer from "../../components/common/FilterDrawer";
 import { clientFilters } from "../../config/clients/clientFiltersConfig";
 import { clientModalConfig } from "../../config/clients/clientModalConfig";
 import ModalDelete from "../../components/common/ModalDelete";
+import Switch from "../../components/common/Switch";
 import '../../styles/css/pages/pages.css';
 
 const ClientsPage: React.FC = () => {
@@ -40,6 +41,7 @@ const ClientsPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [semaphoreOn, setSemaphoreOn] = useState(false);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,10 +140,21 @@ const ClientsPage: React.FC = () => {
             />
           </div>
           <div className={`page-header-div-2 ${titlePage+"-page-header-div-2"}`}>
+            
+            <div className='page-switch-container'>
+              <Switch
+                value={semaphoreOn ? "on" : "off"}
+                onChange={v => setSemaphoreOn(v === "on")}
+                options={["off", "on"]}
+                labels={["", ""]}
+              />
+              <p className='page-title-switch-status'>Estado de cuenta</p>
+            </div>
             <button
               onClick={() => setShowFilters(true)}
               className={`page-filter-button ${titlePage+"-page-filter-button"}`}
             >
+              
               <img
                 src="/assets/icons/filter-icon.svg"
                 alt="Filtros"
@@ -177,6 +190,15 @@ const ClientsPage: React.FC = () => {
           sortBy={sortBy}
           sortDirection={sortDirection}
           onSort={handleSort}
+          useSemaphoreStatus={semaphoreOn}
+          semaphoreField="payment_semaphore_status"
+          semaphoreColorMap={{
+            GREEN: "#E9FFF6",
+            YELLOW: "#FFFCDA",
+            RED: "#FFDFDF",
+            NONE: "",
+          }}
+          semaphoreActive={semaphoreOn}
         />
         {/* Controles de paginación y leyenda */}
         <div className={`page-pagination ${titlePage+"-page-pagination"}`}>

@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { UseFormReturn, FieldValues } from 'react-hook-form';
 import '../../styles/css/components/common/itemForm.css';
+import Select from "react-select";
 
 // Validaciones opcionales
 interface FieldValidation {
@@ -10,7 +11,18 @@ interface FieldValidation {
 }
 
 // Definición de un campo del formulario
-export type FieldType = "text" | "number" | "select" | "checkbox" | "file" | "date" | "textarea" | "password" | "email";
+export type FieldType =
+  | "text"
+  | "number"
+  | "select"
+  | "checkbox"
+  | "file"
+  | "date"
+  | "textarea"
+  | "password"
+  | "email"
+  | "multiselect"
+  | "time";
 
 export interface Field<T> {
   name: keyof T | string;
@@ -20,9 +32,9 @@ export interface Field<T> {
   validation?: FieldValidation;
   order?: number;
   defaultValue?: any;
-  multiple?: boolean; // <-- agrega esto
-  value?: any;        // <-- opcional, para soportar value controlado
-  onChange?: (name: string, value: any) => void; // <-- opcional
+  multiple?: boolean;
+  value?: any;
+  onChange?: (name: string, value: any) => void;
 }
 
 // Props del componente
@@ -162,6 +174,35 @@ export function ItemForm<T extends FieldValues>({
               />
             )}
           </div>
+        );
+      case 'multiselect':
+        // Adaptar las opciones al formato que espera react-select
+        const options = field.options?.map(option => ({
+          label: option.label,
+          value: option.value
+        })) || [];
+
+        // Forzar a array para evitar error de TS
+        const watchedValue = watch(field.name as any);
+        const currentValue = ((Array.isArray(watchedValue) ? watchedValue : []) as any[])
+          .map((val: any) => options.find(opt => opt.value === val))
+          .filter(Boolean);
+
+        return (
+          <Select
+            isMulti
+            options={options}
+            value={currentValue}
+            classNamePrefix="react-select"
+            onChange={selected => {
+              const values = (selected as any[]).map(opt => opt.value);
+              setValue(field.name as any, values as any, { shouldValidate: true, shouldDirty: true });
+              if (onFieldChange) {
+                onFieldChange(field.name as string, values);
+              }
+            }}
+            placeholder="Seleccionar uno o más días"
+          />
         );
       default:
         return (

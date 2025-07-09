@@ -32,10 +32,11 @@ export const productFields = (
 // Columnas de la tabla de productos
 export const productColumns: Column<Product>[] = sortByOrder([
   { header: 'Descripción', accessor: 'description', order: 1 },
+  { header: 'ID Artículo', accessor: 'product_id', order: 1 },
   { header: 'Categoría', accessor: 'product_category.name', order: 2 },
   { header: 'Volumen (L)', accessor: 'volume_liters', order: 3 },
   { header: 'Precio', accessor: 'price', order: 4 },
   { header: 'Retornable', accessor: 'is_returnable', order: 5, render: (v: boolean) => v ? "Sí" : "No" },
   { header: 'N° de serie', accessor: 'serial_number', order: 7 },
   { header: 'Stock', accessor: 'total_stock', order: 8 },
-]); // Ordena las columnas por la propiedad "order"
+]);

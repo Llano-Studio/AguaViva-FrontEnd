@@ -11,9 +11,10 @@ export const clientFields = (
   zones: { label: string; value: number }[]
 ): Field<CreateClientDTO>[] => {
   return sortByOrder([
-    { name: "name", label: "Nombre", validation: { required: true }, order: 1 },
-    { name: "phone", label: "Teléfono", validation: { required: true }, order: 2 },
-    { name: "address", label: "Dirección", validation: { required: true }, order: 3 },
+    { name: "name", label: "Nombre", validation: { required: true }, order: 0 },
+    { name: "phone", label: "Teléfono", validation: { required: true }, order: 1 },
+    { name: "address", label: "Dirección", validation: { required: true }, order: 2 },
+    { name: "alias", label: "Empresa", validation: { required: false }, order: 3 },
     { name: "taxId", label: "CUIT/CUIL", validation: { required: true }, order: 4 },
     ...dependentLocationFields<CreateClientDTO>(countries, provinces, localities, zones).map(f => ({ ...f, order: f.order! + 4 })),
     { name: "registrationDate", label: "Fecha de alta", type: "date", validation: { required: true }, order: 9 },
@@ -33,22 +34,26 @@ export const clientFields = (
 
 // Columnas de la tabla de clientes (sin cambios)
 export const clientColumns: Column<Client>[] = sortByOrder([
-  { header: 'Nombre', accessor: 'name', order: 1 },
+  { header: 'Nombre', accessor: 'name', order: 0 },
+  { header: 'ID Cliente', accessor: 'person_id', order: 1 },
   { header: 'Teléfono', accessor: 'phone', order: 2 },
   { header: 'Dirección', accessor: 'address', order: 3 },
-  { header: 'CUIT/CUIL', accessor: 'taxId', order: 4 },
-  { header: 'Localidad', accessor: 'locality.name', order: 5 },
-  { header: 'Zona', accessor: 'zone.name', order: 6 },
+  { header: 'Empresa', accessor: 'alias', order: 4,
+    render: (value: string) => value ? value : '-' 
+  },
+  { header: 'CUIT/CUIL', accessor: 'taxId', order: 5 },
+  { header: 'Localidad', accessor: 'locality.name', order: 6 },
+  { header: 'Zona', accessor: 'zone.name', order: 7 },
   { 
     header: 'Tipo', 
     accessor: 'type',
-    order: 7,
+    order: 8,
     render: (value: string) => value === 'PLAN' ? 'Abono' : 'Individual'
   },
   { 
     header: 'Semáforo de pago', 
     accessor: 'payment_semaphore_status',
-    order: 8,
+    order: 9,
     render: (value: string) => {
       if (value === "GREEN") return "Verde";
       if (value === "YELLOW") return "Amarillo";

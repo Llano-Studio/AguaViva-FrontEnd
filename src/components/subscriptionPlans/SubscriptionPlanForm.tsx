@@ -107,7 +107,10 @@ const SubscriptionPlanForm: React.FC<SubscriptionPlanFormProps> = ({
   // Añadir producto al abono
   const handleAddProduct = async (product: any, quantity: number) => {
     if (!planToEdit) return;
+    console.log("producto a agregar: ",product);
+    console.log("cantidad a agregar: ",quantity);
     const exists = selectedProducts.some(p => p.product_id === product.product_id);
+    console.log("producto a agregar: ",product.product_id);
     if (!exists) {
       const res = await addProduct({ product_id: product.product_id, product_quantity: quantity });
       if (res) setSelectedProducts(res.products);

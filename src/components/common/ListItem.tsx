@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import ModalDelete from "./ModalDelete";
+import React from "react";
+import { ViewButton, EditButton, DeleteButton } from "./ActionButtons";
 import "../../styles/css/components/common/listItem.css";
 
 interface ListColumn<T> {
@@ -14,7 +14,9 @@ interface ListItemProps<T> {
   columns: ListColumn<T>[];
   getKey: (item: T) => string | number;
   onRemove?: (item: T) => void;
-  content?: string; // Nuevo: para pasar a ModalDelete
+  onEdit?: (item: T) => void;
+  onView?: (item: T) => void;
+  content?: string;
   genere?: "M" | "F";
 }
 
@@ -23,30 +25,15 @@ export function ListItem<T>({
   columns,
   getKey,
   onRemove,
-  content = "elemento",
-  genere = "M",
+  onEdit,
+  onView,
 }: ListItemProps<T>) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<T | null>(null);
-
-  if (!items.length) return <div>No hay elementos.</div>;
+  if (!items.length) return <div>No hay elementos para mostrar.</div>;
 
   const handleDeleteClick = (item: T) => {
-    setItemToDelete(item);
-    setModalOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (itemToDelete && onRemove) {
-      onRemove(itemToDelete);
+    if (onRemove) {
+      onRemove(item); // Llama directamente al handler del padre
     }
-    setModalOpen(false);
-    setItemToDelete(null);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setItemToDelete(null);
   };
 
   return (
@@ -57,7 +44,7 @@ export function ListItem<T>({
             {columns.map(col => (
               <th key={col.accessor}>{col.header}</th>
             ))}
-            {onRemove && <th></th>}
+            {(onView || onEdit || onRemove) && <th>Acciones</th>}
           </tr>
         </thead>
         <tbody>
@@ -68,30 +55,19 @@ export function ListItem<T>({
                   {col.render ? col.render(item) : (item as any)[col.accessor]}
                 </td>
               ))}
-              {onRemove && (
+              {(onView || onEdit || onRemove) && (
                 <td>
-                  <button
-                    type="button"
-                    className="ListItem-button-delete"
-                    onClick={() => handleDeleteClick(item)}
-                  >
-                    <img src="/assets/icons/delete-icon.svg" alt="icono-borrar" className="ListItem-icon-delete" />
-                  </button>
+                  {onView && <ViewButton onClick={() => onView(item)} />}
+                  {onEdit && <EditButton onClick={() => onEdit(item)} />}
+                  {onRemove && (
+                    <DeleteButton onClick={() => handleDeleteClick(item)} />
+                  )}
                 </td>
               )}
             </tr>
           ))}
         </tbody>
       </table>
-      {onRemove && (
-        <ModalDelete
-          isOpen={modalOpen}
-          onClose={handleCloseModal}
-          onDelete={handleConfirmDelete}
-          content={content}
-          genere={genere}
-        />
-      )}
     </>
   );
 }

@@ -25,7 +25,7 @@ export const useClients = () => {
       .join(",");
   };
 
-  const fetchClients = useCallback(
+const fetchClients = useCallback(
     async (
       pageParam = page,
       limitParam = limit,
@@ -42,13 +42,16 @@ export const useClients = () => {
           sortBy: sortByParam,
           ...filtersParam,
         });
-        setClients(response.data);
-        setTotal(response.total);
-        setPage(response.page);
-        setLimit(response.limit);
-        setTotalPages(response.totalPages);
-        console.log("fetchClients useClients", response);
-        return true;
+        
+        if (response?.data) {
+          setClients(response.data);
+          setTotal(response.meta.total);           
+          setTotalPages(response.meta.totalPages || 1); 
+          setPage(response.meta.page || 1);       
+          setLimit(response.meta.limit || 10);    
+          return true;
+        }
+        return false;
       } catch (err: any) {
         setError(err.message || "Error al obtener clientes");
         return false;

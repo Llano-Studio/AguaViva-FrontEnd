@@ -89,10 +89,17 @@ export function AddItem<T = any, D = any>({
     setShowDropdown(false);
     justSelectedRef.current = true;
   };
-
-  const handleAdd = () => {
+  
+const handleAdd = () => {
     if (selected) {
-      onAdd(selected, inputData);
+      if (renderInputs) {
+        // Si hay inputs personalizados, pasa el objeto inputData completo
+        onAdd(selected, inputData);
+      } else {
+        // Si no, pasa solo la cantidad (número)
+        const quantity = (inputData as any)?.quantity ?? 1;
+        onAdd(selected, quantity);
+      }
       setQuery("");
       setResults([]);
       setSelected(null);

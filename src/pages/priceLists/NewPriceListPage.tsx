@@ -1,7 +1,7 @@
 import React from "react";
 import PriceListForm from "../../components/priceLists/PriceListForm";
 import { useNavigate } from "react-router-dom";
-import usePriceLists from "../../hooks/usePriceLists";
+import {usePriceLists} from "../../hooks/usePriceLists";
 import "../../styles/css/pages/newPages.css";
 
 const NewPriceListPage: React.FC = () => {

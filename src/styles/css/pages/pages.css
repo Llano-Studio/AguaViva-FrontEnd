@@ -26,6 +26,7 @@
 .page-header-div-2{
   display: flex;
   gap: 15px;
+  align-items: center;
 }
 
 .page-filter-button{
@@ -141,3 +142,14 @@
   margin-right: 5px;
 }
 
+.page-title-switch-status{
+  font-size: 11px;
+  color: var(--text-color-3);
+  font-weight: 600;
+  margin-right: 14px;
+}
+
+.page-switch-container{
+  display: flex;
+  align-items: center;
+}

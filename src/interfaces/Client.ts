@@ -5,6 +5,7 @@ export interface Client {
   name: string;
   phone: string;
   address: string;
+  alias: string;
   taxId: string;
   localityId: number;
   zoneId: number;
@@ -22,6 +23,7 @@ export interface CreateClientDTO {
   name: string;
   phone: string;
   address: string;
+  alias: string;
   taxId: string;
   countryId: number; 
   provinceId: number; 
@@ -33,10 +35,12 @@ export interface CreateClientDTO {
 
 export interface ClientsResponse {
   data: Client[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  meta: {
+    limit: number;
+    page: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface LoanedProduct {

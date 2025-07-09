@@ -1,7 +1,10 @@
 export const clientModalConfig = [
-  { label: "Nombre", accessor: "name", className: "modal-item-1", order: 1 },
-  { label: "Teléfono", accessor: "phone", className: "modal-item-2", order: 2 },
-  { label: "Dirección", accessor: "address", className: "modal-item-3", order: 3 },
+  { label: "Nombre", accessor: "name", className: "modal-item-1", order: 0 },
+  { label: "Teléfono", accessor: "phone", className: "modal-item-2", order: 1 },
+  { label: "Dirección", accessor: "address", className: "modal-item-3", order: 2 },
+  { label: "Empresa", accessor: "alias", className: "modal-item-3", order: 3,
+    render: (value: string) => value ? value : '-' 
+  },
   { label: "CUIT/CUIL", accessor: "taxId", className: "modal-item-4", order: 4 },
   { label: "Localidad", accessor: "locality.name", className: "modal-item-5", order: 5 },
   { label: "Zona", accessor: "zone.name", className: "modal-item-6", order: 6 },

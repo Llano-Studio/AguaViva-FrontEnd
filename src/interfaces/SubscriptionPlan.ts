@@ -29,10 +29,12 @@ export interface CreateSubscriptionPlanDTO {
 
 export interface SubscriptionPlansResponse {
   data: SubscriptionPlan[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  meta: {
+    limit: number;
+    page: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface AddProductToPlanDTO {

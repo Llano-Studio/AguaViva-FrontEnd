@@ -6,6 +6,7 @@ import useClients from "../../hooks/useClients";
 import { useDependentLocationFields } from "../../hooks/useDependentLocationFields";
 import { useForm } from "react-hook-form";
 import { getDependentLocationOptions, handleDependentLocationChange } from "../../config/common/dependentLocationLogic";
+import SubscriptionClient from "./SubscriptionClient";
 
 interface ClientFormProps {
   onCancel: () => void;
@@ -21,6 +22,7 @@ const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): Cre
       name: clientToEdit.name,
       phone: clientToEdit.phone,
       address: clientToEdit.address,
+      alias: clientToEdit.alias,
       taxId: clientToEdit.taxId,
       countryId: clientToEdit.locality?.province?.country?.country_id ?? 0,
       provinceId: clientToEdit.locality?.province?.province_id ?? 0,
@@ -34,6 +36,7 @@ const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): Cre
     name: "",
     phone: "",
     address: "",
+    alias: "",
     taxId: "",
     countryId: 0,
     provinceId: 0,
@@ -111,6 +114,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
           name,
           phone,
           address,
+          alias,
           taxId,
           localityId,
           zoneId,
@@ -122,6 +126,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
           name,
           phone,
           address,
+          alias,
           taxId,
           localityId,
           zoneId,
@@ -160,6 +165,10 @@ const ClientForm: React.FC<ClientFormProps> = ({
         class={classForm}
         onFieldChange={handleFieldChange as (fieldName: string, value: any) => void}
       />
+
+      {isEditing && clientToEdit && (
+        <SubscriptionClient clientId={clientToEdit.person_id} isEditing={isEditing} />
+      )}
     </>
   );
 };

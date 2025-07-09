@@ -14,7 +14,7 @@ export const Switch = <T extends string = string>({
   options,
   labels,
 }: SwitchProps<T>) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+  <div className="switch-container">
     <span style={{ fontWeight: value === options[0] ? "bold" : "normal" }}>
       {labels ? labels[0] : options[0]}
     </span>

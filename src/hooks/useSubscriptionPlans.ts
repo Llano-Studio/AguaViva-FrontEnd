@@ -43,10 +43,10 @@ export const useSubscriptionPlans = () => {
           ...filtersParam,
         });
         setPlans(response.data);
-        setTotal(response.total);
-        setPage(response.page);
-        setLimit(response.limit);
-        setTotalPages(response.totalPages);
+        setTotal(response.meta.total);
+        setPage(response.meta.page);
+        setLimit(response.meta.limit);
+        setTotalPages(response.meta.totalPages);
         return true;
       } catch (err: any) {
         setError(err.message || "Error al obtener abonos");
