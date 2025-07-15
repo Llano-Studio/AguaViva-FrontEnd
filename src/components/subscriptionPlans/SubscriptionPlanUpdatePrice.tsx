@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { ModalUpdate } from "../common/ModalUpdate";
 import { subscriptionPlanUpdatePriceConfig } from "../../config/subscriptionPlans/subscriptionPlanUpdatePriceConfig";
-import Switch from "../common/Switch";
 import { SubscriptionPlanService } from "../../services/SubscriptionPlanService";
+import Tab, { TabOption } from "../common/Tab";
 
 interface SubscriptionPlanUpdatePriceProps {
   isOpen: boolean;
@@ -13,6 +13,16 @@ interface SubscriptionPlanUpdatePriceProps {
 
 const planService = new SubscriptionPlanService();
 
+const tabs: TabOption[] = [
+  { key: "porcentaje", label: "Porcentaje" },
+  { key: "monto", label: "Monto fijo" },
+];
+
+const signTabs: TabOption[] = [
+  { key: "sumar", label: "Sumar" },
+  { key: "restar", label: "Restar" },
+];
+
 export const SubscriptionPlanUpdatePrice: React.FC<SubscriptionPlanUpdatePriceProps> = ({
   isOpen,
   onClose,
@@ -22,55 +32,49 @@ export const SubscriptionPlanUpdatePrice: React.FC<SubscriptionPlanUpdatePricePr
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Switches
-  const [mode, setMode] = useState<"porcentaje" | "monto">("porcentaje");
+  const [activeTab, setActiveTab] = useState<"porcentaje" | "monto">("porcentaje");
   const [sign, setSign] = useState<"sumar" | "restar">("sumar");
 
   const initialValues = { percentage: 0, fixedAmount: 0, reason: "" };
 
-    const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: any) => {
     setLoading(true);
     setError(null);
     try {
-        let payload: any = { reason: values.reason };
-        if (mode === "porcentaje") {
+      let payload: any = { reason: values.reason };
+      if (activeTab === "porcentaje") {
         payload.percentage = sign === "sumar" ? Math.abs(values.percentage) : -Math.abs(values.percentage);
-        // No incluyas fixedAmount
-        } else {
+      } else {
         payload.fixedAmount = sign === "sumar" ? Math.abs(values.fixedAmount) : -Math.abs(values.fixedAmount);
-        // No incluyas percentage
-        }
-        await planService.adjustAllPrices(payload);
-        if (onUpdated) onUpdated();
-        onClose();
+      }
+      await planService.adjustAllPrices(payload);
+      if (onUpdated) onUpdated();
+      onClose();
     } catch (err: any) {
-        setError(err.message || "Error al actualizar precios");
+      setError(err.message || "Error al actualizar precios");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    };
+  };
 
-  // Renderiza los switches arriba del form
   const renderExtra = (
-    <div style={{ display: "flex", gap: 24, marginBottom: 16 }}>
-      <Switch
-        value={mode}
-        onChange={setMode}
-        options={["porcentaje", "monto"]}
-        labels={["Porcentaje", "Monto fijo"]}
+    <div style={{ display: "flex", gap: 24, marginBottom: 16, flexDirection: "column" }}>
+      <Tab
+        options={tabs}
+        activeKey={activeTab}
+        onChange={key => setActiveTab(key as "porcentaje" | "monto")}
       />
-      <Switch
-        value={sign}
-        onChange={setSign}
-        options={["sumar", "restar"]}
-        labels={["Sumar", "Restar"]}
+      <Tab
+        options={signTabs}
+        activeKey={sign}
+        onChange={key => setSign(key as "sumar" | "restar")}
+        style={{ marginTop: 8 }}
       />
     </div>
   );
 
-  // Oculta el input que no corresponde según el modo
   const filteredConfig = subscriptionPlanUpdatePriceConfig.filter(field =>
-    mode === "porcentaje"
+    activeTab === "porcentaje"
       ? field.accessor !== "fixedAmount"
       : field.accessor !== "percentage"
   );

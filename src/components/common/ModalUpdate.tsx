@@ -69,7 +69,7 @@ export const ModalUpdate: React.FC<ModalUpdateProps> = ({
           <div className={`modalUpdate-content ${classModal ? classModal + "-modalUpdate-content" : ""}`}>
             {config.map(field => (
               <div key={field.accessor} className={field.className ? `${classModal ? classModal + "-" : ""}${field.className}` : ""}>
-                <label className="modalUpdate-label">{field.label}:</label>
+                <label className="modalUpdate-label form-label">{field.label}:</label>
                 <input
                   type={field.type}
                   value={values[field.accessor] ?? ""}
@@ -77,17 +77,17 @@ export const ModalUpdate: React.FC<ModalUpdateProps> = ({
                   required={field.required}
                   min={field.min}
                   onChange={e => handleChange(field.accessor, field.type === "number" ? Number(e.target.value) : e.target.value)}
-                  className="modalUpdate-label-value"
+                  className="modalUpdate-label-value form-input"
                 />
               </div>
             ))}
           </div>
           {error && <div className="text-red-500">{error}</div>}
-          <div className="modalUpdate-delete-actions" style={{ marginTop: 24 }}>
-            <button type="button" onClick={onClose} className="modalUpdate-delete-button-cancel">
+          <div className="modalUpdate-actions">
+            <button type="button" onClick={onClose} className="modalUpdate-button-cancel form-cancel">
               Cancelar
             </button>
-            <button type="submit" className="modalUpdate-button-delete" disabled={loading}>
+            <button type="submit" className="modalUpdate-button-submit form-submit" disabled={loading}>
               {loading ? "Guardando..." : "Guardar"}
             </button>
           </div>

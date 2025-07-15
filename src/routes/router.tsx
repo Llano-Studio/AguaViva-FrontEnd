@@ -22,7 +22,7 @@ const NewZonePage = React.lazy(() => import("../pages/zones/NewZonePage"));
 const OrdersPage = React.lazy(() => import("../pages/orders/OrdersPage"));
 const SubscriptionPlansPage = React.lazy(() => import("../pages/subscriptionPlans/SubscriptionPlansPage"));
 const NewSubscriptionPlanPage = React.lazy(() => import("../pages/subscriptionPlans/NewSubscriptionPlanPage"));
-const PriceLists = React.lazy(() => import("../pages/priceLists/PriceLists"));
+const PriceLists = React.lazy(() => import("../pages/priceLists/PriceListsPage"));
 const NewPriceListPage = React.lazy(() => import("../pages/priceLists/NewPriceListPage"));
 const ProfilePage = React.lazy(() => import("../pages/profile/ProfilePage"));
 

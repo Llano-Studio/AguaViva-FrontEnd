@@ -1,9 +1,4 @@
-.priceListForm-actions-container{
-    display: flex;
-    justify-content: space-between;
-}
-
-.priceListForm-update-prices-btn{
+.subscriptionPlans-update-prices-btn {
     color: var(--text-color-2);
     background: var(--acent-color-1);
     font-size: 11px;

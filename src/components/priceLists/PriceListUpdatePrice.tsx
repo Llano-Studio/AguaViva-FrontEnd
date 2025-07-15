@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { ModalUpdate } from "../common/ModalUpdate";
 import { priceListUpdatePriceConfig } from "../../config/priceLists/priceListUpdatePriceConfig";
 import { usePriceLists } from "../../hooks/usePriceLists";
-import Switch from "../common/Switch";
 import { usePriceListItems } from "../../hooks/usePriceListItem";
+import Tab, { TabOption } from "../common/Tab";
 
 interface PriceListUpdatePriceProps {
   isOpen: boolean;
@@ -13,6 +13,11 @@ interface PriceListUpdatePriceProps {
   onUpdated?: () => void;
 }
 
+const signTabs: TabOption[] = [
+  { key: "sumar", label: "Sumar" },
+  { key: "restar", label: "Restar" },
+];
+
 export const PriceListUpdatePrice: React.FC<PriceListUpdatePriceProps> = ({
   isOpen,
   onClose,
@@ -21,12 +26,11 @@ export const PriceListUpdatePrice: React.FC<PriceListUpdatePriceProps> = ({
   onUpdated,
 }) => {
   const { applyPercentage, fetchPriceListById } = usePriceLists();
-  const { fetchItems } = usePriceListItems(priceListId); // Si necesitas refrescar los items locales
+  const { fetchItems } = usePriceListItems(priceListId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"sumar" | "restar">("sumar");
 
-  // Valores iniciales del modal
   const initialValues = { percentage: 0, reason: "" };
 
   const handleSubmit = async (values: any) => {
@@ -39,9 +43,8 @@ export const PriceListUpdatePrice: React.FC<PriceListUpdatePriceProps> = ({
         reason: values.reason,
       };
       const result = await applyPercentage(priceListId, payload);
-      // Refresca los productos de la lista de precios
       await fetchPriceListById(priceListId);
-      await fetchItems(); // Si usas un hook local para los items
+      await fetchItems();
       if (result && onUpdated) onUpdated();
       onClose();
     } catch (err: any) {
@@ -51,13 +54,13 @@ export const PriceListUpdatePrice: React.FC<PriceListUpdatePriceProps> = ({
     }
   };
 
-  // Switch para sumar/restar
-  const renderSwitch = (
-    <Switch
-      value={mode}
-      onChange={setMode}
-      options={["sumar", "restar"]}
-      labels={["Sumar", "Restar"]}
+  // Tab para sumar/restar
+  const renderTab = (
+    <Tab
+      options={signTabs}
+      activeKey={mode}
+      onChange={key => setMode(key as "sumar" | "restar")}
+      style={{ marginBottom: 16 }}
     />
   );
 
@@ -72,8 +75,7 @@ export const PriceListUpdatePrice: React.FC<PriceListUpdatePriceProps> = ({
       loading={loading}
       error={error}
       initialValues={initialValues}
-      // Renderiza el switch arriba del form
-      renderExtra={renderSwitch}
+      renderExtra={renderTab}
     />
   );
 };

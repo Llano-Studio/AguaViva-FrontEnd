@@ -13,6 +13,7 @@ import { subscriptionPlanModalConfig } from "../../config/subscriptionPlans/subs
 import ModalDelete from "../../components/common/ModalDelete";
 import '../../styles/css/pages/pages.css';
 import SubscriptionPlanUpdatePrice from "../../components/subscriptionPlans/SubscriptionPlanUpdatePrice";
+import "../../styles/css/pages/subscriptionPlans/subscriptionPlansPage.css";
 
 const SubscriptionPlansPage: React.FC = () => {
   const {

@@ -36,14 +36,14 @@ export const priceListItemListColumns = sortByOrder([
     order: 3,
     render: (item: PriceListItem) => item.product?.volume_liters ?? "-",
   },
+  // {
+  //   header: "Precio producto",
+  //   accessor: "product_price",
+  //   order: 4,
+  //   render: (item: PriceListItem) => item.product?.price ? `$${item.product.price}` : "-",
+  // },
   {
-    header: "Precio producto",
-    accessor: "product_price",
-    order: 4,
-    render: (item: PriceListItem) => item.product?.price ? `$${item.product.price}` : "-",
-  },
-  {
-    header: "Precio unitario lista",
+    header: "Precio de lista",
     accessor: "unit_price",
     order: 5,
     render: (item: PriceListItem) => `$${item.unit_price}`,
@@ -69,7 +69,7 @@ export const priceListItemListColumns = sortByOrder([
     accessor: "notes",
     order: 8,
     render: (item: PriceListItem) => (
-      <div style={{ maxWidth: 200, wordBreak: "break-word" }}>
+      <div style={{ width: 200, wordBreak: "break-word" }}>
         {item.product?.notes ?? "-"}
       </div>
     ),

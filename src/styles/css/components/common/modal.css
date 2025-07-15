@@ -18,7 +18,9 @@
 }
 
 .modal-title{
-    @apply text-xl font-bold;
+    color: var(--text-color-3);
+    font-size: 16px;
+    font-weight: 600;
 }
 
 .modal-button-close{

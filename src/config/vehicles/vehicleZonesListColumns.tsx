@@ -43,4 +43,5 @@ export const vehicleZonesListColumns = sortByOrder([
     order: 6,
     render: (item: any) => item.notes || "",
   },
+
 ]);

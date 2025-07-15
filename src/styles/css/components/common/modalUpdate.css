@@ -10,7 +10,7 @@
     border-radius: 10px;
     padding: 25px 50px;
     width: 862px;
-    min-height: 359px;
+    height: fit-content;
 }   
 
 .modalUpdate-header{
@@ -18,7 +18,9 @@
 }
 
 .modalUpdate-title{
-    @apply text-xl font-bold;
+    color: var(--text-color-3);
+    font-size: 16px;
+    font-weight: 600;
 }
 
 .modalUpdate-button-close{
@@ -47,4 +49,14 @@
 .modalUpdate-label-value{
     font-size: 12px;
     font-weight: 400;
+}
+
+.modalUpdate-actions{
+    margin-top: 24px;
+    display: flex;
+    gap: 10px;
+}
+
+.modalUpdate-container form{
+    margin-top: 20px;
 }

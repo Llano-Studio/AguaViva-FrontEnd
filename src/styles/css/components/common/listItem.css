@@ -45,7 +45,7 @@ thead .listItem-tr{
 
 .listItem-table thead th:last-child,
 .listItem-table tbody td:last-child{
-  min-width: 48px;
+  min-width: 95px;
 }
 
 .listItem-table tbody td{
