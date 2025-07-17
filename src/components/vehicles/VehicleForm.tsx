@@ -10,6 +10,8 @@ import { User } from "../../interfaces/User";
 import { ZoneService } from "../../services/ZoneService";
 import { UserService } from "../../services/UserService";
 import VehicleZones from "./VehicleZones";
+import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 interface VehicleFormProps {
   onCancel: () => void;
@@ -17,6 +19,7 @@ interface VehicleFormProps {
   vehicleToEdit?: Vehicle | null;
   refreshVehicles: () => Promise<void>;
   class?: string;
+  onSuccess?: (msg: string) => void;
 }
 
 const getInitialValues = (
@@ -43,6 +46,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
   vehicleToEdit,
   refreshVehicles,
   class: classForm,
+  onSuccess,
 }) => {
   const { createVehicle, updateVehicle } = useVehicles();
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +57,10 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
   const [selectedZoneIds, setSelectedZoneIds] = useState<number[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
 
+  // Modal de confirmación de actualización
+  const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
+  const [pendingValues, setPendingValues] = useState<CreateVehicleDTO | null>(null);
+
   const {
     assignedZones,
     assignedUsers,
@@ -61,6 +69,8 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
     fetchVehicleUsers,
     // Puedes agregar lógica para usuarios si tienes endpoint de asignación
   } = useVehicleAssignments();
+
+  const { showSnackbar } = useSnackbar();
 
   // Cargar zonas y usuarios disponibles al montar
   useEffect(() => {
@@ -75,11 +85,11 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
 
   // Si editas, carga las asignaciones actuales
   useEffect(() => {
-  if (isEditing && vehicleToEdit?.vehicle_id) {
-    fetchVehicleZones(vehicleToEdit.vehicle_id);
-    fetchVehicleUsers(vehicleToEdit.vehicle_id);
-  }
-}, [isEditing, vehicleToEdit?.vehicle_id, fetchVehicleZones, fetchVehicleUsers]);
+    if (isEditing && vehicleToEdit?.vehicle_id) {
+      fetchVehicleZones(vehicleToEdit.vehicle_id);
+      fetchVehicleUsers(vehicleToEdit.vehicle_id);
+    }
+  }, [isEditing, vehicleToEdit?.vehicle_id, fetchVehicleZones, fetchVehicleUsers]);
 
   // Actualiza los seleccionados cuando se cargan las asignaciones
   useEffect(() => {
@@ -99,6 +109,11 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
   });
 
   const handleSubmit = async (values: CreateVehicleDTO | FormData) => {
+    if (isEditing && vehicleToEdit) {
+      setPendingValues(values as CreateVehicleDTO);
+      setShowUpdateConfirm(true);
+      return;
+    }
     try {
       let success = false;
       let vehicleId: number | undefined;
@@ -106,32 +121,49 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
         setError("No se admiten archivos en este formulario.");
         return;
       }
-      if (isEditing && vehicleToEdit) {
-        success = await updateVehicle(vehicleToEdit.vehicle_id, values);
-        vehicleId = vehicleToEdit.vehicle_id;
-      } else {
-        const created = await createVehicle(values);
-        success = !!created;
-        vehicleId = created?.vehicle_id;
-      }
+      const created = await createVehicle(values);
+      success = !!created;
+      vehicleId = created?.vehicle_id;
       if (success && vehicleId) {
-        // Asignar zonas al vehículo
         await assignZonesToVehicle(vehicleId, selectedZoneIds, "Asignación desde formulario", true);
-        // Aquí podrías agregar lógica para asignar usuarios si tienes el endpoint
         await refreshVehicles();
+        if (onSuccess) onSuccess("Vehículo creado correctamente.");
+        showSnackbar("Vehículo creado correctamente.", "success");
         onCancel();
       } else {
         setError("Error al guardar el vehículo");
       }
-    } catch (err) {
-      setError("Error al guardar el vehículo");
+    } catch (err: any) {
+      setError(err?.message || "Error al guardar el vehículo");
+      showSnackbar(err?.message || "Error al guardar el vehículo", "error");
       console.error(err);
+    }
+  };
+
+  // Confirmación de edición
+  const handleConfirmUpdate = async () => {
+    if (!pendingValues || !vehicleToEdit) return;
+    try {
+      const updated = await updateVehicle(vehicleToEdit.vehicle_id, pendingValues);
+      if (updated) {
+        await assignZonesToVehicle(vehicleToEdit.vehicle_id, selectedZoneIds, "Asignación desde formulario", true);
+        await refreshVehicles();
+        if (onSuccess) onSuccess("Vehículo editado correctamente.");
+        showSnackbar("Vehículo editado correctamente.", "success");
+        onCancel();
+      }
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar el vehículo");
+      showSnackbar(err?.message || "Error al actualizar el vehículo", "error");
+      console.error(err);
+    } finally {
+      setShowUpdateConfirm(false);
+      setPendingValues(null);
     }
   };
 
   return (
     <>
-      {error && <div className="error-message">{error}</div>}
       <ItemForm<CreateVehicleDTO>
         {...form}
         onSubmit={handleSubmit}
@@ -139,9 +171,17 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
         fields={vehicleFields}
         class={classForm}
       />
+      {error && <div className="error-message">{error}</div>}
       {isEditing && vehicleToEdit && (
         <VehicleZones vehicleId={vehicleToEdit.vehicle_id} isEditing={isEditing} />
       )}
+      <ModalUpdateConfirm
+        isOpen={showUpdateConfirm}
+        onClose={() => setShowUpdateConfirm(false)}
+        onConfirm={handleConfirmUpdate}
+        content="móvil"
+        genere="M"
+      />
     </>
   );
 };

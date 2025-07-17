@@ -11,6 +11,9 @@ import useProducts from "../../hooks/useProducts";
 import { usePriceListItems } from "../../hooks/usePriceListItem";
 import "../../styles/css/components/priceLists/priceListForm.css";
 import { PriceListUpdatePrice } from "./PriceListUpdatePrice";
+import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
+import { useSnackbar } from "../../context/SnackbarContext";
+import { formatDateForInput } from "../../utils/formatDateForInput";
 
 interface PriceListFormProps {
   onCancel: () => void;
@@ -18,6 +21,7 @@ interface PriceListFormProps {
   priceListToEdit?: PriceList | null;
   refreshPriceLists: () => Promise<void>;
   class?: string;
+  onSuccess?: (msg: string) => void;
 }
 
 const getInitialValues = (
@@ -30,7 +34,7 @@ const getInitialValues = (
       description: priceListToEdit.description ?? "",
       is_default: priceListToEdit.is_default,
       active: priceListToEdit.active,
-      effective_date: priceListToEdit.effective_date,
+      effective_date: formatDateForInput(priceListToEdit.effective_date),
     };
   }
   return {
@@ -48,6 +52,7 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
   priceListToEdit,
   refreshPriceLists,
   class: classForm,
+  onSuccess,
 }) => {
   const {
     createPriceList,
@@ -56,9 +61,13 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
     fetchPriceListById,
   } = usePriceLists();
 
+  const { showSnackbar } = useSnackbar();
+
   const { addItem, removeItem } = usePriceListItems(priceListToEdit?.price_list_id || 0);
   const [showUpdatePriceModal, setShowUpdatePriceModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
+  const [pendingValues, setPendingValues] = useState<CreatePriceListDTO | null>(null);
 
   const initialValues = useMemo(
     () => getInitialValues(isEditing, priceListToEdit),
@@ -71,7 +80,6 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
 
   const { products } = useProducts();
 
-  // Cargar los items de la lista seleccionada al editar
   useEffect(() => {
     if (isEditing && priceListToEdit?.price_list_id) {
       fetchPriceListById(priceListToEdit.price_list_id);
@@ -99,46 +107,72 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
       product_id: product.product_id,
       unit_price,
     });
-    // Refresca los items de la lista
     await fetchPriceListById(priceListToEdit.price_list_id);
   };
 
   // Eliminar producto de la lista de precios
   const handleRemoveProduct = async (item: any) => {
     await removeItem(item.price_list_item_id);
-    // Refresca los items de la lista
     if (priceListToEdit) {
       await fetchPriceListById(priceListToEdit.price_list_id);
     }
   };
 
+  // Submit handler
   const handleSubmit = async (values: CreatePriceListDTO | FormData) => {
     try {
-      let success = false;
       if (values instanceof FormData) {
         setError("No se admiten archivos en este formulario.");
         return;
       }
       if (isEditing && priceListToEdit) {
-        success = await updatePriceList(priceListToEdit.price_list_id, values);
-      } else {
-        success = await createPriceList(values);
+        setPendingValues(values);
+        setShowUpdateConfirm(true);
+        return;
       }
+      const success = await createPriceList(values);
       if (success) {
         await refreshPriceLists();
+        if (onSuccess) onSuccess("Lista de precios creada correctamente.");
+        showSnackbar("Lista de precios creada correctamente.", "success");
         onCancel();
       } else {
         setError("Error al guardar la lista de precios");
+        showSnackbar("Error al guardar la lista de precios", "error");
       }
-    } catch (err) {
-      setError("Error al guardar la lista de precios");
+    } catch (err: any) {
+      setError(err?.message || "Error al guardar la lista de precios");
+      showSnackbar(err?.message || "Error al guardar la lista de precios", "error");
       console.error(err);
+    }
+  };
+
+  // Confirmación de edición
+  const handleConfirmUpdate = async () => {
+    if (!pendingValues || !priceListToEdit) return;
+    try {
+      const success = await updatePriceList(priceListToEdit.price_list_id, pendingValues);
+      if (success) {
+        await refreshPriceLists();
+        if (onSuccess) onSuccess("Lista de precios editada correctamente.");
+        showSnackbar("Lista de precios editada correctamente.", "success");
+        onCancel();
+      } else {
+        setError("Error al actualizar la lista de precios");
+        showSnackbar("Error al actualizar la lista de precios", "error");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar la lista de precios");
+      showSnackbar(err?.message || "Error al actualizar la lista de precios", "error");
+      console.error(err);
+    } finally {
+      setShowUpdateConfirm(false);
+      setPendingValues(null);
     }
   };
 
   return (
     <>
-      {error && <div className="error-message">{error}</div>}
       <ItemForm<CreatePriceListDTO>
         {...form}
         onSubmit={handleSubmit}
@@ -146,6 +180,7 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
         fields={priceListFields}
         class={classForm}
       />
+      {error && <div className="error-message">{error}</div>}
       {isEditing && priceListToEdit && (
         <div style={{
           marginTop: 24,
@@ -215,6 +250,13 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
           />
         </div>
       )}
+      <ModalUpdateConfirm
+        isOpen={showUpdateConfirm}
+        onClose={() => setShowUpdateConfirm(false)}
+        onConfirm={handleConfirmUpdate}
+        content="lista de precios"
+        genere="F"
+      />
     </>
   );
 };

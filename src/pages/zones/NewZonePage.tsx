@@ -1,11 +1,18 @@
 import React from "react";
 import ZoneForm from "../../components/zones/ZoneForm";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/newPages.css";
 
 const NewZonePage: React.FC = () => {
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
   const titlePage = "new-zone";
+
+  const handleSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    navigate("/zonas");
+  };
 
   return (
     <div className={`new-page-container ${titlePage+"-page-container"}`}>
@@ -22,6 +29,7 @@ const NewZonePage: React.FC = () => {
         isEditing={false}
         refreshZones={async () => {}}
         class={titlePage}
+        onSuccess={handleSuccess}
       />
     </div>
   );

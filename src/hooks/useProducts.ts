@@ -51,9 +51,8 @@ export const useProducts = () => {
           return true;
         }
         return false;
-      } catch (err) {
-        setError('Error al cargar productos');
-        console.error(err);
+      } catch (err: any) {
+        setError(err?.message || "Error al cargar productos");
         return false;
       } finally {
         setIsLoading(false);
@@ -76,10 +75,9 @@ export const useProducts = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al crear producto');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al crear artículo");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -95,26 +93,24 @@ export const useProducts = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al actualizar producto');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar artículo");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const deleteProduct = async (id: number) => {
     try {
       setIsLoading(true);
       await productService.deleteProduct(id);
       await fetchProducts(page, limit, search, filters, getSortParams());
       setSelectedProduct(null);
       return true;
-    } catch (err) {
-      setError('Error al eliminar producto');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar artículo");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -126,10 +122,9 @@ export const useProducts = () => {
       await productService.deleteProductImage(id);
       await fetchProducts(page, limit, search, filters, getSortParams());
       return true;
-    } catch (err) {
-      setError('Error al eliminar imagen');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar imagen");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +136,7 @@ export const useProducts = () => {
     setSelectedProduct,
     isLoading,
     error,
-    handleDelete,
+    deleteProduct,
     handleDeleteImage,
     updateProduct,
     createProduct,

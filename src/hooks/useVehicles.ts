@@ -68,13 +68,12 @@ export const useVehicles = () => {
       const newVehicle = await vehicleService.createVehicle(vehicleData);
       if (newVehicle) {
         await fetchVehicles(page, limit, search, filters, getSortParams());
-        return newVehicle; // <-- Retorna el objeto Vehicle
+        return newVehicle;
       }
       return null;
-    } catch (err) {
-      setError('Error al crear vehículo');
-      console.error(err);
-      return null;
+    } catch (err: any) {
+      setError(err?.message || "Error al crear vehículo");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -90,26 +89,24 @@ export const useVehicles = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al actualizar vehículo');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar vehículo");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const deleteVehicle = async (id: number) => {
     try {
       setIsLoading(true);
       await vehicleService.deleteVehicle(id);
       await fetchVehicles(page, limit, search, filters, getSortParams());
       setSelectedVehicle(null);
       return true;
-    } catch (err) {
-      setError('Error al eliminar vehículo');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar vehículo");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +118,7 @@ export const useVehicles = () => {
     setSelectedVehicle,
     isLoading,
     error,
-    handleDelete,
+    deleteVehicle,
     updateVehicle,
     createVehicle,
     refreshVehicles: () => fetchVehicles(page, limit, search, filters, getSortParams()),

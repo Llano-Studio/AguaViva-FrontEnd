@@ -10,15 +10,17 @@ import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { zoneFilters } from "../../config/zones/zoneFilterConfig";
 import { zoneModalConfig } from "../../config/zones/zoneModalConfig";
-import ModalDelete from "../../components/common/ModalDelete";
+import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
+import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
+import PaginationControls from "../../components/common/PaginationControls";
 
 const ZonesPage: React.FC = () => {
   const { 
     zones, 
     selectedZone, 
     setSelectedZone,
-    handleDelete, 
+    deleteZone, 
     isLoading,
     error,
     page,
@@ -44,6 +46,8 @@ const ZonesPage: React.FC = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const { showSnackbar } = useSnackbar();
+
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
@@ -58,9 +62,18 @@ const ZonesPage: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (zoneToDelete) {
-      await handleDelete(zoneToDelete.zone_id);
-      setShowDeleteModal(false);
-      setZoneToDelete(null);
+      try {
+        await deleteZone(zoneToDelete.zone_id);
+        console.log("zona eliminada");
+        showSnackbar("Zona eliminada correctamente.", "success");
+        await fetchZones();
+        console.log("pase fetchzone");
+      } catch (err: any) {
+        showSnackbar(err?.message || "Error al eliminar zona", "error");
+      } finally {
+        setShowDeleteModal(false);
+        setZoneToDelete(null);
+      }
     }
   };
 
@@ -103,6 +116,13 @@ const ZonesPage: React.FC = () => {
       setSortDirection(sortDirection.filter((_, i) => i !== idx));
     }
     setPage(1);
+  };
+
+  const handleFormSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    handleCloseForm();
+    setShowForm(false);
+    fetchZones();
   };
 
   if (error) {
@@ -181,39 +201,16 @@ const ZonesPage: React.FC = () => {
           onSort={handleSort}
         />
         {/* Controles de paginación y leyenda */}
-        <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          {/* Leyenda de cantidad */}
-          <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} zonas
-          </div>
-          {/* Paginación numerada */}
-          <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
-            <button
-              className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1}
-            >
-              &lt;
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`${page === i + 1 ? 'bg-[#403A92] text-white' : 'bg-[#FFFFFF] hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
-                onClick={() => setPage(i + 1)}
-                disabled={page === i + 1}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className={`page-pagination-button-next ${titlePage+"-page-pagination-button-next"}`}
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          start={start}
+          end={end}
+          total={total}
+          label="zonas"
+          className={titlePage+"-page-pagination"}
+        />
       </div>
 
       {/* Panel del formulario */}
@@ -237,6 +234,7 @@ const ZonesPage: React.FC = () => {
               zoneToEdit={selectedZone}
               refreshZones={async () => { await fetchZones(); }}
               class={titlePage}
+              onSuccess={handleFormSuccess}
             />
           )}
         </div>
@@ -256,7 +254,7 @@ const ZonesPage: React.FC = () => {
       />
 
       {/* Modal de Eliminar */}
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}

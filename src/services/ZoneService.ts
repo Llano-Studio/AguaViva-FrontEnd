@@ -32,17 +32,15 @@ export class ZoneService {
     try {
       return await httpAdapter.post<Zone>(zone, this.zonesUrl);
     } catch (error: any) {
-      console.error("Error en createZone:", error);
-      return null;
+      throw new Error(error?.message || error?.response?.data?.message || "Error al crear zona");
     }
   }
 
   async updateZone(id: number, zone: Partial<CreateZoneDTO>): Promise<Zone | null> {
     try {
       return await httpAdapter.patch<Zone>(zone, `${this.zonesUrl}/${id}`);
-    } catch (error) {
-      console.error("Error en updateZone:", error);
-      return null;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar zona");
     }
   }
 
@@ -50,9 +48,8 @@ export class ZoneService {
     try {
       await httpAdapter.delete(`${this.zonesUrl}/${id}`);
       return true;
-    } catch (error) {
-      console.error("Error en deleteZone:", error);
-      return false;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar zona");
     }
   }
 

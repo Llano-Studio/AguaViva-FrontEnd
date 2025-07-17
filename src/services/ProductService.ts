@@ -23,12 +23,10 @@ export class ProductService {
   }
 
   async createProduct(product: FormData | CreateProductDTO, isFormData = false): Promise<Product | null> {
-    console.log("createProduct: ", product);
     try {
       return await httpAdapter.post<Product>(product, this.productsUrl, isFormData ? { isFormData: true } : undefined);
-    } catch (error) {
-      console.error("Error en createProduct:", error);
-      return null;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al crear artículo");
     }
   }
 
@@ -39,9 +37,8 @@ export class ProductService {
       } else {
         return await httpAdapter.put<Product>(product, `${this.productsUrl}/${id}`);
       }
-    } catch (error) {
-      console.error("Error en updateProduct:", error);
-      return null;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar artículo");
     }
   }
 
@@ -49,9 +46,8 @@ export class ProductService {
     try {
       await httpAdapter.delete(`${this.productsUrl}/${id}`);
       return true;
-    } catch (error) {
-      console.error("Error en deleteProduct:", error);
-      return false;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar artículo");
     }
   }
 
@@ -74,5 +70,4 @@ export class ProductService {
       return [];
     }
   }
-
 }

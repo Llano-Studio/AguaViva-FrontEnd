@@ -7,7 +7,7 @@ import { vehicleZonesModalConfig } from "../../config/vehicles/vehicleZonesModal
 import { VehicleZone } from "../../services/VehicleZonesService";
 import ModalVehicleZones from "./ModalVehicleZones";
 import { Modal } from "../common/Modal";
-import ModalDelete from "../common/ModalDelete";
+import ModalDeleteConfirm from "../common/ModalDeleteConfirm";
 import { ListItem } from "../common/ListItem";
 import "../../styles/css/components/vehicles/vehicleZones.css";
 
@@ -178,7 +178,7 @@ const VehicleZones: React.FC<VehicleZonesProps> = ({ vehicleId, isEditing }) => 
       />
 
       {/* Modal de confirmación de eliminación */}
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}

@@ -1,5 +1,6 @@
 import React from "react";
 import { sortByOrder } from "../../utils/sortByOrder";
+import { formatDateForView } from "../../utils/formateDateForView";
 
 export const subscriptionPlanModalConfig = sortByOrder([
   {
@@ -44,19 +45,21 @@ export const subscriptionPlanModalConfig = sortByOrder([
     accessor: "created_at",
     className: "modal-item-7",
     order: 7,
+    render: (value: string) => formatDateForView(value)
   },
   {
     label: "Fecha de modificación",
     accessor: "updated_at",
     className: "modal-item-8",
     order: 8,
+    render: (value: string) => formatDateForView(value)
   },
   {
     label: "Productos",
     accessor: "products",
     className: "modal-item-9",
     order: 9,
-    render: (products) => (
+    render: (products: any[]) => (
       <ul>
         {Array.isArray(products) && products.map((p: any) => (
           <li key={p.product_id}>

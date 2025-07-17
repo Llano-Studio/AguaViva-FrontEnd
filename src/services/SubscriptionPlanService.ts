@@ -30,26 +30,19 @@ export class SubscriptionPlanService {
     }
   }
 
-  async createSubscriptionPlan(plan: CreateSubscriptionPlanDTO): Promise<any | null> {
+  async createSubscriptionPlan(plan: CreateSubscriptionPlanDTO): Promise<SubscriptionPlan | null> {
     try {
-      const response = await httpAdapter.post<any>(plan, this.plansUrl);
-      return response;
+      return await httpAdapter.post<SubscriptionPlan>(plan, this.plansUrl);
     } catch (error: any) {
-      console.error("Error en createSubscriptionPlan:", error);
-      if (error.response) {
-        console.error("Datos de respuesta:", error.response.data);
-        console.error("Estado de respuesta:", error.response.status);
-      }
-      return null;
+      throw new Error(error?.message || error?.response?.data?.message || "Error al crear abono");
     }
   }
 
   async updateSubscriptionPlan(id: number, plan: Partial<CreateSubscriptionPlanDTO>): Promise<SubscriptionPlan | null> {
     try {
       return await httpAdapter.patch<SubscriptionPlan>(plan, `${this.plansUrl}/${id}`);
-    } catch (error) {
-      console.error("Error en updateSubscriptionPlan:", error);
-      return null;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar abono");
     }
   }
 
@@ -57,9 +50,8 @@ export class SubscriptionPlanService {
     try {
       await httpAdapter.delete(`${this.plansUrl}/${id}`);
       return true;
-    } catch (error) {
-      console.error("Error en deleteSubscriptionPlan:", error);
-      return false;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar abono");
     }
   }
 
@@ -82,5 +74,4 @@ export class SubscriptionPlanService {
   async adjustProductQuantities(planId: number, data: AdjustProductQuantitiesDTO): Promise<SubscriptionPlan> {
     return await httpAdapter.post<SubscriptionPlan>(data, `${this.plansUrl}/${planId}/adjust-product-quantities`);
   }
-
 }

@@ -22,29 +22,19 @@ export class ClientService {
     }
   }
 
-async createClient(client: CreateClientDTO): Promise<any | null> {
-  console.log("createClient: ", client);
-  try {
-    const response = await httpAdapter.post<any>(client, this.clientsUrl );
-    console.log("Respuesta de createClient:", response);
-    return response;
-  } catch (error: any) {
-    console.error("Error en createClient:", error);
-    // Registrar más detalles si están disponibles
-    if (error.response) {
-      console.error("Datos de respuesta:", error.response.data);
-      console.error("Estado de respuesta:", error.response.status);
+  async createClient(client: CreateClientDTO): Promise<any> {
+    try {
+      return await httpAdapter.post<any>(client, this.clientsUrl);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al crear cliente");
     }
-    return null;
   }
-}
 
   async updateClient(id: number, client: Partial<CreateClientDTO>): Promise<Client | null> {
     try {
       return await httpAdapter.patch<Client>(client, `${this.clientsUrl}/${id}`);
-    } catch (error) {
-      console.error("Error en updateClient:", error);
-      return null;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar cliente");
     }
   }
 
@@ -52,9 +42,8 @@ async createClient(client: CreateClientDTO): Promise<any | null> {
     try {
       await httpAdapter.delete(`${this.clientsUrl}/${id}`);
       return true;
-    } catch (error) {
-      console.error("Error en deleteClient:", error);
-      return false;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar cliente");
     }
   }
 }

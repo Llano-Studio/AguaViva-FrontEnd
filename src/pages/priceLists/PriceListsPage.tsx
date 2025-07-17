@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { DataTable } from "../../components/common/DataTable";
 import { Modal } from "../../components/common/Modal";
 import { PriceList } from "../../interfaces/PriceList";
-import {usePriceLists} from "../../hooks/usePriceLists";
+import { usePriceLists } from "../../hooks/usePriceLists";
 import PriceListForm from "../../components/priceLists/PriceListForm";
 import { useNavigate } from "react-router-dom";
 import { priceListColumns } from "../../config/priceLists/priceListFieldsConfig";
@@ -10,15 +10,17 @@ import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { priceListFilters } from "../../config/priceLists/priceListFiltersConfig";
 import { priceListModalConfig } from "../../config/priceLists/priceListModalConfig";
-import ModalDelete from "../../components/common/ModalDelete";
+import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import "../../styles/css/pages/pages.css";
+import { useSnackbar } from "../../context/SnackbarContext";
+import PaginationControls from "../../components/common/PaginationControls";
 
 const PriceListsPage: React.FC = () => {
   const {
     priceLists,
     selectedPriceList,
     setSelectedPriceList,
-    handleDelete,
+    deletePriceList,
     isLoading,
     error,
     refreshPriceLists,
@@ -43,6 +45,7 @@ const PriceListsPage: React.FC = () => {
   const [priceListToDelete, setPriceListToDelete] = useState<PriceList | null>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -58,9 +61,16 @@ const PriceListsPage: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (priceListToDelete) {
-      await handleDelete(priceListToDelete.price_list_id);
-      setShowDeleteModal(false);
-      setPriceListToDelete(null);
+      try {
+        await deletePriceList(priceListToDelete.price_list_id);
+        showSnackbar("Lista de precios eliminada correctamente.", "success");
+        await refreshPriceLists();
+      } catch (err: any) {
+        showSnackbar(err?.message || "Error al eliminar lista de precios", "error");
+      } finally {
+        setShowDeleteModal(false);
+        setPriceListToDelete(null);
+      }
     }
   };
 
@@ -103,6 +113,14 @@ const PriceListsPage: React.FC = () => {
       setSortDirection(sortDirection.filter((_, i) => i !== idx));
     }
     setPage(1);
+  };
+
+  // Maneja el éxito en crear/editar lista de precios
+  const handleFormSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    setShowForm(false);
+    setSelectedPriceList(null);
+    refreshPriceLists();
   };
 
   if (error) {
@@ -179,37 +197,16 @@ const PriceListsPage: React.FC = () => {
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} listas de precios
-          </div>
-          <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
-            <button
-              className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1}
-            >
-              &lt;
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`${page === i + 1 ? 'bg-[#403A92] text-white' : 'bg-[#FFFFFF] hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
-                onClick={() => setPage(i + 1)}
-                disabled={page === i + 1}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className={`page-pagination-button-next ${titlePage+"-page-pagination-button-next"}`}
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          start={start}
+          end={end}
+          total={total}
+          label="listas de precios"
+          className={titlePage+"-page-pagination"}
+        />
       </div>
 
       <div
@@ -232,6 +229,7 @@ const PriceListsPage: React.FC = () => {
               priceListToEdit={selectedPriceList}
               refreshPriceLists={async () => { await refreshPriceLists(); }}
               class={titlePage}
+              onSuccess={handleFormSuccess}
             />
           )}
         </div>
@@ -249,7 +247,7 @@ const PriceListsPage: React.FC = () => {
         data={selectedPriceList}
       />
 
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}

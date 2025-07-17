@@ -92,10 +92,9 @@ export const usePriceLists = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al crear lista de precios');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al crear lista de precios");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -112,16 +111,15 @@ export const usePriceLists = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al actualizar lista de precios');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar lista de precios");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const deletePriceList = async (id: number) => {
     try {
       setIsLoading(true);
       await priceListService.deletePriceList(id);
@@ -129,10 +127,9 @@ export const usePriceLists = () => {
       setSelectedPriceList(null);
       setSelectedPriceListItems([]);
       return true;
-    } catch (err) {
-      setError('Error al eliminar lista de precios');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar lista de precios");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -161,7 +158,7 @@ export const usePriceLists = () => {
     setSelectedPriceListItems,
     isLoading,
     error,
-    handleDelete,
+    deletePriceList,
     updatePriceList,
     createPriceList,
     fetchPriceListById,

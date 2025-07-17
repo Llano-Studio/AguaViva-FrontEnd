@@ -63,7 +63,6 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
 
   return (
     <>
-      {error && <div className="error-message">{error}</div>}
       <ItemForm
         {...form}
         fields={fields}
@@ -71,6 +70,7 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
         onCancel={onCancel}
         class="client-subscription"
       />
+      {error && <div className="error-message">{error}</div>}
       {loading && <div className="loading-message">Cargando...</div>}
     </>
   );

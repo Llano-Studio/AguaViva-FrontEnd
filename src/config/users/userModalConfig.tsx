@@ -12,7 +12,7 @@ export const userModalConfig = sortByOrder([
       <ImageProfile 
         src={value}
         alt="Imagen de perfil"
-        style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover" }}
+        style={{ width: 180, height: 180, borderRadius: "6px", objectFit: "cover" }}
       />
   },
   {

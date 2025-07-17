@@ -2,12 +2,19 @@ import React from "react";
 import SubscriptionPlanForm from "../../components/subscriptionPlans/SubscriptionPlanForm";
 import { useNavigate } from "react-router-dom";
 import useSubscriptionPlans from "../../hooks/useSubscriptionPlans";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/newPages.css";
 
 const NewSubscriptionPlanPage: React.FC = () => {
   const navigate = useNavigate();
   const titlePage = "new-subscription-plan";
   const { refreshPlans } = useSubscriptionPlans();
+  const { showSnackbar } = useSnackbar();
+
+  const handleSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    navigate("/abonos");
+  };
 
   return (
     <div className={`new-page-container ${titlePage+"-page-container"}`}>
@@ -24,6 +31,7 @@ const NewSubscriptionPlanPage: React.FC = () => {
         isEditing={false}
         refreshPlans={async () => { await refreshPlans(); }}
         class={titlePage}
+        onSuccess={handleSuccess}
       />
     </div>
   );

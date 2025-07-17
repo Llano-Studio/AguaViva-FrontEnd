@@ -1,13 +1,20 @@
 import React from "react";
-import {ProductForm} from "../../components/products/ProductForm";
+import { ProductForm } from "../../components/products/ProductForm";
 import { useNavigate } from "react-router-dom";
 import useProducts from "../../hooks/useProducts";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/newPages.css";
 
 const NewProductPage: React.FC = () => {
   const navigate = useNavigate();
   const titlePage = "new-product";
-  const { createProduct, refreshProducts } = useProducts();
+  const { refreshProducts } = useProducts();
+  const { showSnackbar } = useSnackbar();
+
+  const handleSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    navigate("/articulos");
+  };
 
   return (
     <div className={`new-page-container ${titlePage+"-page-container"}`}>
@@ -24,6 +31,7 @@ const NewProductPage: React.FC = () => {
         isEditing={false}
         refreshProducts={refreshProducts}
         class={titlePage}
+        onSuccess={handleSuccess}
       />
     </div>
   );

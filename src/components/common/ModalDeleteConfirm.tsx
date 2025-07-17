@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import '../../styles/css/components/common/modalDelete.css'
+import '../../styles/css/components/common/modalDeleteConfirm.css'
 
-interface ModalDeleteProps {
+interface ModalDeleteConfirmProps {
   isOpen: boolean;
   onClose: () => void;
   onDelete: () => void;
@@ -10,7 +10,7 @@ interface ModalDeleteProps {
   genere: "M" | "F"; // "M" para masculino, "F" para femenino
 }
 
-const ModalDelete: React.FC<ModalDeleteProps> = ({
+const ModalDeleteConfirm: React.FC<ModalDeleteConfirmProps> = ({
   isOpen,
   onClose,
   onDelete,
@@ -23,24 +23,24 @@ const ModalDelete: React.FC<ModalDeleteProps> = ({
   const eliminar = `eliminar ${content}`;
 
   return ReactDOM.createPortal(
-    <div className="modalDelete-container">
-      <div className="modalDelete">
-        <p className="modalDelete-legend-1">
+    <div className="modalDeleteConfirm-container">
+      <div className="modalDeleteConfirm">
+        <p className="modalDeleteConfirm-legend-1">
           ¿Quieres eliminar {articulo} {content}?
         </p>
-        <p className="modalDelete-legend-2">
+        <p className="modalDeleteConfirm-legend-2">
           Al eliminar {articulo} {content} se perderán los datos ingresados
         </p>
-        <div className="modalDelete-actions">
+        <div className="modalDeleteConfirm-actions">
           <button
             onClick={onClose}
-            className="modalDelete-button-cancel"
+            className="modalDeleteConfirm-button-cancel"
           >
             Cancelar
           </button>
           <button
             onClick={onDelete}
-            className="modalDelete-button-delete"
+            className="modalDeleteConfirm-button-delete"
           >
             {eliminar}
           </button>
@@ -51,4 +51,4 @@ const ModalDelete: React.FC<ModalDeleteProps> = ({
   );
 };
 
-export default ModalDelete;
+export default ModalDeleteConfirm;

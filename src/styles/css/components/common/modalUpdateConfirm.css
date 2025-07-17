@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+.modalUpdateConfirm-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 80%);
+}
+
+.modalUpdateConfirm{
+    @apply rounded shadow-lg;
+    width: 400px;
+    height: 144px;
+    background: var(--bg-color-3);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 20px 17px 20px;
+}
+
+.modalUpdateConfirm-title{
+    @apply text-lg font-bold mb-4 text-red-600 capitalize;
+}
+
+.modalUpdateConfirm-legend-1{
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color-3);
+}
+
+.modalUpdateConfirm-legend-2{
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+    width: 14rem;
+    text-align: center;
+}
+
+.modalUpdateConfirm-actions{
+    @apply flex justify-center gap-2;
+}
+
+.modalUpdateConfirm-button-cancel, .modalUpdateConfirm-button-confirm{
+    font-size: 11px;
+    width: 146px;
+    height: 28px;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalUpdateConfirm-button-confirm{
+    background: var(--acent-color-1);
+    color: var(--text-color-2);
+}
+
+.modalUpdateConfirm-button-cancel{
+    border: 1.5px solid var(--text-color-3);
+    color: var(--text-color-3);
+}

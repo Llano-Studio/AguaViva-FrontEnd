@@ -1,4 +1,5 @@
 import { sortByOrder } from "../../utils/sortByOrder";
+import { formatDateForView } from "../../utils/formateDateForView";
 
 export const priceListModalConfig = sortByOrder([
   {
@@ -18,6 +19,7 @@ export const priceListModalConfig = sortByOrder([
     accessor: "effective_date",
     className: "modal-item-3",
     order: 3,
+    render: (value: string) => formatDateForView(value)
   },
   {
     label: "Por defecto",
@@ -38,11 +40,13 @@ export const priceListModalConfig = sortByOrder([
     accessor: "created_at",
     className: "modal-item-6",
     order: 6,
+    render: (value: string) => formatDateForView(value)
   },
   {
     label: "Fecha de modificación",
     accessor: "updated_at",
     className: "modal-item-7",
     order: 7,
+    render: (value: string) => formatDateForView(value)
   },
 ]);

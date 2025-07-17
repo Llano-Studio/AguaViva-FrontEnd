@@ -49,7 +49,7 @@ export const useZones = () => {
         setTotalPages(response.meta.totalPages);
         return true;
       } catch (err: any) {
-        setError(err.message || "Error al obtener zonas");
+        setError(err?.message || "Error al obtener zonas");
         return false;
       } finally {
         setIsLoading(false);
@@ -71,10 +71,9 @@ export const useZones = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al crear zona');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al crear zona");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -90,26 +89,24 @@ export const useZones = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al actualizar zona');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar zona");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const deleteZone = async (id: number) => {
     try {
       setIsLoading(true);
       await zoneService.deleteZone(id);
       await fetchZones(page, limit, search, filters, getSortParams());
       setSelectedZone(null);
       return true;
-    } catch (err) {
-      setError('Error al eliminar zona');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar zona");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +118,7 @@ export const useZones = () => {
     setSelectedZone,
     isLoading,
     error,
-    handleDelete,
+    deleteZone,
     updateZone,
     createZone,
     refreshZones: () => fetchZones(page, limit, search, filters, getSortParams()),

@@ -10,15 +10,17 @@ import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { userFilters } from "../../config/users/userFiltersConfig";
 import {userModalConfig}  from "../../config/users/userModalConfig";
-import ModalDelete from "../../components/common/ModalDelete";
+import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
+import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
+import PaginationControls from "../../components/common/PaginationControls";
 
 const UsersPage: React.FC = () => {
   const { 
     users, 
     selectedUser, 
     setSelectedUser, 
-    handleDelete, 
+    deleteUser, 
     isLoading,
     error,
     refreshUsers,
@@ -44,6 +46,8 @@ const UsersPage: React.FC = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const { showSnackbar } = useSnackbar();
+
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
@@ -58,9 +62,16 @@ const UsersPage: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (userToDelete) {
-      await handleDelete(userToDelete.id);
-      setShowDeleteModal(false);
-      setUserToDelete(null);
+      try {
+        await deleteUser(userToDelete.id);
+        showSnackbar("Usuario eliminado correctamente.", "success");
+        refreshUsers();
+      } catch (err: any) {
+        showSnackbar(err?.message || "Error al eliminar usuario", "error");
+      } finally {
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+      }
     }
   };
 
@@ -94,20 +105,25 @@ const UsersPage: React.FC = () => {
   const handleSort = (column: string) => {
     const idx = sortBy.indexOf(column);
     if (idx === -1) {
-      // Agrega nuevo campo ascendente
       setSortBy([...sortBy, column]);
       setSortDirection([...sortDirection, "asc"]);
     } else if (sortDirection[idx] === "asc") {
-      // Cambia a descendente
       const newDirections = [...sortDirection];
       newDirections[idx] = "desc";
       setSortDirection(newDirections);
     } else if (sortDirection[idx] === "desc") {
-      // Quita el campo de orden
       setSortBy(sortBy.filter((_, i) => i !== idx));
       setSortDirection(sortDirection.filter((_, i) => i !== idx));
     }
     setPage(1);
+  };
+
+  // Maneja el éxito en crear/editar usuario
+  const handleFormSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    setShowForm(false);
+    setSelectedUser(null);
+    refreshUsers();
   };
 
   if (error) {
@@ -186,41 +202,16 @@ const UsersPage: React.FC = () => {
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        {/* Controles de paginación y leyenda */}
-        <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          {/* Leyenda de cantidad */}
-          <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} usuarios
-          </div>
-          {/* Paginación numerada */}
-          <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
-            <button
-              className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1}
-            >
-              &lt;
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`${page === i + 1 ? 'bg-[#403A92] text-white' : 'bg-[#FFFFFF] hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
-                onClick={() => setPage(i + 1)}
-                disabled={page === i + 1}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className={`page-pagination-button-next ${titlePage+"-page-pagination-button-next"}`}
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
-
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          start={start}
+          end={end}
+          total={total}
+          label="usuarios"
+          className={titlePage+"-page-pagination"}
+        />
       </div>
 
       {/* Panel del formulario */}
@@ -245,6 +236,7 @@ const UsersPage: React.FC = () => {
               userToEdit={selectedUser}
               refreshUsers={refreshUsers}
               class={titlePage}
+              onSuccess={handleFormSuccess}
             />
           )}
         </div>
@@ -264,7 +256,7 @@ const UsersPage: React.FC = () => {
       />
 
       {/* Modal de Eliminar */}
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}
@@ -272,16 +264,16 @@ const UsersPage: React.FC = () => {
         genere="M"
       />
 
-              {/* Drawer de filtros */}
-        <FilterDrawer
-          isOpen={showFilters}
-          onClose={() => setShowFilters(false)}
-          fields={userFilters}
-          values={filters}
-          onChange={handleFilterChange}
-          onApply={handleApplyFilters}
-          onClear={handleClearFilters}
-        />
+      {/* Drawer de filtros */}
+      <FilterDrawer
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        fields={userFilters}
+        values={filters}
+        onChange={handleFilterChange}
+        onApply={handleApplyFilters}
+        onClear={handleClearFilters}
+      />
     </div>
   );
 };

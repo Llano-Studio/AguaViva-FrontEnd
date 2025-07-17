@@ -70,19 +70,16 @@ const fetchClients = useCallback(
     try {
       setIsLoading(true);
       const newClient = await clientService.createClient(clientData);
-      if (newClient) {
-        await fetchClients(page, limit, search, filters, getSortParams());
-        return true;
-      }
-      return false;
-    } catch (err) {
-      setError('Error al crear cliente');
-      console.error(err);
-      return false;
+      await fetchClients(page, limit, search, filters, getSortParams());
+      return true;
+    } catch (err: any) {
+      setError(err?.message || "Error al crear cliente");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const updateClient = async (id: number, clientData: Partial<CreateClientDTO>) => {
     try {
@@ -94,26 +91,24 @@ const fetchClients = useCallback(
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al actualizar cliente');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar cliente");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const deleteClient = async (id: number) => {
     try {
       setIsLoading(true);
       await clientService.deleteClient(id);
       await fetchClients(page, limit, search, filters, getSortParams());
       setSelectedClient(null);
       return true;
-    } catch (err) {
-      setError('Error al eliminar cliente');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar cliente");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +120,7 @@ const fetchClients = useCallback(
     setSelectedClient,
     isLoading,
     error,
-    handleDelete,
+    deleteClient,
     updateClient,
     createClient,
     refreshClients: () => fetchClients(page, limit, search, filters, getSortParams()),

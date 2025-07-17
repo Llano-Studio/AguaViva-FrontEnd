@@ -10,16 +10,18 @@ import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { vehicleFilters } from "../../config/vehicles/vehicleFilterConfig";
 import { vehicleModalConfig } from "../../config/vehicles/vehicleModalConfig";
-import ModalDelete from "../../components/common/ModalDelete";
+import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import useVehicleAssignments from "../../hooks/useVehicleAssignments";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/pages.css";
+import PaginationControls from "../../components/common/PaginationControls";
 
 const VehiclesPage: React.FC = () => {
   const {
     vehicles,
     selectedVehicle,
     setSelectedVehicle,
-    handleDelete,
+    deleteVehicle,
     isLoading,
     error,
     refreshVehicles,
@@ -53,6 +55,8 @@ const VehiclesPage: React.FC = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const { showSnackbar } = useSnackbar();
+
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
@@ -67,9 +71,16 @@ const VehiclesPage: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (vehicleToDelete) {
-      await handleDelete(vehicleToDelete.vehicle_id);
-      setShowDeleteModal(false);
-      setVehicleToDelete(null);
+      try {
+        await deleteVehicle(vehicleToDelete.vehicle_id);
+        showSnackbar("Vehículo eliminado correctamente.", "success");
+        await refreshVehicles();
+      } catch (err: any) {
+        showSnackbar(err?.message || "Error al eliminar vehículo", "error");
+      } finally {
+        setShowDeleteModal(false);
+        setVehicleToDelete(null);
+      }
     }
   };
 
@@ -124,6 +135,14 @@ const VehiclesPage: React.FC = () => {
       assignedUsers: users || [],
     });
     setShowViewModal(true);
+  };
+
+  // Maneja el éxito en crear/editar vehículo
+  const handleFormSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    setShowForm(false);
+    setSelectedVehicle(null);
+    refreshVehicles();
   };
 
   if (error) {
@@ -197,37 +216,17 @@ const VehiclesPage: React.FC = () => {
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} Móviles
-          </div>
-          <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
-            <button
-              className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1}
-            >
-              &lt;
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`${page === i + 1 ? 'bg-[#403A92] text-white' : 'bg-[#FFFFFF] hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
-                onClick={() => setPage(i + 1)}
-                disabled={page === i + 1}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className={`page-pagination-button-next ${titlePage+"-page-pagination-button-next"}`}
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          start={start}
+          end={end}
+          total={total}
+          label="móviles"
+          className={titlePage+"-page-pagination"}
+        />
+
       </div>
 
       <div
@@ -250,6 +249,7 @@ const VehiclesPage: React.FC = () => {
               vehicleToEdit={selectedVehicle}
               refreshVehicles={async () => { await refreshVehicles(); }}
               class={titlePage}
+              onSuccess={handleFormSuccess}
             />
           )}
         </div>
@@ -267,7 +267,7 @@ const VehiclesPage: React.FC = () => {
         data={modalVehicle}
       />
 
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}

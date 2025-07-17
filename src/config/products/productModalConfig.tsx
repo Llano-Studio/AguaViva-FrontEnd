@@ -11,7 +11,7 @@ export const productModalConfig = sortByOrder([
         <img
           src={value}
           alt="Imagen de producto"
-          style={{ width: 80, height: 80, borderRadius: "8px", objectFit: "cover" }}
+          style={{ width: 120, height: 120, borderRadius: "6px", objectFit: "cover" }}
         />
       ) : (
         "Sin imagen"

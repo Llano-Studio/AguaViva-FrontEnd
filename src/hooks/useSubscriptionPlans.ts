@@ -49,7 +49,7 @@ export const useSubscriptionPlans = () => {
         setTotalPages(response.meta.totalPages);
         return true;
       } catch (err: any) {
-        setError(err.message || "Error al obtener abonos");
+        setError(err?.message || "Error al obtener abonos");
         return false;
       } finally {
         setIsLoading(false);
@@ -71,10 +71,9 @@ export const useSubscriptionPlans = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al crear abono');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al crear abono");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -90,10 +89,9 @@ export const useSubscriptionPlans = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al actualizar abono');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar abono");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -106,10 +104,9 @@ export const useSubscriptionPlans = () => {
       await fetchPlans(page, limit, search, filters, getSortParams());
       setSelectedPlan(null);
       return true;
-    } catch (err) {
-      setError('Error al eliminar abono');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar abono");
+      throw err;
     } finally {
       setIsLoading(false);
     }

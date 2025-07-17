@@ -10,6 +10,8 @@ import { ListItem } from "../common/ListItem";
 import { useSubscriptionPlanProducts } from "../../hooks/useSubscriptionPlanProducts";
 import { subscriptionPlanProductListColumns } from "../../config/subscriptionPlans/subscriptionPlanProductListColumns";
 import { ProductService } from "../../services/ProductService";
+import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 interface SubscriptionPlanFormProps {
   onCancel: () => void;
@@ -17,6 +19,7 @@ interface SubscriptionPlanFormProps {
   planToEdit?: SubscriptionPlan | null;
   refreshPlans: () => Promise<void>;
   class?: string;
+  onSuccess?: (msg: string) => void;
 }
 
 const getInitialValues = (
@@ -49,9 +52,14 @@ const SubscriptionPlanForm: React.FC<SubscriptionPlanFormProps> = ({
   planToEdit,
   refreshPlans,
   class: classForm,
+  onSuccess,
 }) => {
   const { createSubscriptionPlan, updateSubscriptionPlan } = useSubscriptionPlans();
   const [error, setError] = useState<string | null>(null);
+  const { showSnackbar } = useSnackbar();
+
+  const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
+  const [pendingValues, setPendingValues] = useState<CreateSubscriptionPlanDTO | null>(null);
 
   const initialValues = useMemo(
     () => getInitialValues(isEditing, planToEdit),
@@ -107,10 +115,7 @@ const SubscriptionPlanForm: React.FC<SubscriptionPlanFormProps> = ({
   // Añadir producto al abono
   const handleAddProduct = async (product: any, quantity: number) => {
     if (!planToEdit) return;
-    console.log("producto a agregar: ",product);
-    console.log("cantidad a agregar: ",quantity);
     const exists = selectedProducts.some(p => p.product_id === product.product_id);
-    console.log("producto a agregar: ",product.product_id);
     if (!exists) {
       const res = await addProduct({ product_id: product.product_id, product_quantity: quantity });
       if (res) setSelectedProducts(res.products);
@@ -126,25 +131,52 @@ const SubscriptionPlanForm: React.FC<SubscriptionPlanFormProps> = ({
 
   const handleSubmit = async (values: CreateSubscriptionPlanDTO | FormData) => {
     try {
-      let success = false;
       if (values instanceof FormData) {
         setError("No se admiten archivos en este formulario.");
         return;
       }
       if (isEditing && planToEdit) {
-        success = await updateSubscriptionPlan(planToEdit.subscription_plan_id, values);
-      } else {
-        success = await createSubscriptionPlan(values);
+        setPendingValues(values);
+        setShowUpdateConfirm(true);
+        return;
       }
+      const success = await createSubscriptionPlan(values);
       if (success) {
         await refreshPlans();
+        if (onSuccess) onSuccess("Abono creado correctamente.");
+        showSnackbar("Abono creado correctamente.", "success");
         onCancel();
       } else {
         setError("Error al guardar el abono");
+        showSnackbar("Error al guardar el abono", "error");
       }
-    } catch (err) {
-      setError("Error al guardar el abono");
+    } catch (err: any) {
+      setError(err?.message || "Error al guardar el abono");
+      showSnackbar(err?.message || "Error al guardar el abono", "error");
       console.error(err);
+    }
+  };
+
+  const handleConfirmUpdate = async () => {
+    if (!pendingValues || !planToEdit) return;
+    try {
+      const success = await updateSubscriptionPlan(planToEdit.subscription_plan_id, pendingValues);
+      if (success) {
+        await refreshPlans();
+        if (onSuccess) onSuccess("Abono editado correctamente.");
+        showSnackbar("Abono editado correctamente.", "success");
+        onCancel();
+      } else {
+        setError("Error al actualizar el abono");
+        showSnackbar("Error al actualizar el abono", "error");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar el abono");
+      showSnackbar(err?.message || "Error al actualizar el abono", "error");
+      console.error(err);
+    } finally {
+      setShowUpdateConfirm(false);
+      setPendingValues(null);
     }
   };
 
@@ -167,7 +199,6 @@ const SubscriptionPlanForm: React.FC<SubscriptionPlanFormProps> = ({
 
   return (
     <>
-      {error && <div className="error-message">{error}</div>}
       <ItemForm<CreateSubscriptionPlanDTO>
         {...form}
         onSubmit={handleSubmit}
@@ -175,6 +206,7 @@ const SubscriptionPlanForm: React.FC<SubscriptionPlanFormProps> = ({
         fields={subscriptionPlanFields}
         class={classForm}
       />
+      {error && <div className="error-message">{error}</div>}
       {isEditing && (
         <div style={{
           marginTop: 24,
@@ -207,6 +239,13 @@ const SubscriptionPlanForm: React.FC<SubscriptionPlanFormProps> = ({
           />
         </div>
       )}
+      <ModalUpdateConfirm
+        isOpen={showUpdateConfirm}
+        onClose={() => setShowUpdateConfirm(false)}
+        onConfirm={handleConfirmUpdate}
+        content="abono"
+        genere="M"
+      />
     </>
   );
 };

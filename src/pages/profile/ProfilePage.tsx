@@ -14,29 +14,18 @@ const ProfilePage: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
   
-
   const handleChangePassword = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
-      const token = user?.resetToken || user?.accessToken || "";
-      if (!token) {
-        setError("No se encontró token de sesión.");
-        setLoading(false);
-        return;
-      }
       const authService = new AuthService();
-      const response = await authService.resetPassword(token, newPassword);
-      if (response.success) {
-        setSuccess("Contraseña cambiada correctamente.");
-        setCurrentPassword("");
-        setNewPassword("");
-      } else {
-        setError(response.message || "No se pudo cambiar la contraseña.");
-      }
+      const response = await authService.updatePassword(currentPassword, newPassword);
+      setSuccess(response.message || "Contraseña cambiada correctamente.");
+      setCurrentPassword("");
+      setNewPassword("");
     } catch (err: any) {
-      setError("Error inesperado.");
+      setError(err.message || "No se pudo cambiar la contraseña.");
     } finally {
       setLoading(false);
     }
@@ -115,15 +104,17 @@ const ProfilePage: React.FC = () => {
                   disabled={loading}
                 />
               </label>
-              <button
-                onClick={handleChangePassword}
-                disabled={loading || !currentPassword || !newPassword}
-                className="form-submit profile-change-btn"
-              >
-                Cambiar contraseña
-              </button>
-              {error && <div className="profile-error">{error}</div>}
-              {success && <div className="profile-success">{success}</div>}
+              <div className="profile-change-btn-container">
+                {error && <div className="profile-error">{error}</div>}
+                {success && <div className="profile-success">{success}</div>}
+                <button
+                  onClick={handleChangePassword}
+                  disabled={loading || !currentPassword || !newPassword}
+                  className="form-submit profile-change-btn"
+                >
+                  Cambiar contraseña
+                </button>
+              </div>
             </div>
           </section>
         </div>

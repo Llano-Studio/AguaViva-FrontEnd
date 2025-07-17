@@ -10,9 +10,11 @@ import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { clientFilters } from "../../config/clients/clientFiltersConfig";
 import { clientModalConfig } from "../../config/clients/clientModalConfig";
-import ModalDelete from "../../components/common/ModalDelete";
+import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import Switch from "../../components/common/Switch";
+import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
+import PaginationControls from "../../components/common/PaginationControls";
 
 const ClientsPage: React.FC = () => {
   const { 
@@ -34,6 +36,7 @@ const ClientsPage: React.FC = () => {
     sortDirection,
     setSortDirection,
     fetchClients,
+    deleteClient,
   } = useClients();
   
   const [showViewModal, setShowViewModal] = useState(false);
@@ -44,6 +47,8 @@ const ClientsPage: React.FC = () => {
   const [semaphoreOn, setSemaphoreOn] = useState(false);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -58,10 +63,17 @@ const ClientsPage: React.FC = () => {
   };
 
   const handleConfirmDelete = async () => {
-    // Aquí deberías llamar a tu método de borrado y refrescar la lista
-    setShowDeleteModal(false);
-    setClientToDelete(null);
-    fetchClients();
+    if (!clientToDelete) return;
+    try {
+      await deleteClient(clientToDelete.person_id);
+      showSnackbar("Cliente eliminado correctamente.", "success");
+      await fetchClients();
+    } catch (err: any) {
+      showSnackbar(err?.message || "Error al eliminar cliente", "error");
+    } finally {
+      setShowDeleteModal(false);
+      setClientToDelete(null);
+    }
   };
 
   const handleEditClick = (client: Client) => {
@@ -105,6 +117,14 @@ const ClientsPage: React.FC = () => {
     setPage(1);
   };
 
+  // Maneja el éxito en crear/editar cliente
+  const handleFormSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    setShowForm(false);
+    setSelectedClient(null);
+    fetchClients();
+  };
+
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
   }
@@ -140,7 +160,6 @@ const ClientsPage: React.FC = () => {
             />
           </div>
           <div className={`page-header-div-2 ${titlePage+"-page-header-div-2"}`}>
-            
             <div className='page-switch-container'>
               <Switch
                 value={semaphoreOn ? "on" : "off"}
@@ -154,7 +173,6 @@ const ClientsPage: React.FC = () => {
               onClick={() => setShowFilters(true)}
               className={`page-filter-button ${titlePage+"-page-filter-button"}`}
             >
-              
               <img
                 src="/assets/icons/filter-icon.svg"
                 alt="Filtros"
@@ -196,44 +214,20 @@ const ClientsPage: React.FC = () => {
             GREEN: "#E9FFF6",
             YELLOW: "#FFFCDA",
             RED: "#FFDFDF",
-            NONE: "#E9FFF6", //""
+            NONE: "#E9FFF6",
           }}
           semaphoreActive={semaphoreOn}
         />
-        {/* Controles de paginación y leyenda */}
-        <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          {/* Leyenda de cantidad */}
-          <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} clientes
-          </div>
-          {/* Paginación numerada */}
-          <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
-            <button
-              className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1}
-            >
-              &lt;
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`${page === i + 1 ? 'bg-[#403A92] text-white' : 'bg-[#FFFFFF] hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
-                onClick={() => setPage(i + 1)}
-                disabled={page === i + 1}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className={`page-pagination-button-next ${titlePage+"-page-pagination-button-next"}`}
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          start={start}
+          end={end}
+          total={total}
+          label="clientes"
+          className={titlePage+"-page-pagination"}
+        />
       </div>
 
       {/* Panel del formulario */}
@@ -257,6 +251,7 @@ const ClientsPage: React.FC = () => {
               clientToEdit={selectedClient}
               refreshClients={async () => { await fetchClients(); }}
               class={titlePage}
+              onSuccess={handleFormSuccess}
             />
           )}
         </div>
@@ -276,7 +271,7 @@ const ClientsPage: React.FC = () => {
       />
 
       {/* Modal de Eliminar */}
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}

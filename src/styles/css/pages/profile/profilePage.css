@@ -94,7 +94,8 @@
 }
 
 .profile-section label{
-    width: 33%;
+    width: 32%;
+    align-content: end;
 }
 
 .profile-section h2 {
@@ -106,16 +107,16 @@
 
 .profile-information-fields{
     display: flex;
-    gap: 17px;
+    gap: 2%;
 }
 
 .profile-information-fields div{
-    width: 33%;
+    width: 32%;
 }
 
 .profile-fields {
   display: flex;
-  gap: 17px;
+  gap: 2%;
 }
 
 .profile-input {
@@ -124,19 +125,30 @@
   margin-top: 4px;
 }
 
+.profile-change-btn-container{
+  width: 32%;
+  align-content: end;
+}
+
 .profile-change-btn {
   color: var(--text-color-2);
   background: var(--acent-color-1);
-  width: 33% !important;
+  width: 100% !important;
   align-self: end;
 }
 
 .profile-error {
-  color: red;
-  margin-top: 8px;
+  color: var(--acent-color-3);
 }
 
 .profile-success {
   color: green;
-  margin-top: 8px;
+}
+
+.profile-error,
+.profile-success{
+  font-size: 12px;
+  align-self: end;
+  font-weight: 500;
+  margin-bottom: 2px;
 }

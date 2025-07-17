@@ -3,6 +3,7 @@ import { CreatePriceListDTO } from "../../interfaces/PriceList";
 import { Column } from "../../components/common/DataTable";
 import { PriceList } from "../../interfaces/PriceList";
 import { sortByOrder } from "../../utils/sortByOrder";
+import { formatDateForView } from "../../utils/formateDateForView";
 
 // Campos del formulario de lista de precios
 export const priceListFields: Field<CreatePriceListDTO>[] = sortByOrder([
@@ -17,7 +18,7 @@ export const priceListFields: Field<CreatePriceListDTO>[] = sortByOrder([
 export const priceListColumns: Column<PriceList>[] = sortByOrder([
   { header: "Nombre", accessor: "name", order: 1 },
   { header: "Descripción", accessor: "description", order: 2 },
-  { header: "Fecha Vigencia", accessor: "effective_date", order: 3 },
+  { header: "Fecha Vigencia", accessor: "effective_date", order: 3, render: (value: string) => formatDateForView(value) },
   { header: "Por defecto", accessor: "is_default", order: 4, render: (value: boolean) => value ? 'Sí' : 'No' },
   { header: "Activa", accessor: "active", order: 5, render: (value: boolean) => value ? 'Sí' : 'No' },
 ]);

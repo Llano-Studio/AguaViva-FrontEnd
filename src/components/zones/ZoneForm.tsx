@@ -7,6 +7,8 @@ import { zoneFields } from "../../config/zones/zoneFieldsConfig";
 import useZones from "../../hooks/useZones";
 import { useDependentLocationFields } from "../../hooks/useDependentLocationFields";
 import { getDependentLocationOptions, handleDependentLocationChange } from "../../config/common/dependentLocationLogic";
+import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 interface ZoneFormProps {
   onCancel: () => void;
@@ -14,6 +16,7 @@ interface ZoneFormProps {
   zoneToEdit?: Zone | null;
   refreshZones: () => Promise<void>;
   class?: string;
+  onSuccess?: (msg: string) => void;
 }
 
 const getInitialValues = (
@@ -47,9 +50,13 @@ const ZoneForm: React.FC<ZoneFormProps> = ({
   zoneToEdit,
   refreshZones,
   class: classForm,
+  onSuccess,
 }) => {
   const { createZone, updateZone } = useZones();
   const [error, setError] = useState<string | null>(null);
+  const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
+  const [pendingValues, setPendingValues] = useState<CreateZoneDTO | null>(null);
+  const { showSnackbar } = useSnackbar();
 
   const initialValues = useMemo(
     () => getInitialValues(isEditing, zoneToEdit),
@@ -96,36 +103,69 @@ const ZoneForm: React.FC<ZoneFormProps> = ({
   // Solo enviar los campos requeridos al backend
   const handleSubmit = async (values: CreateZoneDTO | FormData) => {
     try {
-      let success = false;
       if (values instanceof FormData) {
         setError("No se admiten archivos en este formulario.");
         return;
       }
+      if (isEditing && zoneToEdit) {
+        setPendingValues(values);
+        setShowUpdateConfirm(true);
+        return;
+      }
+      // Crear zona
       const payload = {
         name: values.name,
         code: values.code,
         localityId: values.localityId,
       };
-      if (isEditing && zoneToEdit) {
-        success = await updateZone(zoneToEdit.zone_id, payload);
-      } else {
-        success = await createZone(payload);
-      }
+      const success = await createZone(payload);
       if (success) {
         await refreshZones();
+        if (onSuccess) onSuccess("Zona creada correctamente.");
+        showSnackbar("Zona creada correctamente.", "success");
         onCancel();
       } else {
         setError("Error al guardar la zona");
+        showSnackbar("Error al guardar la zona", "error");
       }
-    } catch (err) {
-      setError("Error al guardar la zona");
+    } catch (err: any) {
+      setError(err?.message || "Error al guardar la zona");
+      showSnackbar(err?.message || "Error al guardar la zona", "error");
       console.error(err);
+    }
+  };
+
+  // Confirmación de edición
+  const handleConfirmUpdate = async () => {
+    if (!pendingValues || !zoneToEdit) return;
+    try {
+      const payload = {
+        name: pendingValues.name,
+        code: pendingValues.code,
+        localityId: pendingValues.localityId,
+      };
+      const success = await updateZone(zoneToEdit.zone_id, payload);
+      if (success) {
+        await refreshZones();
+        if (onSuccess) onSuccess("Zona editada correctamente.");
+        showSnackbar("Zona editada correctamente.", "success");
+        onCancel();
+      } else {
+        setError("Error al actualizar la zona");
+        showSnackbar("Error al actualizar la zona", "error");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar la zona");
+      showSnackbar(err?.message || "Error al actualizar la zona", "error");
+      console.error(err);
+    } finally {
+      setShowUpdateConfirm(false);
+      setPendingValues(null);
     }
   };
 
   return (
     <>
-      {error && <div className="error-message">{error}</div>}
       <ItemForm<CreateZoneDTO>
         {...form}
         onSubmit={handleSubmit}
@@ -133,6 +173,14 @@ const ZoneForm: React.FC<ZoneFormProps> = ({
         fields={zoneFields(countryOptions, provinceOptions, localityOptions)}
         class={classForm}
         onFieldChange={handleFieldChange as (fieldName: string, value: any) => void}
+      />
+      {error && <div className="error-message">{error}</div>}
+      <ModalUpdateConfirm
+        isOpen={showUpdateConfirm}
+        onClose={() => setShowUpdateConfirm(false)}
+        onConfirm={handleConfirmUpdate}
+        content="zona"
+        genere="F"
       />
     </>
   );

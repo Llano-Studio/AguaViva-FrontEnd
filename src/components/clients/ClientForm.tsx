@@ -7,6 +7,9 @@ import { useDependentLocationFields } from "../../hooks/useDependentLocationFiel
 import { useForm } from "react-hook-form";
 import { getDependentLocationOptions, handleDependentLocationChange } from "../../config/common/dependentLocationLogic";
 import SubscriptionClient from "./SubscriptionClient";
+import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
+import { useSnackbar } from "../../context/SnackbarContext";
+import { formatDateForInput } from "../../utils/formatDateForInput";
 
 interface ClientFormProps {
   onCancel: () => void;
@@ -14,6 +17,7 @@ interface ClientFormProps {
   clientToEdit?: Client | null;
   refreshClients: () => Promise<void>;
   class?: string;
+  onSuccess?: (msg: string) => void;
 }
 
 const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): CreateClientDTO => {
@@ -28,7 +32,7 @@ const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): Cre
       provinceId: clientToEdit.locality?.province?.province_id ?? 0,
       localityId: clientToEdit.locality?.locality_id ?? 0,
       zoneId: clientToEdit.zone?.zone_id ?? 0,
-      registrationDate: clientToEdit.registrationDate?.split('T')[0] ?? "",
+      registrationDate: formatDateForInput(clientToEdit.registration_date),
       type: clientToEdit.type
     };
   }
@@ -53,9 +57,15 @@ const ClientForm: React.FC<ClientFormProps> = ({
   clientToEdit,
   refreshClients,
   class: classForm,
+  onSuccess,
 }) => {
   const { createClient, updateClient } = useClients();
   const [error, setError] = useState<string | null>(null);
+  const { showSnackbar } = useSnackbar();
+
+  // Estado para el modal de confirmación de actualización
+  const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
+  const [pendingValues, setPendingValues] = useState<CreateClientDTO | null>(null);
 
   // Memoiza los valores iniciales para evitar recrear el formulario en cada render
   const initialValues = useMemo(
@@ -104,11 +114,14 @@ const ClientForm: React.FC<ClientFormProps> = ({
 
   // Submit handler
   const handleSubmit = async (values: CreateClientDTO | FormData) => {
+    if (isEditing && clientToEdit) {
+      setPendingValues(values as CreateClientDTO);
+      setShowUpdateConfirm(true);
+      return;
+    }
+    // Crear cliente (alta normal)
     try {
-      let success = false;
       let dataToSend: any = values;
-
-      // Si es un objeto (no FormData), filtra solo los campos requeridos
       if (!(values instanceof FormData)) {
         const {
           name,
@@ -134,29 +147,76 @@ const ClientForm: React.FC<ClientFormProps> = ({
           type
         };
       }
-
-      if (isEditing && clientToEdit) {
-        const updatedClient = await updateClient(clientToEdit.person_id, dataToSend);
-        success = !!updatedClient;
-      } else {
-        const newClient = await createClient(dataToSend);
-        success = !!newClient;
-      }
-      if (success) {
+      const newClient = await createClient(dataToSend);
+      if (newClient) {
         await refreshClients();
+        if (onSuccess) onSuccess("Cliente creado correctamente.");
+        showSnackbar("Cliente creado correctamente.", "success");
         onCancel();
       } else {
         setError("Error al guardar el cliente");
+        showSnackbar("Error al guardar el cliente", "error");
       }
-    } catch (err) {
-      setError("Error al guardar el cliente");
+    } catch (err: any) {
+      setError(err?.message || "Error al guardar el cliente");
+      showSnackbar(err?.message || "Error al guardar el cliente", "error");
       console.error(err);
+    }
+  };
+
+  // Confirmación de edición
+  const handleConfirmUpdate = async () => {
+    if (!pendingValues || !clientToEdit) return;
+    try {
+      let dataToSend: any = pendingValues;
+      if (!(pendingValues instanceof FormData)) {
+        const {
+          name,
+          phone,
+          address,
+          alias,
+          taxId,
+          localityId,
+          zoneId,
+          registrationDate,
+          type
+        } = pendingValues as CreateClientDTO;
+
+        dataToSend = {
+          name,
+          phone,
+          address,
+          alias,
+          taxId,
+          localityId,
+          zoneId,
+          registrationDate,
+          type
+        };
+      }
+      const updatedClient = await updateClient(clientToEdit.person_id, dataToSend);
+      if (updatedClient) {
+        await refreshClients();
+        if (onSuccess) onSuccess("Cliente editado correctamente.");
+        showSnackbar("Cliente editado correctamente.", "success");
+        onCancel();
+      } else {
+        setError("Error al actualizar el cliente");
+        showSnackbar("Error al actualizar el cliente", "error");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar el cliente");
+      showSnackbar(err?.message || "Error al actualizar el cliente", "error");
+      console.error(err);
+    } finally {
+      setShowUpdateConfirm(false);
+      setPendingValues(null);
     }
   };
 
   return (
     <>
-      {error && <div className="error-message">{error}</div>}
+      
       <ItemForm<CreateClientDTO>
         {...form}
         onSubmit={handleSubmit}
@@ -165,10 +225,19 @@ const ClientForm: React.FC<ClientFormProps> = ({
         class={classForm}
         onFieldChange={handleFieldChange as (fieldName: string, value: any) => void}
       />
+      {error && <div className="error-message">{error}</div>}
 
       {isEditing && clientToEdit && (
         <SubscriptionClient clientId={clientToEdit.person_id} isEditing={isEditing} />
       )}
+
+      <ModalUpdateConfirm
+        isOpen={showUpdateConfirm}
+        onClose={() => setShowUpdateConfirm(false)}
+        onConfirm={handleConfirmUpdate}
+        content="cliente"
+        genere="M"
+      />
     </>
   );
 };

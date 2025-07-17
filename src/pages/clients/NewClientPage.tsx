@@ -1,11 +1,18 @@
 import React from "react";
 import ClientForm from "../../components/clients/ClientForm";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/newPages.css";
 
 const NewClientPage: React.FC = () => {
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
   const titlePage = "new-client";
+
+  const handleSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    navigate("/clientes");
+  };
 
   return (
     <div className={`new-page-container ${titlePage+"-page-container"}`}>
@@ -22,6 +29,7 @@ const NewClientPage: React.FC = () => {
         isEditing={false}
         refreshClients={async () => {}}
         class={titlePage}
+        onSuccess={handleSuccess}
       />
     </div>
   );

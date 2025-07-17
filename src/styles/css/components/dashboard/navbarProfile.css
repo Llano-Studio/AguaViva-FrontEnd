@@ -12,13 +12,15 @@
 }
 
 .navbar-datos-profile{
-    background: #403A92;
+    background: var(--acent-color-1);
     height: 51px;
     align-self: center;
     width: 197px;
     padding: 7px 10px 10px 45px;
     transform: translate(-30px, 0px);
     border-radius: 7px;
+    display:flex;
+    justify-content: space-between;
 }
 
 .navbar-name{
@@ -33,4 +35,48 @@
     color: #FFFFFF;
     font-size: 10px;
     font-weight: 400;
+}
+
+.navbar-profile-dropdown {
+  position: absolute;
+  top: 92%;
+  right: 0;
+  background: var(--acent-color-1);
+  border-radius: 0 0 7px 7px;
+  box-shadow: 0 2px 8px rgba(64,58,146,0.08);
+  padding: 10px 0;
+  min-width: 140px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+.navbar-profile-logout-btn {
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  padding: 10px 15px 5px 45px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 400;
+  width: 100%;
+  transition: background 0.2s;
+}
+.navbar-profile-logout-btn:hover {
+  opacity:0.7;
+}
+
+.navbar-profile-dropdown-btn{
+    padding: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-datos-profile-container-2{
+    align-content: center;
 }

@@ -1,10 +1,13 @@
 import { AuthProvider } from "./context/AuthContext";
 import AppRouter from "./routes/router";
+import { SnackbarProvider } from "./context/SnackbarContext";
 
 const App = () => {
   return (
     <AuthProvider>
-      <AppRouter />
+      <SnackbarProvider>
+        <AppRouter />
+      </SnackbarProvider>
     </AuthProvider>
   );
 };

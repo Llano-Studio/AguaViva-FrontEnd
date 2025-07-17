@@ -3,22 +3,25 @@ import { DataTable } from '../../components/common/DataTable';
 import { Modal } from '../../components/common/Modal';
 import { Product } from '../../interfaces/Product';
 import useProducts from '../../hooks/useProducts';
-import {ProductForm} from '../../components/products/ProductForm';
+import { ProductForm } from '../../components/products/ProductForm';
 import { useNavigate } from "react-router-dom";
 import { productColumns } from "../../config/products/productFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { productFilters } from "../../config/products/productFiltersConfig";
 import { productModalConfig } from "../../config/products/productModalConfig";
-import ModalDelete from "../../components/common/ModalDelete";
+import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
+import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
+import PaginationControls from "../../components/common/PaginationControls";
+import ModalCategories from "../../components/products/ModalCategories";
 
 const ProductsPage: React.FC = () => {
   const {
     products,
     selectedProduct,
     setSelectedProduct,
-    handleDelete,
+    deleteProduct,
     isLoading,
     error,
     refreshProducts,
@@ -43,6 +46,8 @@ const ProductsPage: React.FC = () => {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [showCategoriesModal, setShowCategoriesModal] = useState(false);
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -58,9 +63,16 @@ const ProductsPage: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (productToDelete) {
-      await handleDelete(productToDelete.product_id);
-      setShowDeleteModal(false);
-      setProductToDelete(null);
+      try {
+        await deleteProduct(productToDelete.product_id);
+        showSnackbar("Artículo eliminado correctamente.", "success");
+        refreshProducts();
+      } catch (err: any) {
+        showSnackbar(err?.message || "Error al eliminar artículo", "error");
+      } finally {
+        setShowDeleteModal(false);
+        setProductToDelete(null);
+      }
     }
   };
 
@@ -107,6 +119,14 @@ const ProductsPage: React.FC = () => {
     setPage(1);
   };
 
+  // Maneja el éxito en crear/editar producto
+  const handleFormSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    setShowForm(false);
+    setSelectedProduct(null);
+    refreshProducts();
+  };
+
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
   }
@@ -142,6 +162,12 @@ const ProductsPage: React.FC = () => {
             />
           </div>
           <div className={`page-header-div-2 ${titlePage+"-page-header-div-2"}`}>
+            <button
+              onClick={() => setShowCategoriesModal(true)}
+              className={`page-action-button ${titlePage}-page-action-button`}
+            >
+              Categorías
+            </button>
             <button
               onClick={() => setShowFilters(true)}
               className={`page-filter-button ${titlePage+"-page-filter-button"}`}
@@ -182,38 +208,16 @@ const ProductsPage: React.FC = () => {
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        {/* Controles de paginación y leyenda */}
-        <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} artículos
-          </div>
-          <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
-            <button
-              className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1}
-            >
-              &lt;
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`${page === i + 1 ? 'bg-[#403A92] text-white' : 'bg-[#FFFFFF] hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
-                onClick={() => setPage(i + 1)}
-                disabled={page === i + 1}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className={`page-pagination-button-next ${titlePage+"-page-pagination-button-next"}`}
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          start={start}
+          end={end}
+          total={total}
+          label="artículos"
+          className={titlePage+"-page-pagination"}
+        />
       </div>
 
       {/* Panel del formulario */}
@@ -237,6 +241,7 @@ const ProductsPage: React.FC = () => {
               productToEdit={selectedProduct}
               refreshProducts={refreshProducts}
               class={titlePage}
+              onSuccess={handleFormSuccess}
             />
           )}
         </div>
@@ -256,12 +261,18 @@ const ProductsPage: React.FC = () => {
       />
 
       {/* Modal de Eliminar */}
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}
         content="artículo"
         genere="M"
+      />
+
+      {/* Modal de Categorías */}
+      <ModalCategories
+        isOpen={showCategoriesModal}
+        onClose={() => setShowCategoriesModal(false)}
       />
 
       {/* Drawer de filtros */}

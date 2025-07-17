@@ -26,17 +26,15 @@ export class VehicleService {
     try {
       return await httpAdapter.post<Vehicle>(vehicle, this.vehiclesUrl);
     } catch (error: any) {
-      console.error("Error en createVehicle:", error);
-      return null;
+      throw new Error(error?.message || error?.response?.data?.message || "Error al crear vehículo");
     }
   }
 
   async updateVehicle(id: number, vehicle: Partial<CreateVehicleDTO>): Promise<Vehicle | null> {
     try {
       return await httpAdapter.patch<Vehicle>(vehicle, `${this.vehiclesUrl}/${id}`);
-    } catch (error) {
-      console.error("Error en updateVehicle:", error);
-      return null;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar vehículo");
     }
   }
 
@@ -44,9 +42,8 @@ export class VehicleService {
     try {
       await httpAdapter.delete(`${this.vehiclesUrl}/${id}`);
       return true;
-    } catch (error) {
-      console.error("Error en deleteVehicle:", error);
-      return false;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar vehículo");
     }
   }
 

@@ -1,15 +1,11 @@
 import { API_URL } from "../config";
-import { IAuthService } from "../interfaces/IAuthService";
-
-export interface PasswordRecoveryResponse {
-  success: boolean;
-  message?: string;
-}
-
-export interface ResetPasswordResponse {
-  success: boolean;
-  message?: string;
-}
+import {
+  IAuthService,
+  PasswordRecoveryResponse,
+  ResetPasswordResponse,
+  UpdatePasswordResponse,
+} from "../interfaces/IAuthService";
+import { httpAdapter } from "./httpAdapter";
 
 export class AuthService implements IAuthService {
   private apiUrl: string;
@@ -18,23 +14,15 @@ export class AuthService implements IAuthService {
     this.apiUrl = API_URL;
   }
 
-  async login(email: string, password: string): Promise<{ user: any; accessToken: string } | null>  {
-    console.log("datos desde AuthService: ", email, password);
+  async login(email: string, password: string): Promise<{ user: any; accessToken: string } | null> {
     try {
-      const response = await fetch(`${this.apiUrl}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-
-      const data = await response.json();
-      if (response.ok && data && data.user && data.accessToken) {
-        return data;
+      const response = await httpAdapter.post<{ user: any; accessToken: string }>(
+        { email, password },
+        "/auth/login"
+      );
+      if (response && response.user && response.accessToken) {
+        return response;
       }
-
       return null;
     } catch (error) {
       console.error("Error al intentar iniciar sesión:", error);
@@ -44,18 +32,11 @@ export class AuthService implements IAuthService {
 
   async recoverPassword(email: string): Promise<PasswordRecoveryResponse> {
     try {
-      const response = await fetch(`${this.apiUrl}/auth/recover-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      return { success: !!data.success, message: data.message };
-      
+      const response = await httpAdapter.post<PasswordRecoveryResponse>(
+        { email },
+        "/auth/recover-password"
+      );
+      return { success: !!response.success, message: response.message };
     } catch (error: any) {
       console.error("Error al intentar recuperar la contraseña:", error);
       let errorMessage = "Error de red o servidor";
@@ -68,16 +49,11 @@ export class AuthService implements IAuthService {
 
   async resetPassword(token: string, newPassword: string): Promise<ResetPasswordResponse> {
     try {
-      const response = await fetch(`${this.apiUrl}/auth/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token, password: newPassword }),
-      });
-
-      const data = await response.json();
-      return { success: !!data.success, message: data.message };
+      const response = await httpAdapter.post<ResetPasswordResponse>(
+        { token, password: newPassword },
+        "/auth/reset-password"
+      );
+      return { success: !!response.success, message: response.message };
     } catch (error: any) {
       console.error("Error al intentar restablecer la contraseña:", error);
       let errorMessage = "Error de red o servidor";
@@ -85,6 +61,18 @@ export class AuthService implements IAuthService {
         errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
       }
       return { success: false, message: errorMessage };
+    }
+  }
+
+  async updatePassword(currentPassword: string, newPassword: string): Promise<UpdatePasswordResponse> {
+    try {
+      const response = await httpAdapter.post<UpdatePasswordResponse>(
+        { currentPassword, newPassword },
+        "/auth/update-password"
+      );
+      return response;
+    } catch (error: any) {
+      throw new Error(error?.message || "Error al actualizar la contraseña.");
     }
   }
 }

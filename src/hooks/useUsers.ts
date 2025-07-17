@@ -48,13 +48,11 @@ export const useUsers = () => {
           setTotalPages(response.meta.totalPages || 1);
           setPage(response.meta.page || 1);
           setLimit(response.meta.limit || 10);
-          console.log("Usuarios cargados:", response.data);
           return true;
         }
         return false;
-      } catch (err) {
-        setError('Error al cargar usuarios');
-        console.error(err);
+      } catch (err: any) {
+        setError(err?.message || "Error al cargar usuarios");
         return false;
       } finally {
         setIsLoading(false);
@@ -68,9 +66,7 @@ export const useUsers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, search, filters, sortBy, sortDirection]);
 
-  // Ahora acepta FormData o DTO
   const createUser = async (userData: CreateUserDTO | FormData, isFormData = false) => {
-    console.log("userData en createUser:", userData);
     try {
       setIsLoading(true);
       const newUser = await userService.createUser(userData as any, isFormData);
@@ -79,16 +75,14 @@ export const useUsers = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al crear usuario');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al crear usuario");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Ahora acepta FormData o Partial<User>
   const updateUser = async (id: number, userData: Partial<User> | FormData, isFormData = false) => {
     try {
       setIsLoading(true);
@@ -99,26 +93,24 @@ export const useUsers = () => {
         return true;
       }
       return false;
-    } catch (err) {
-      setError('Error al actualizar usuario');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar usuario");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const deleteUser = async (id: number) => {
     try {
       setIsLoading(true);
       await userService.deleteUser(id);
       await fetchUsers(page, limit, search, filters, getSortParams());
       setSelectedUser(null);
       return true;
-    } catch (err) {
-      setError('Error al eliminar usuario');
-      console.error(err);
-      return false;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar usuario");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -130,7 +122,7 @@ export const useUsers = () => {
     setSelectedUser,
     isLoading,
     error,
-    handleDelete,
+    deleteUser,
     updateUser,
     createUser,
     refreshUsers: () => fetchUsers(page, limit, search, filters, getSortParams()),

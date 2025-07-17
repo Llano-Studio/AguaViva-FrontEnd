@@ -6,7 +6,7 @@ import { clientSubscriptionModalConfig } from "../../config/clients/clientSubscr
 import { Modal } from "../common/Modal";
 import { SubscriptionPlanService } from "../../services/SubscriptionPlanService";
 import useClientSubscriptions from "../../hooks/useClientSubscriptions";
-import ModalDelete from "../common/ModalDelete";
+import ModalDeleteConfirm from "../common/ModalDeleteConfirm";
 import { parseTimeRangeFields } from "../../utils/parseTimeRangeFields";
 import "../../styles/css/components/clients/subscriptionClient.css";
 
@@ -220,7 +220,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
         data={subscriptionToView}
       />
 
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);

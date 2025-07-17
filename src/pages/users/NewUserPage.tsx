@@ -2,14 +2,20 @@ import React from "react";
 import UserForm from "../../components/users/UserForm";
 import { useNavigate } from "react-router-dom";
 import useUsers from "../../hooks/useUsers";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/newPages.css";
 
 const NewUserPage: React.FC = () => {
   const navigate = useNavigate();
   const titlePage = "new-user";
-  const { createUser, refreshUsers } = useUsers();
+  const { refreshUsers } = useUsers();
+  const { showSnackbar } = useSnackbar();
 
-  // El UserForm ya soporta imagen y FormData, solo pasamos las props necesarias
+  const handleSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    navigate("/usuarios");
+  };
+
   return (
     <div className={`new-page-container ${titlePage+"-page-container"}`}>
       <div className={`new-page-header ${titlePage+"-page-header"}`}>
@@ -25,6 +31,7 @@ const NewUserPage: React.FC = () => {
         isEditing={false}
         refreshUsers={refreshUsers}
         class={titlePage}
+        onSuccess={handleSuccess}
       />
     </div>
   );

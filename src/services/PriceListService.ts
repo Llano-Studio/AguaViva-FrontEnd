@@ -26,17 +26,15 @@ export class PriceListService {
     try {
       return await httpAdapter.post<PriceList>(data, this.priceListUrl);
     } catch (error: any) {
-      console.error("Error en createPriceList:", error);
-      return null;
+      throw new Error(error?.message || error?.response?.data?.message || "Error al crear lista de precios");
     }
   }
 
   async updatePriceList(id: number, data: UpdatePriceListDTO): Promise<PriceList | null> {
     try {
       return await httpAdapter.patch<PriceList>(data, `${this.priceListUrl}/${id}`);
-    } catch (error) {
-      console.error("Error en updatePriceList:", error);
-      return null;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar lista de precios");
     }
   }
 
@@ -44,9 +42,8 @@ export class PriceListService {
     try {
       await httpAdapter.delete(`${this.priceListUrl}/${id}`);
       return true;
-    } catch (error) {
-      console.error("Error en deletePriceList:", error);
-      return false;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar lista de precios");
     }
   }
 

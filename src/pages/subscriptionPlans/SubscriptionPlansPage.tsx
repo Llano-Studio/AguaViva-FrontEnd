@@ -10,10 +10,12 @@ import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { subscriptionPlanFilters } from "../../config/subscriptionPlans/subscriptionPlanFiltersConfig";
 import { subscriptionPlanModalConfig } from "../../config/subscriptionPlans/subscriptionPlanModalConfig";
-import ModalDelete from "../../components/common/ModalDelete";
+import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import '../../styles/css/pages/pages.css';
 import SubscriptionPlanUpdatePrice from "../../components/subscriptionPlans/SubscriptionPlanUpdatePrice";
 import "../../styles/css/pages/subscriptionPlans/subscriptionPlansPage.css";
+import { useSnackbar } from "../../context/SnackbarContext";
+import PaginationControls from "../../components/common/PaginationControls";
 
 const SubscriptionPlansPage: React.FC = () => {
   const {
@@ -46,6 +48,7 @@ const SubscriptionPlansPage: React.FC = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [showUpdatePriceModal, setShowUpdatePriceModal] = useState(false);
+  const { showSnackbar } = useSnackbar();
   
 
   useEffect(() => {
@@ -62,9 +65,16 @@ const SubscriptionPlansPage: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (planToDelete) {
-      await handleDelete(planToDelete.subscription_plan_id);
-      setShowDeleteModal(false);
-      setPlanToDelete(null);
+      try {
+        await handleDelete(planToDelete.subscription_plan_id);
+        showSnackbar("Abono eliminado correctamente.", "success");
+        await refreshPlans();
+      } catch (err: any) {
+        showSnackbar(err?.message || "Error al eliminar abono", "error");
+      } finally {
+        setShowDeleteModal(false);
+        setPlanToDelete(null);
+      }
     }
   };
 
@@ -199,38 +209,16 @@ const SubscriptionPlansPage: React.FC = () => {
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        {/* Controles de paginación y leyenda */}
-        <div className={`page-pagination ${titlePage+"-page-pagination"}`}>
-          <div className={`page-pagination-legend ${titlePage+"-page-pagination-legend"}`}>
-            Mostrando {end > total ? total : end} de {total} abonos
-          </div>
-          <div className={`page-pagination-controls ${titlePage+"-page-pagination-controls"}`}>
-            <button
-              className={`page-pagination-botton-prev ${titlePage+"-page-pagination-botton-prev"}`}
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1}
-            >
-              &lt;
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`${page === i + 1 ? 'bg-[#403A92] text-white' : 'bg-[#FFFFFF] hover:bg-gray-300'} page-pagination-button ${titlePage+"-page-pagination-button"}`}
-                onClick={() => setPage(i + 1)}
-                disabled={page === i + 1}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className={`page-pagination-button-next ${titlePage+"-page-pagination-button-next"}`}
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          start={start}
+          end={end}
+          total={total}
+          label="abonos"
+          className={titlePage+"-page-pagination"}
+        />
       </div>
 
       {/* Panel del formulario */}
@@ -273,7 +261,7 @@ const SubscriptionPlansPage: React.FC = () => {
       />
 
       {/* Modal de Eliminar */}
-      <ModalDelete
+      <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleConfirmDelete}

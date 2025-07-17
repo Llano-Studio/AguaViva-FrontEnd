@@ -78,3 +78,8 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.error-message{
+  color: var(--acent-color-3);
+  margin-top: 15px;
+}

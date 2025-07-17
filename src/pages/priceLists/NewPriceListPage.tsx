@@ -1,13 +1,20 @@
 import React from "react";
 import PriceListForm from "../../components/priceLists/PriceListForm";
 import { useNavigate } from "react-router-dom";
-import {usePriceLists} from "../../hooks/usePriceLists";
+import { usePriceLists } from "../../hooks/usePriceLists";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/newPages.css";
 
 const NewPriceListPage: React.FC = () => {
   const navigate = useNavigate();
   const titlePage = "new-price-list";
   const { refreshPriceLists } = usePriceLists();
+  const { showSnackbar } = useSnackbar();
+
+  const handleSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    navigate("/listas-precios");
+  };
 
   return (
     <div className={`new-page-container ${titlePage+"-page-container"}`}>
@@ -24,6 +31,7 @@ const NewPriceListPage: React.FC = () => {
         isEditing={false}
         refreshPriceLists={async () => { await refreshPriceLists(); }}
         class={titlePage}
+        onSuccess={handleSuccess}
       />
     </div>
   );

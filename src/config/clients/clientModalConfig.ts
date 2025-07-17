@@ -1,3 +1,5 @@
+import { formatDateForView } from "../../utils/formateDateForView";
+
 export const clientModalConfig = [
   { label: "Nombre", accessor: "name", className: "modal-item-1", order: 0 },
   { label: "Teléfono", accessor: "phone", className: "modal-item-2", order: 1 },
@@ -8,7 +10,13 @@ export const clientModalConfig = [
   { label: "CUIT/CUIL", accessor: "taxId", className: "modal-item-4", order: 4 },
   { label: "Localidad", accessor: "locality.name", className: "modal-item-5", order: 5 },
   { label: "Zona", accessor: "zone.name", className: "modal-item-6", order: 6 },
-  { label: "Fecha de alta", accessor: "registration_date", className: "modal-item-7", order: 7 },
+  { 
+    label: "Fecha de alta", 
+    accessor: "registration_date", 
+    className: "modal-item-7", 
+    order: 7,
+    render: (value: string) => formatDateForView(value)
+  },
   { 
     label: "Tipo", 
     accessor: "type", 

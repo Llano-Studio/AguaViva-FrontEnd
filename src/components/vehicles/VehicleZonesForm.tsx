@@ -100,7 +100,6 @@ const VehicleZonesForm: React.FC<VehicleZonesFormProps> = ({
 
   return (
     <>
-      {error && <div className="error-message">{error}</div>}
       <ItemForm<VehicleZoneFormData>
         {...form}
         fields={fields}
@@ -109,6 +108,7 @@ const VehicleZonesForm: React.FC<VehicleZonesFormProps> = ({
         class="vehicle-zones"
         onFieldChange={handleFieldChangeWrapper} // <-- usa el wrapper aquí
       />
+      {error && <div className="error-message">{error}</div>}
       {loading && <div className="loading-message">Cargando...</div>}
     </>
   );
