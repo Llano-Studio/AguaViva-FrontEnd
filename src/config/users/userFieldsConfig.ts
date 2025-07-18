@@ -2,6 +2,7 @@ import { Field } from "../../components/common/ItemForm";
 import { User } from "../../interfaces/User";
 import { Column } from "../../components/common/DataTable";
 import { sortByOrder } from "../../utils/sortByOrder";
+import { renderRoleLabel } from "../../utils/roleLabels";
 
 
 // Campos del formulario de usuario (ya ordenados por order)
@@ -19,8 +20,9 @@ export const userFields = sortByOrder([
     label: "Rol", 
     type: "select",
     options: [
-      { label: "Usuario", value: "USER" },
-      { label: "Administrador", value: "ADMIN" }
+      { label: "Administrativo", value: "ADMINISTRATIVE" },
+      { label: "Superadministrador", value: "SUPERADMIN" },
+      { label: "Chofer", value: "DRIVERS" }
     ],
     validation: { required: true },
     order: 3,
@@ -55,7 +57,7 @@ export const userColumns: Column<User>[] = sortByOrder([
     header: 'Rol', 
     accessor: 'role',
     order: 3,
-    render: (value: string) => value === 'ADMIN' ? 'Administrador' : 'Usuario'
+    render: (value: string) => renderRoleLabel(value)
   },
   { 
     header: 'Activo', 

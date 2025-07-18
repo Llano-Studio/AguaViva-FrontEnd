@@ -7,8 +7,9 @@ export const userFilters = sortByOrder([
     type: "checkbox" as const,
     order: 1,
     options: [
-      { label: "Usuario", value: "USER" },
-      { label: "Administrador", value: "ADMIN" },
+      { label: "Administrativo", value: "ADMINISTRATIVE" },
+      { label: "Superadministrador", value: "SUPERADMIN" },
+      { label: "Chofer", value: "DRIVERS" }
     ],
   },
   {

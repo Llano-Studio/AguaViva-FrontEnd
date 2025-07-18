@@ -1,6 +1,7 @@
 import React from "react";
 import ImageProfile from "../../components/common/ImageProfile";
 import { sortByOrder } from "../../utils/sortByOrder";
+import { renderRoleLabel } from "../../utils/roleLabels";
 
 export const userModalConfig = sortByOrder([
   {
@@ -32,7 +33,7 @@ export const userModalConfig = sortByOrder([
     accessor: "role",
     className: "modal-item-3",
     order: 4,
-    render: (value: string) => value === "ADMIN" ? "Administrador" : "Usuario",
+    render: (value: string) => renderRoleLabel(value)
   },
   {
     label: "Estado",

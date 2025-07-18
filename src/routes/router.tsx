@@ -20,6 +20,7 @@ const ResetPasswordPage = React.lazy(() => import("../pages/resetPassword/ResetP
 const ZonesPage = React.lazy(() => import("../pages/zones/ZonesPage"));
 const NewZonePage = React.lazy(() => import("../pages/zones/NewZonePage"));
 const OrdersPage = React.lazy(() => import("../pages/orders/OrdersPage"));
+const NewOrderPage = React.lazy(() => import("../pages/orders/NewOrderPage"));
 const SubscriptionPlansPage = React.lazy(() => import("../pages/subscriptionPlans/SubscriptionPlansPage"));
 const NewSubscriptionPlanPage = React.lazy(() => import("../pages/subscriptionPlans/NewSubscriptionPlanPage"));
 const PriceLists = React.lazy(() => import("../pages/priceLists/PriceListsPage"));
@@ -50,6 +51,7 @@ const AppRouter: React.FC = () => {
             <Route index element={<Navigate to="/dashboard" />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="pedidos" element={<OrdersPage />} />
+            <Route path="pedidos/nuevo-pedido" element={<NewOrderPage />} />
             <Route path="clientes" element={<ClientsPage />} />
             <Route path="clientes/nuevo-cliente" element={<NewClientPage/>} />
             <Route path="entregas" element={<DeliveriesPage />} />

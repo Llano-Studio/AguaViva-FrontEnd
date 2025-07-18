@@ -214,7 +214,7 @@ const ClientsPage: React.FC = () => {
             GREEN: "#E9FFF6",
             YELLOW: "#FFFCDA",
             RED: "#FFDFDF",
-            NONE: "#E9FFF6",
+            NONE: "#FFFFFF",
           }}
           semaphoreActive={semaphoreOn}
         />

@@ -2,14 +2,8 @@ import React from 'react';
 import { EditButton, DeleteButton, ViewButton } from './ActionButtons';
 import SortBy from './SortBy';
 import { getSemaphoreStyle } from './SemaphoreStatus';
+import {Column} from '../../interfaces/Common';
 import '../../styles/css/components/common/dataTable.css';
-
-export interface Column<T> {
-  header: string;
-  accessor: keyof T | string;
-  render?: (value: any, row: T) => React.ReactNode;
-  order?: number;
-}
 
 interface DataTableProps<T extends { id: number }> {
   data: T[];

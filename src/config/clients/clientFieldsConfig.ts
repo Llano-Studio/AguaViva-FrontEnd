@@ -1,6 +1,6 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field } from "../../interfaces/Common";
 import { CreateClientDTO, Client } from "../../interfaces/Client";
-import { Column } from "../../components/common/DataTable";
+import { Column } from "../../interfaces/Common";
 import { sortByOrder } from "../../utils/sortByOrder";
 import { dependentLocationFields } from "../common/dependentLocationFields";
 
@@ -55,10 +55,10 @@ export const clientColumns: Column<Client>[] = sortByOrder([
     accessor: 'payment_semaphore_status',
     order: 9,
     render: (value: string) => {
-      if (value === "GREEN") return "Verde";
-      if (value === "YELLOW") return "Amarillo";
-      if (value === "RED") return "Rojo";
-      if (value === "NONE") return "Gris";
+      if (value === "GREEN") return "Al dia";
+      if (value === "YELLOW") return "Atrasado";
+      if (value === "RED") return "Vencido";
+      if (value === "NONE") return "-";
       return value;
     }
   }

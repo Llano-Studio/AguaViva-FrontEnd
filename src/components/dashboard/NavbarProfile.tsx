@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "../../styles/css/components/dashboard/navbarProfile.css";
 import ImageProfile from "../common/ImageProfile";
+import { renderRoleLabel } from "../../utils/roleLabels";
 
 const NavbarProfile: React.FC = () => {
   const usuario = useAuth().user;
@@ -28,10 +29,10 @@ const NavbarProfile: React.FC = () => {
     <>
       <NavLink to="/perfil" className="navbar-profile">
         <ImageProfile src={usuario?.profileImageUrl} alt="Usuarios" className="navbar-img-profile" />
-        <div className="navbar-datos-profile" ref={dropdownRef}>
+        <div className="navbar-datos-profile" ref={dropdownRef} style={{ position: "relative" }}>
           <div className="navbar-datos-profile-container-1">
             <p className="navbar-name">{usuario?.name}</p>
-            <p className="navbar-role">{usuario?.role}</p>
+            <p className="navbar-role">{renderRoleLabel ? renderRoleLabel(usuario?.role ?? "") : usuario?.role}</p>
           </div>
           <div className="navbar-datos-profile-container-2">
             <button
@@ -46,20 +47,18 @@ const NavbarProfile: React.FC = () => {
               <img src="/assets/icons/arrow-down-white.svg" alt="Volver" className="navbar-profile-dropdown-icon" />
             </button>
           </div>
-          {open && (
-            <div className="navbar-profile-dropdown">
-              <button
-                className="navbar-profile-logout-btn"
-                onClick={e => {
-                  e.preventDefault();
-                  logout();
-                }}
-                type="button"
-              >
-                Cerrar sesión
-              </button>
-            </div>
-          )}
+          <div className={`navbar-profile-dropdown${open ? " show" : ""}`}>
+            <button
+              className="navbar-profile-logout-btn"
+              onClick={e => {
+                e.preventDefault();
+                logout();
+              }}
+              type="button"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </NavLink>
     </>
