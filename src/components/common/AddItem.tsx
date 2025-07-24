@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import SearchBar from "./SearchBar";
+import SearchBarWithDropdown from "./SearchBarWithDropdown";
 import "../../styles/css/components/common/addItem.css";
 
 interface AddItemProps<T = any, D = any> {
@@ -37,6 +38,10 @@ export function AddItem<T = any, D = any>({
   const justSelectedRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const skipNextSearchRef = useRef(false);
+
+  const fetchAllOptions = async () => {
+    return onSearch(""); // Puedes personalizar esto según el módulo
+  };
 
   // Búsqueda reactiva
   useEffect(() => {
@@ -113,7 +118,9 @@ const handleAdd = () => {
       <h4 className="addItem-title">{title}</h4>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <div className="addItem-search-container">
-          <SearchBar
+
+          {/* Nuevo: botón para desplegar todas las opciones del módulo */}
+          <SearchBarWithDropdown
             value={query}
             onChange={val => {
               setQuery(val);
@@ -123,7 +130,13 @@ const handleAdd = () => {
                 justSelectedRef.current = false;
               }
             }}
+            fetchOptions={fetchAllOptions}
+            renderOption={renderItem}
+            onOptionSelect={item => {
+              handleSelect(item);
+            }}
             placeholder={placeholder}
+            class="addItem"
           />
           {showDropdown && results.length > 0 && (
             <ul className="addItem-dropdown">

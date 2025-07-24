@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { CreateOrderOneOffDTO, OrderOneOff } from "../../interfaces/OrderOneOff";
-import { ItemForm } from "../common/ItemForm";
-import { orderOneOffFormFields } from "../../config/orders/orderFieldsConfig";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 
@@ -24,31 +22,23 @@ const getInitialValues = (
     return {
       person_id: orderToEdit.person_id,
       sale_channel_id: orderToEdit.sale_channel_id,
-      price_list_id: undefined, // No existe en OrderOneOff, lo dejamos undefined
-      delivery_address: orderToEdit.person?.address ?? "",
-      locality_id: orderToEdit.locality_id,
-      zone_id: orderToEdit.zone_id,
-      purchase_date: orderToEdit.purchase_date,
+      delivery_address: orderToEdit.delivery_address,
       notes: orderToEdit.notes ?? "",
-      payment_method_id: orderToEdit.payment_method_id,
-      items: [
-        {
-          product_id: orderToEdit.product_id,
-          quantity: orderToEdit.quantity,
-        },
-      ],
+      paid_amount: orderToEdit.paid_amount,
+      items: orderToEdit.items?.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price_list_id: item.price_list_id,
+        notes: item.notes,
+      })) ?? [],
     };
   }
   return {
     person_id: 0,
     sale_channel_id: 0,
-    price_list_id: undefined,
     delivery_address: "",
-    locality_id: 0,
-    zone_id: 0,
-    purchase_date: new Date().toISOString().split("T")[0],
     notes: "",
-    payment_method_id: undefined,
+    paid_amount: 0,
     items: [],
   };
 };
@@ -74,6 +64,11 @@ const OrderOneOffForm: React.FC<OrderOneOffFormProps> = ({
 
   const form = useForm<CreateOrderOneOffDTO>({
     defaultValues: initialValues,
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "items",
   });
 
   const handleSubmit = async (values: CreateOrderOneOffDTO | FormData) => {
@@ -126,13 +121,64 @@ const OrderOneOffForm: React.FC<OrderOneOffFormProps> = ({
 
   return (
     <>
-      <ItemForm<CreateOrderOneOffDTO>
-        {...form}
-        onSubmit={handleSubmit}
-        onCancel={onCancel}
-        fields={orderOneOffFormFields()}
-        class={classForm}
-      />
+      <form onSubmit={form.handleSubmit(handleSubmit)} className={classForm}>
+        <div>
+          <label>Persona ID</label>
+          <input type="number" {...form.register("person_id", { required: true })} />
+        </div>
+        <div>
+          <label>Canal de venta</label>
+          <input type="number" {...form.register("sale_channel_id", { required: true })} />
+        </div>
+        <div>
+          <label>Dirección de entrega</label>
+          <input type="text" {...form.register("delivery_address", { required: true })} />
+        </div>
+        <div>
+          <label>Notas</label>
+          <input type="text" {...form.register("notes")} />
+        </div>
+        <div>
+          <label>Monto pagado</label>
+          <input type="number" step="0.01" {...form.register("paid_amount", { required: true })} />
+        </div>
+        <div>
+          <label>Productos</label>
+          {fields.map((field, idx) => (
+            <div key={field.id} style={{ border: "1px solid #ccc", margin: 4, padding: 4 }}>
+              <input
+                type="number"
+                placeholder="Producto ID"
+                {...form.register(`items.${idx}.product_id`, { required: true })}
+              />
+              <input
+                type="number"
+                placeholder="Cantidad"
+                {...form.register(`items.${idx}.quantity`, { required: true })}
+              />
+              <input
+                type="number"
+                placeholder="Lista de precio ID"
+                {...form.register(`items.${idx}.price_list_id`)}
+              />
+              <input
+                type="text"
+                placeholder="Notas del item"
+                {...form.register(`items.${idx}.notes`)}
+              />
+              <button type="button" onClick={() => remove(idx)}>Eliminar</button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => append({ product_id: 0, quantity: 1, price_list_id: undefined, notes: "" })}
+          >
+            Agregar producto
+          </button>
+        </div>
+        <button type="submit">Guardar</button>
+        <button type="button" onClick={onCancel}>Cancelar</button>
+      </form>
       {error && <div className="error-message">{error}</div>}
 
       <ModalUpdateConfirm

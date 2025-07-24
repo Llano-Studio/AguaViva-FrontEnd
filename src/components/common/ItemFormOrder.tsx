@@ -6,7 +6,7 @@ import '../../styles/css/components/common/itemForm.css';
 import SearchBarWithDropdown from './SearchBarWithDropdown';
 
 // Props del componente
-interface ItemFormProps<T extends FieldValues> extends UseFormReturn<T> {
+interface ItemFormOrderProps<T extends FieldValues> extends UseFormReturn<T> {
   onSubmit: (values: T | FormData) => void;
   onCancel?: () => void; 
   fields: Field<T>[];
@@ -18,7 +18,7 @@ interface ItemFormProps<T extends FieldValues> extends UseFormReturn<T> {
   selectFieldProps?: Record<string, any>;
 }
 
-export function ItemForm<T extends FieldValues>({
+export function ItemFormOrder<T extends FieldValues>({
   onSubmit,
   onCancel,
   fields,
@@ -33,8 +33,8 @@ export function ItemForm<T extends FieldValues>({
   hideActions = false,
   searchFieldProps = {},
   selectFieldProps = {},
-}: ItemFormProps<T>) {
-  const formRef = useRef<HTMLFormElement>(null);
+}: ItemFormOrderProps<T>) {
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Para preview de imagen (opcional)
   const filePreviews = fields
@@ -264,29 +264,17 @@ export function ItemForm<T extends FieldValues>({
 
   const customSubmit = (data: any) => {
     if (hasFileField) {
-      if (!formRef.current) return;
-      const formData = new FormData(formRef.current);
-
-      // Asegura que los checkboxes estén presentes como "true"/"false"
-      fields.forEach((field) => {
-        if (field.type === "checkbox") {
-          formData.set(field.name as string, data[field.name] ? "true" : "false");
-        }
-      });
-
-      onSubmit(formData);
+      // No se soporta FormData aquí, pero se deja por compatibilidad
+      onSubmit(data);
     } else {
       onSubmit(data);
     }
   };
 
   return (
-    <form
+    <div
       ref={formRef}
-      onSubmit={handleSubmit(customSubmit)}
       className={`form ${classForm ? classForm+"-form" : ""}`}
-      encType={hasFileField ? "multipart/form-data" : undefined}
-      autoComplete="off"
     >
       {fields.map((field) => {
         const fieldName = String(field.name);
@@ -305,7 +293,6 @@ export function ItemForm<T extends FieldValues>({
           </div>
         );
       })}
-      {/* Renderiza inputs custom si se pasan como prop */}
       {renderInputs && renderInputs({}, () => {})}
       {!hideActions && (
         <div className={`form-actions ${classForm ? classForm+"-form-actions" : ""}`}>
@@ -319,13 +306,14 @@ export function ItemForm<T extends FieldValues>({
             </button>
           )}
           <button
-            type="submit"
+            type="button"
             className={`form-submit ${classForm ? classForm+"-form-submit" : ""}`}
+            onClick={handleSubmit(customSubmit)}
           >
-            Guardar
+            Agregar artículo
           </button>
         </div>
       )}
-    </form>
+    </div>
   );
 }

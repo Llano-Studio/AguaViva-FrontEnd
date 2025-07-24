@@ -60,6 +60,30 @@ export interface CreateOrderDTO {
   order_type: OrderType;
   status: OrderStatus;
   notes?: string;
-  items: { product_id: number; quantity: number }[];
+  items: OrderItemInput[];
+}
+
+export interface OrderItemInput {
+  product_id: number;
+  quantity: number;
   price_list_id?: number;
+  notes?: string;
+}
+
+export interface CreateOrderFormDTO extends CreateOrderDTO {
+  customer_address?: string;
+  customer_id_display?: number;
+  zone?: string;
+  mobile?: string;
+}
+
+export interface OrderItemInputForm extends OrderItemInput {
+  product_name?: string;
+  abono_id?: string;
+  abono_name?: string;
+  price_unit?: string;
+  price_total?: string;
+  image_url?: string;
+  is_returnable?: boolean;
+  price_list_name?: string;
 }

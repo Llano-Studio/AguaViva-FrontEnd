@@ -2,7 +2,7 @@ import { httpAdapter } from "./httpAdapter";
 import { OrderOneOff, OrdersOneOffResponse, CreateOrderOneOffDTO } from "../interfaces/OrderOneOff";
 
 export class OrderOneOffService {
-  private ordersUrl = "/orders/one-off";
+  private ordersUrl = "/multi-one-off-purchases";
 
   async getOrders(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<OrdersOneOffResponse> {
     const safeParams = {
@@ -29,6 +29,7 @@ export class OrderOneOffService {
     }
   }
 
+  // Si tu backend soporta update y delete, ajusta los endpoints:
   async updateOrder(id: number, order: Partial<CreateOrderOneOffDTO>): Promise<OrderOneOff | null> {
     try {
       return await httpAdapter.patch<OrderOneOff>(order, `${this.ordersUrl}/${id}`);

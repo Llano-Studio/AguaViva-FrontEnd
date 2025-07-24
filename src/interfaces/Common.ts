@@ -9,6 +9,7 @@ export interface Field<T> {
   multiple?: boolean;
   value?: any;
   onChange?: (name: string, value: any) => void;
+  disabled?: boolean;
 }
 
 // Validaciones opcionales
@@ -30,7 +31,8 @@ export type FieldType =
   | "password"
   | "email"
   | "multiselect"
-  | "time";
+  | "time"
+  | "search";
 
 export interface Column<T> {
   header: string;

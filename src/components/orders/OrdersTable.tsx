@@ -23,6 +23,7 @@ const mapRowsWithId = (rows: OrderTableRow[]) =>
     scheduled_delivery_date: (row as any).scheduled_delivery_date ?? "",
     status: (row as any).status ?? (row as any).delivery_status,
     total_amount: (row as any).total_amount ?? "",
+    // Puedes agregar más campos si quieres mostrar price_list_id o notes en la tabla
   }));
 
 const OrdersTable: React.FC<Props> = ({
