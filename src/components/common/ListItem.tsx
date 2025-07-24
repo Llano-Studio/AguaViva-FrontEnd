@@ -28,7 +28,7 @@ export function ListItem<T>({
   onEdit,
   onView,
 }: ListItemProps<T>) {
-  if (!items.length) return <div>No hay elementos para mostrar.</div>;
+  if (!items.length) return <div className="listItem-empty">No hay elementos para mostrar.</div>;
 
   const handleDeleteClick = (item: T) => {
     if (onRemove) {

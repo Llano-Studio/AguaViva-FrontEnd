@@ -36,12 +36,6 @@ export const priceListItemListColumns = sortByOrder([
     order: 3,
     render: (item: PriceListItem) => item.product?.volume_liters ?? "-",
   },
-  // {
-  //   header: "Precio producto",
-  //   accessor: "product_price",
-  //   order: 4,
-  //   render: (item: PriceListItem) => item.product?.price ? `$${item.product.price}` : "-",
-  // },
   {
     header: "Precio de lista",
     accessor: "unit_price",

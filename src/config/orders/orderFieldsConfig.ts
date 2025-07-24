@@ -55,6 +55,10 @@ export const orderPedidoFields: Field<CreateOrderFormDTO>[] = [
   { name: "delivery_time", label: "Horario", type: "text", validation: { required: false }, order: 4 },
 ];
 
+export const orderNotesFields: Field<CreateOrderFormDTO>[] = [
+  { name: "notes", label: "Observaciones", type: "textarea", validation: { required: false }, order: 1 },
+];
+
 // Campos para formulario de órdenes One-Off (multi-one-off-purchases)
 export const orderOneOffFormFields = (): Field<CreateOrderOneOffDTO>[] => sortByOrder([
   { name: "person_id", label: "Cliente", type: "search", validation: { required: true }, order: 0 },

@@ -82,7 +82,7 @@ export interface OrderItemInputForm extends OrderItemInput {
   abono_id?: string;
   abono_name?: string;
   price_unit?: string;
-  price_total?: string;
+  price_total_item?: string;
   image_url?: string;
   is_returnable?: boolean;
   price_list_name?: string;

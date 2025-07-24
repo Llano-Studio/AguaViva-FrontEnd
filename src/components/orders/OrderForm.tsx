@@ -6,8 +6,11 @@ import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { useFormOrder } from "../../hooks/useFormOrder";
 import { ItemFormOrder } from "../common/ItemFormOrder";
-import { orderClientFields, orderPedidoFields, orderArticleFields } from "../../config/orders/orderFieldsConfig";
-import { calculatePriceUnitAndTotal } from "../../utils/calculatePriceProductUnitAndTotal";
+import { orderNotesFields } from "../../config/orders/orderFieldsConfig";
+import { OrderClientSection } from "./OrderClientSection";
+import { OrderPedidoSection } from "./OrderPedidoSection";
+import { OrderArticlesSection } from "./OrderArticlesSection";
+import { calculatePriceTotalOrder } from "../../utils/calculatePriceTotalOrder";
 import "../../styles/css/components/orders/orderForm.css";
 
 interface OrderFormProps {
@@ -19,8 +22,6 @@ interface OrderFormProps {
   class?: string;
   onSuccess?: (msg: string) => void;
 }
-
-const initialArticle = { product_id: 0, quantity: 1, price_list_id: 1, notes: "", abono_id: "" };
 
 const OrderForm: React.FC<OrderFormProps> = ({
   onSubmit,
@@ -38,7 +39,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
   // Cliente seleccionado
   const [selectedClient, setSelectedClient] = useState<any>(null);
-  const [selectedMobileId, setSelectedMobileId] = useState<number | null>(null);
 
   // Formulario articulos
   const [selectedAbonoName, setSelectedAbonoName] = useState<string>("-");
@@ -48,21 +48,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
   // Hook de lógica
   const {
-    fetchClients,
-    fetchProducts,
-    fetchProductById,
     fetchClientDetails,
     fetchZoneMobiles,
-    fetchSubscriptionsByCustomer,
-    fetchProductsBySubscriptionPlan,
-    fetchPriceLists, 
-    clientDetails,
-    zoneMobiles,
-    clearClientAndMobiles,
   } = useFormOrder();
-
-  // Artículo temporal para agregar
-  const [articleData, setArticleData] = useState<OrderItemInput & { abono?: string }>(initialArticle);
 
   // Artículos agregados
   const [articles, setArticles] = useState<OrderItemInputForm[]>(orderToEdit?.order_item?.map((oi: any) => ({
@@ -75,7 +63,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
     abono_id: oi.abono_id || "",
     abono_name: oi.abono_name || "",
     price_unit: oi.price_unit || "0",
-    price_total: oi.price_total || "0",
+    price_total_item: oi.price_total_item || "0",
     image_url: oi.image_url || "",
     is_returnable: oi.is_returnable || false,
   })) ?? []);
@@ -102,106 +90,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
   });
 
-  // Form para artículos
-  const articleForm = useForm<typeof articleData>({
-    defaultValues: initialArticle
-  });
-
   useEffect(() => {
-    articleForm.setValue("price_list_id", 1);
-    fetchPriceLists().then(lists => {
-      const general = lists.find((pl: any) => pl.price_list_id === 1);
-      if (general) {
-        setSelectedPriceListName(general.name);
-      } else {
-        setSelectedPriceListName("");
-      }
-    });
-  }, []);
-
-
-  // Handler para seleccionar cliente
-  const handleClientSelect = async (client: any) => {
-    setSelectedClient(client);
-    console.log("Cliente seleccionado:", client);
-    form.setValue("customer_id", client.person_id);
-    form.setValue("customer_address", client.address || "");
-    form.setValue("customer_id_display", client.person_id || "");
-
-    // Traer detalles del cliente y móviles de la zona
-    const details = await fetchClientDetails(client.person_id);
-    console.log("Detalles del cliente:", details);
-    if (details?.zone?.zone_id) {
-      form.setValue("zone", details.zone.name || "");
-      const mobiles = await fetchZoneMobiles(details.zone.zone_id);
-      if (mobiles.length > 0) {
-        console.log("Móviles de la zona:", mobiles);
-        setSelectedMobileId(mobiles[0].id);
-        form.setValue("mobile", String(mobiles[0].id));
-      } else {
-        setSelectedMobileId(null);
-        form.setValue("mobile", "");
-      }
-    } else {
-      form.setValue("zone", "");
-      setSelectedMobileId(null);
-      form.setValue("mobile", "");
-    }
-  };
-
-  // Handler para agregar artículo
-  const handleAddArticle = async (values: FormData | (OrderItemInputForm & { abono?: string })) => {
-    if (values instanceof FormData) return;
-    if (!values.product_id || !values.quantity) return;
-
-    const product = await fetchProductById(values.product_id);
-
-    let price_unit = "0";
-    let price_total = "0";
-    if (!values.abono) {
-      const priceData = await calculatePriceUnitAndTotal(
-        values.product_id,
-        values.price_list_id ?? 1,
-        values.quantity
-      );
-      price_unit = priceData.price_unit || "0";
-      price_total = priceData.price_total || "0";
-    }
-
-    // Busca los nombres
-    const product_name = product?.description || "";
-    const price_list = await fetchPriceLists();
-    const price_list_name = price_list.find((pl: any) => pl.price_list_id === values.price_list_id)?.name || "";
-    const abono_name = selectedAbonoName || "";
-
-    const newArticle = {
-      product_id: values.product_id,
-      product_name,
-      quantity: values.quantity,
-      price_list_id: values.price_list_id,
-      price_list_name,
-      notes: values.notes,
-      abono: values.abono || "",
-      abono_name,
-      price_unit,
-      price_total,
-      image_url: product?.image_url || "",
-      is_returnable: product?.is_returnable || false,
-    };
-
-    setArticles(prev => [...prev, newArticle]);
-    articleForm.reset(initialArticle);
-    setSelectedAbonoName("-");
-    setAbonoSelected(null);
-    setSelectedProductName("");
-  };
-
-  // Handler para eliminar artículo
-  const handleRemoveArticle = (item: OrderItemInput) => {
-    setArticles(prev => prev.filter(a =>
-      !(a.product_id === item.product_id && a.quantity === item.quantity && a.price_list_id === item.price_list_id && a.notes === item.notes)
-    ));
-  };
+    const total = calculatePriceTotalOrder(articles);
+    form.setValue("total_amount", total);
+  }, [articles]);
 
   // Handler para submit
   const handleSubmit = async (values: CreateOrderDTO | FormData) => {
@@ -251,164 +143,46 @@ const OrderForm: React.FC<OrderFormProps> = ({
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className={classForm}>
       {/* Datos del cliente */}
-      <fieldset className="order-section">
-        <legend>Datos del cliente</legend>
-        <ItemFormOrder
-          {...form}
-          fields={orderClientFields}
-          hideActions
-          onSubmit={() => {}}
-          searchFieldProps={{
-            customer_id: {
-              value: selectedClient?.name || "",
-              fetchOptions: fetchClients,
-              renderOption: (client: any) => <span>{client.name}</span>,
-              onOptionSelect: handleClientSelect,
-              placeholder: "Buscar cliente...",
-              class: "order"
-            }
-          }}
-        />
-      </fieldset>
+      <OrderClientSection
+        form={form}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
+      />
 
       {/* Datos del pedido */}
-      <fieldset className="order-section">
-        <legend>Datos del pedido</legend>
-        <ItemFormOrder
-          {...form}
-          fields={orderPedidoFields}
-          hideActions
-          onSubmit={() => {}}
-          selectFieldProps={{
-            mobile: {
-              options: zoneMobiles.map(mobile => ({
-                label: mobile.name || mobile.plate,
-                value: String(mobile.id)
-              })),
-              value: form.watch("mobile") || "",
-              onChange: (e: React.ChangeEvent<HTMLSelectElement>) => {
-                setSelectedMobileId(Number(e.target.value));
-                form.setValue("mobile", e.target.value);
-              }
-            }
-          }}
-        />
-      </fieldset>
+      <OrderPedidoSection
+        form={form}
+      />
 
       {/* Sección Datos de artículos */}
-      <fieldset className="order-section">
-        <legend>Datos de artículos</legend>
-        <ItemFormOrder<OrderItemInput & { abono_id?: string }>
-          {...articleForm}
-          fields={
-            abonoSelected === null
-              ? orderArticleFields // Mostrar todos los campos, incluyendo price_list_id
-              : orderArticleFields.filter(f => f.name !== "price_list_id") // Ocultar price_list_id si hay abono seleccionado
-          }
-          searchFieldProps={{
-            abono: {
-              value: selectedAbonoName,
-              fetchOptions: async (query: string) => {
-                if (!selectedClient?.person_id) return [{ isNone: true, subscription_plan: { name: "-" } }];
-                const subs = await fetchSubscriptionsByCustomer(selectedClient.person_id, query);
-                return [{ isNone: true, subscription_plan: { name: "-" } }, ...subs];
-              },
-              renderOption: (sub: any) => <span>{sub.subscription_plan?.name}</span>,
-              onOptionSelect: (sub: any) => {
-                if (sub.isNone) {
-                  articleForm.setValue("abono", "");
-                  setSelectedAbonoName("-");
-                  setAbonoSelected(null);
-                } else {
-                  articleForm.setValue("abono", sub.subscription_plan?.subscription_plan_id);
-                  setSelectedAbonoName(sub.subscription_plan?.name || "");
-                  setAbonoSelected(sub.subscription_plan?.subscription_plan_id);
-                }
-              },
-              placeholder: "Seleccionar abono...",
-              class: "order"
-            },
-            product_id: {
-              value: selectedProductName || "",
-              fetchOptions: async (query: string) => {
-                if (abonoSelected !== null) {
-                  const products = await fetchProductsBySubscriptionPlan(abonoSelected);
-                  // Filtra por query si quieres
-                  if (query) {
-                    return products.filter((p: any) =>
-                      p.product_description.toLowerCase().includes(query.toLowerCase())
-                    );
-                  }
-                  return products;
-                } else {
-                  return await fetchProducts(query);
-                }
-              },
-              renderOption: (product: any) => <span>{product.product_description || product.description}</span>,
-              onOptionSelect: (product: any) => {
-                articleForm.setValue("product_id", product.product_id);
-                setSelectedProductName(product.product_description || product.description || "");
-              },
-              placeholder: "Buscar artículo...",
-              class: "order"
-            },
-            price_list_id: {
-              value: selectedPriceListName,
-              fetchOptions: async (query: string) => {
-                const lists = await fetchPriceLists(query);
-                // Filtra las listas que incluyan el producto seleccionado
-                if (articleForm.watch("product_id")) {
-                  const filtered = lists.filter((pl: any) =>
-                    pl.price_list_item?.some((item: any) => item.product_id === articleForm.watch("product_id"))
-                  );
-                  return filtered;
-                }
-                return lists;
-              },
-              renderOption: (pl: any) => <span>{pl.name}</span>,
-              onOptionSelect: (pl: any) => {
-                articleForm.setValue("price_list_id", pl.price_list_id);
-                setSelectedPriceListName(pl.name || "");
-              },
-              placeholder: "Buscar lista de precios...",
-              class: "order"
-            }
-          }}
-          onSubmit={handleAddArticle}
-          hideActions={false}
-        />
-        <div style={{ marginTop: 16 }}>
-          <ListItem
-            items={articles}
-            columns={[
-              { header: "", accessor: "image_url" },
-              { header: "Artículo", accessor: "product_name" },
-              { header: "Cantidad", accessor: "quantity" },
-              { header: "Precio Unidad", accessor: "price_unit" },
-              { 
-                header: "Abono", 
-                accessor: "abono_name",
-                render: (item) => item.abono_id && item.abono_id !== "" ? item.abono_id : "-"
-              },
-              {
-                header: "Retornable",
-                accessor: "is_returnable",
-                render: (item) => item.is_returnable ? "Sí" : "No"
-              },
-              { header: "Lista de precios", accessor: "price_list_name" },
-              { header: "Precio Total", accessor: "price_total"},
-            ]}
-            getKey={item => `${item.product_id}-${item.price_list_id ?? ""}-${item.notes ?? ""}`}
-            onRemove={handleRemoveArticle}
-          />
-        </div>
-      </fieldset>
+      <OrderArticlesSection
+        form={form}
+        setArticles={setArticles}
+        articles={articles}
+        abonoSelected={abonoSelected}
+        selectedAbonoName={selectedAbonoName}
+        selectedClient={selectedClient}
+        setSelectedAbonoName={setSelectedAbonoName}
+        setAbonoSelected={setAbonoSelected}
+        selectedProductName={selectedProductName}
+        setSelectedProductName={setSelectedProductName}
+        selectedPriceListName={selectedPriceListName}
+        setSelectedPriceListName={setSelectedPriceListName}
+      />
 
+      <ItemFormOrder
+        {...form}
+        fields={orderNotesFields}
+        hideActions={true}
+        onSubmit={() => {}}
+        class="notes-order"
+      />
+      
       {error && <div className="error-message">{error}</div>}
 
       <div className="order-actions">
-        <button type="submit">Guardar</button>
-        <button type="button" onClick={onCancel}>Cancelar</button>
+        <button type="submit" className="order-actions-button-submit">Agregar pedido</button>
+        <button type="button" onClick={onCancel} className="order-actions-button-cancel">Cancelar</button>
       </div>
 
       <ModalUpdateConfirm
@@ -418,6 +192,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         content="pedido"
         genere="M"
       />
+
     </form>
   );
 };
