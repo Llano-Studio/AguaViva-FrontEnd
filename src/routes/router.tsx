@@ -4,7 +4,7 @@ import DashboardLayout from "../components/dashboard/DashboardLayout";
 import PrivateRoute from "./PrivateRoute";
 
 // Lazy loaded pages
-const Dashboard = React.lazy(() => import("../pages/dashboard/Dashboard"));
+const DashboardPage = React.lazy(() => import("../pages/dashboard/DashboardPage"));
 const UsersPage = React.lazy(() => import("../pages/users/UsersPage"));
 const ClientsPage = React.lazy(() => import("../pages/clients/ClientsPage"));
 const NewClientPage = React.lazy(() => import("../pages/clients/NewClientPage"));
@@ -49,7 +49,7 @@ const AppRouter: React.FC = () => {
             }
           >
             <Route index element={<Navigate to="/dashboard" />} />
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="dashboard" element={<DashboardPage />} />
             <Route path="pedidos" element={<OrdersPage />} />
             <Route path="pedidos/nuevo-pedido" element={<NewOrderPage />} />
             <Route path="clientes" element={<ClientsPage />} />

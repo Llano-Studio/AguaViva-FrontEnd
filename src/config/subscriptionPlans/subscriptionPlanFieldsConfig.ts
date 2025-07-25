@@ -1,6 +1,5 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field, Column } from "../../interfaces/Common";
 import { SubscriptionPlan, CreateSubscriptionPlanDTO } from "../../interfaces/SubscriptionPlan";
-import { Column } from "../../components/common/DataTable";
 import { sortByOrder } from "../../utils/sortByOrder";
 
 // Campos del formulario de abono (ordenados por order)

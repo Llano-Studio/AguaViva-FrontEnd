@@ -1,6 +1,5 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field, Column } from "../../interfaces/Common";
 import { User } from "../../interfaces/User";
-import { Column } from "../../components/common/DataTable";
 import { sortByOrder } from "../../utils/sortByOrder";
 import { renderRoleLabel } from "../../utils/roleLabels";
 

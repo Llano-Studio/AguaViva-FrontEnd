@@ -1,6 +1,5 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field, Column } from "../../interfaces/Common";
 import { CreatePriceListDTO } from "../../interfaces/PriceList";
-import { Column } from "../../components/common/DataTable";
 import { PriceList } from "../../interfaces/PriceList";
 import { sortByOrder } from "../../utils/sortByOrder";
 import { formatDateForView } from "../../utils/formateDateForView";

@@ -1,6 +1,5 @@
-import { Field } from "../../interfaces/Common";
+import { Field, Column } from "../../interfaces/Common";
 import { CreateClientDTO, Client } from "../../interfaces/Client";
-import { Column } from "../../interfaces/Common";
 import { sortByOrder } from "../../utils/sortByOrder";
 import { dependentLocationFields } from "../common/dependentLocationFields";
 

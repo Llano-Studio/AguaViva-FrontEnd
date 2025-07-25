@@ -1,4 +1,4 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field } from "../../interfaces/Common";
 import { dependentLocationFields } from "../common/dependentLocationFields";
 
 export interface VehicleZoneFormData {

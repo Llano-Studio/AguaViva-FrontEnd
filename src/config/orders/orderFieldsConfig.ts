@@ -2,7 +2,7 @@ import { Column, Field } from "../../interfaces/Common";
 import { Order, CreateOrderFormDTO } from "../../interfaces/Order";
 import { OrderOneOff, CreateOrderOneOffDTO } from "../../interfaces/OrderOneOff";
 import { sortByOrder } from "../../utils/sortByOrder";
-
+import { formatDateForView } from "../../utils/formateDateForView"; // <-- Agrega este import
 
 // Campos para formulario de órdenes regulares (Order)
 export const orderFormFields = (): Field<CreateOrderFormDTO>[] => sortByOrder([
@@ -74,8 +74,18 @@ export const orderTableColumns: Column<{ [key: string]: any }>[] = sortByOrder([
   { header: "ID", accessor: "id", order: 0 },
   { header: "Cliente", accessor: "customer.name", order: 1 },
   { header: "Tipo", accessor: "order_type", order: 2 },
-  { header: "Fecha", accessor: "order_date", order: 3 },
-  { header: "Entrega", accessor: "scheduled_delivery_date", order: 4 },
+  { 
+    header: "Fecha", 
+    accessor: "order_date", 
+    order: 3,
+    render: (value: string) => formatDateForView(value)
+  },
+  { 
+    header: "Entrega", 
+    accessor: "scheduled_delivery_date", 
+    order: 4,
+    render: (value: string) => formatDateForView(value)
+  },
   { header: "Estado", accessor: "status", order: 5 },
   { header: "Total", accessor: "total_amount", order: 6 },
 ]);

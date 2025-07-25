@@ -1,6 +1,5 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field, Column } from "../../interfaces/Common";
 import { CreateProductDTO, Product } from "../../interfaces/Product";
-import { Column } from "../../components/common/DataTable";
 import { sortByOrder } from "../../utils/sortByOrder";
 
 // Función para generar los campos del formulario de productos

@@ -10,6 +10,7 @@ interface Props {
   sortBy?: string[];
   sortDirection?: ("asc" | "desc")[];
   onSort?: (column: string) => void;
+  onView?: (order: OrderTableRow) => void;
 }
 
 // Mapea las filas para agregar la propiedad 'id' y normalizar los campos requeridos por DataTable
@@ -35,6 +36,7 @@ const OrdersTable: React.FC<Props> = ({
   sortBy,
   sortDirection,
   onSort,
+  onView,
 }) => {
   const mappedOrders = mapRowsWithId(orders);
 
@@ -54,6 +56,7 @@ const OrdersTable: React.FC<Props> = ({
       sortBy={sortBy}
       sortDirection={sortDirection}
       onSort={onSort}
+      onView={onView}
     />
   );
 };

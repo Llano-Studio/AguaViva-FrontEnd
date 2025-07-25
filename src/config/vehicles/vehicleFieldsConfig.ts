@@ -1,6 +1,5 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field, Column } from "../../interfaces/Common";
 import { Vehicle, CreateVehicleDTO } from "../../interfaces/Vehicle";
-import { Column } from "../../components/common/DataTable";
 import { sortByOrder } from "../../utils/sortByOrder";
 
 // Campos del formulario de vehículo

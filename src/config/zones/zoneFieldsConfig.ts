@@ -1,6 +1,5 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field, Column } from "../../interfaces/Common";
 import { CreateZoneDTO } from "../../interfaces/Zones";
-import { Column } from "../../components/common/DataTable";
 import { Zone } from "../../interfaces/Locations";
 import { sortByOrder } from "../../utils/sortByOrder";
 import { dependentLocationFields } from "../common/dependentLocationFields";

@@ -1,4 +1,4 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field } from "../../interfaces/Common";
 
 export function dependentLocationFields<T>(
   countryOptions: { label: string; value: number }[],

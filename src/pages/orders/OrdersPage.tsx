@@ -11,6 +11,9 @@ import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/pages.css";
 import PaginationControls from "../../components/common/PaginationControls";
+import { orderModalConfig } from "../../config/orders/orderModalConfig";
+import { Modal } from "../../components/common/Modal";
+
 
 const OrdersPage: React.FC = () => {
   const {
@@ -60,6 +63,9 @@ const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { showSnackbar } = useSnackbar();
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [orderToView, setOrderToView] = useState<any>(null);
+
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -103,6 +109,11 @@ const OrdersPage: React.FC = () => {
       setShowDeleteModal(false);
       setOrderToDelete(null);
     }
+  };
+
+  const handleViewClick = (order: any) => {
+    setOrderToView(order);
+    setShowViewModal(true);
   };
 
   const handleEditClick = (order: any) => {
@@ -236,6 +247,7 @@ const OrdersPage: React.FC = () => {
           sortBy={filterType === "ORDER" ? sortByRegular : sortByOneOff}
           sortDirection={filterType === "ORDER" ? sortDirectionRegular : sortDirectionOneOff}
           onSort={handleSort}
+          onView={handleViewClick}
         />
         <PaginationControls
           page={page}
@@ -248,6 +260,18 @@ const OrdersPage: React.FC = () => {
           className={titlePage + "-page-pagination"}
         />
       </div>
+
+      <Modal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setOrderToView(null);
+        }}
+        title="Detalles del Pedido"
+        class={titlePage}
+        config={orderModalConfig}
+        data={orderToView}
+      />
 
       {/* Modal de Eliminar */}
       <ModalDeleteConfirm

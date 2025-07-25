@@ -1,6 +1,5 @@
-import { Field } from "../../components/common/ItemForm";
+import { Field, Column } from "../../interfaces/Common";
 import { CreateProductCategoryDTO, ProductCategory } from "../../interfaces/ProductCategories";
-import { Column } from "../../components/common/DataTable";
 
 export const productCategoryFields: Field<CreateProductCategoryDTO>[] = [
   {
