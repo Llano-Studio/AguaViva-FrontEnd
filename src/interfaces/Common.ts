@@ -32,7 +32,8 @@ export type FieldType =
   | "email"
   | "multiselect"
   | "time"
-  | "search";
+  | "search"
+  | "datetime-local";
 
 export interface Column<T> {
   header: string;

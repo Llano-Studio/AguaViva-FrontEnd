@@ -230,7 +230,7 @@ const VehiclesPage: React.FC = () => {
       </div>
 
       <div
-        className={`form-container ${titlePage+"-form-container"}
+        className={`table-scroll form-container ${titlePage+"-form-container"}
           ${showForm ? "translate-x-0" : "translate-x-full"}
         `}>
         <div className={`form-wrapper ${titlePage+"-form-wrapper"}`}>

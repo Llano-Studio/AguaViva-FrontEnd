@@ -1,0 +1,23 @@
+.modalVehicleUsers-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color-3);
+  margin-bottom: 13px;
+}
+
+.vehicle-users-form {
+  padding: 0;
+  border: none;
+}
+
+.modalVehicleUsers-wrapper {
+  width: 900px;
+}
+
+.modalVehicleUsers-button-close {
+  padding: 0;
+}
+
+.modalVehicleUsers-container {
+  z-index: 1000;
+}

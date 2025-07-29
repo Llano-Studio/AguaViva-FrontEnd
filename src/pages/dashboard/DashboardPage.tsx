@@ -96,7 +96,7 @@ const DashboardPage: React.FC = () => {
           >
           <img
               src="/assets/icons/pedidos.svg"
-              alt="Generar hoja de ruta"
+              alt="pedidos"
               className={`page-button-direction-icon ${titlePage+"-page-button-direction-icon"}`}
               style={{ display: "inline-block" }}
           />
@@ -126,7 +126,7 @@ const DashboardPage: React.FC = () => {
           >
           <img
               src="/assets/icons/entregas.svg"
-              alt="Generar hoja de ruta"
+              alt="entregas"
               className={`page-button-direction-icon ${titlePage+"-page-button-direction-icon"}`}
               style={{ display: "inline-block" }}
           />

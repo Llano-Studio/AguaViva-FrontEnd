@@ -2,6 +2,7 @@
 
 .new-page-container{
     @apply mx-auto;
+    padding-top: 2rem;
 }
 
 .new-page-header{

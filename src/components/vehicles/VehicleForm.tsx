@@ -12,6 +12,7 @@ import { UserService } from "../../services/UserService";
 import VehicleZones from "./VehicleZones";
 import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
+import VehicleUsers from "./VehicleUsers";
 
 interface VehicleFormProps {
   onCancel: () => void;
@@ -174,6 +175,10 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
       {error && <div className="error-message">{error}</div>}
       {isEditing && vehicleToEdit && (
         <VehicleZones vehicleId={vehicleToEdit.vehicle_id} isEditing={isEditing} />
+      )}
+
+      {isEditing && vehicleToEdit && (
+        <VehicleUsers vehicleId={vehicleToEdit.vehicle_id} isEditing={isEditing} />
       )}
       <ModalUpdateConfirm
         isOpen={showUpdateConfirm}

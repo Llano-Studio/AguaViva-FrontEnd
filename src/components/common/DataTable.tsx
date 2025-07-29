@@ -1,5 +1,5 @@
 import React from 'react';
-import { EditButton, DeleteButton, ViewButton } from './ActionButtons';
+import { EditButton, DeleteButton, ViewButton, DownloadButton } from './ActionButtons';
 import SortBy from './SortBy';
 import { getSemaphoreStyle } from './SemaphoreStatus';
 import {Column} from '../../interfaces/Common';
@@ -11,6 +11,7 @@ interface DataTableProps<T extends { id: number }> {
   onEdit?: (item: T) => void;
   onDelete?: (id: number) => void;
   onView?: (item: T) => void;
+  onDownload?: (item: T) => void;
   class?: string;
   sortBy?: string[];
   sortDirection?: ("asc" | "desc")[];
@@ -33,6 +34,7 @@ export function DataTable<T extends { id: number }>({
   onEdit, 
   onDelete, 
   onView,
+  onDownload,
   class: classTable,
   sortBy = [],
   sortDirection = [],
@@ -67,6 +69,7 @@ export function DataTable<T extends { id: number }>({
             <th className={`table-th-acciones ${classTable ? classTable+"-table-th-acciones" : ""}`}>Acciones</th>
           </tr>
         </thead>
+        
         <tbody>
           {data.map((item) => {
             const trStyle =
@@ -92,6 +95,7 @@ export function DataTable<T extends { id: number }>({
                   </td>
                 ))}
                 <td className={`table-td-2 ${classTable ? classTable + "-table-td-2" : ""}`}>
+                  {onDownload && <DownloadButton onClick={() => onDownload(item)} />}
                   {onView && <ViewButton onClick={() => onView(item)} />}
                   {onEdit && <EditButton onClick={() => onEdit(item)} />}
                   {onDelete && <DeleteButton onClick={() => onDelete(item.id)} />}
@@ -99,7 +103,7 @@ export function DataTable<T extends { id: number }>({
               </tr>
             );
           })}
-        </tbody>
+        </tbody>    
       </table>
     </div>
   );

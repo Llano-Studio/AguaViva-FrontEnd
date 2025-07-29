@@ -82,13 +82,14 @@ const LoginPage: React.FC = () => {
                 </button>
               </div>
               {error && <p className="text-red-500">{error}</p>}
-              <button onClick={goToPasswordRecovery} className="text-blue-500 recovery-password">
+              <button onClick={goToPasswordRecovery} className="text-blue-500 recovery-password" type="button">
               ¿Olvidaste tu contraseña?
               </button>
               <button
                 type="submit"
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 submit"
                 disabled={loading}
+                autoFocus
               >
                 {loading ? "Iniciando sesión..." : "Iniciar sesión"}
               </button>

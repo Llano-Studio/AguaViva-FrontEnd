@@ -10,6 +10,14 @@ import { deliveryModalConfig } from "../../config/deliveries/deliveryModalConfig
 import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
 import { useSnackbar } from "../../context/SnackbarContext";
+import useRouteSheets from "../../hooks/useRouteSheets";
+import { routeSheetColumns } from "../../config/routeSheets/routeSheetFieldsConfig";
+import { routeSheetModalConfig } from "../../config/routeSheets/routeSheetModalConfig";
+import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
+import RouteSheetForm from "../../components/routeSheets/RouteSheetForm";
+import { routeSheetFields } from "../../config/routeSheets/routeSheetFieldsConfig";
+import "../../styles/css/pages/deliveries/deliveriesPage.css";
+import { useNavigate } from "react-router-dom";
 
 const DeliveriesPage: React.FC = () => {
   const {
@@ -33,17 +41,49 @@ const DeliveriesPage: React.FC = () => {
     fetchDeliveries,
   } = useDeliveries();
 
+  const {
+    routeSheets,
+    selectedRouteSheet,
+    setSelectedRouteSheet,
+    isLoading: isLoadingRouteSheets,
+    error: errorRouteSheets,
+    page: routeSheetPage,
+    setPage: setRouteSheetPage,
+    totalPages: routeSheetTotalPages,
+    total: routeSheetTotal,
+    sortBy: routeSheetSortBy,
+    setSortBy: setRouteSheetSortBy,
+    sortDirection: routeSheetSortDirection,
+    setSortDirection: setRouteSheetSortDirection,
+    fetchRouteSheets,
+    deleteRouteSheet,
+    createRouteSheet,
+    updateRouteSheet,
+  } = useRouteSheets();
+
   const [showViewModal, setShowViewModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const [showRouteSheetModal, setShowRouteSheetModal] = useState(false);
+  const [showRouteSheetForm, setShowRouteSheetForm] = useState(false);
+  const [showDeleteRouteSheetModal, setShowDeleteRouteSheetModal] = useState(false);
+  const [routeSheetToDelete, setRouteSheetToDelete] = useState<any>(null);
+
   const { showSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+  const { printRouteSheet } = useRouteSheets();
 
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [deliveries]);
+
+  useEffect(() => {
+    fetchRouteSheets();
+    // eslint-disable-next-line
+  }, []);
 
   const handleViewClick = (delivery: any) => {
     setSelectedDelivery(delivery);
@@ -65,6 +105,48 @@ const DeliveriesPage: React.FC = () => {
     setPage(1);
   };
 
+  const handleViewRouteSheet = (routeSheet: any) => {
+    setSelectedRouteSheet(routeSheet);
+    setShowRouteSheetModal(true);
+  };
+
+  const handleEditRouteSheet = (routeSheet: any) => {
+    setSelectedRouteSheet(routeSheet);
+    setShowRouteSheetForm(true);
+  };
+
+  const handleDeleteRouteSheet = (id: number) => {
+    const sheet = routeSheets.find(r => r.route_sheet_id === id);
+    setRouteSheetToDelete(sheet || null);
+    setShowDeleteRouteSheetModal(true);
+  };
+
+  const handleConfirmDeleteRouteSheet = async () => {
+    if (!routeSheetToDelete) return;
+    try {
+      await deleteRouteSheet(routeSheetToDelete.route_sheet_id);
+      showSnackbar("Hoja de ruta eliminada correctamente.", "success");
+      await fetchRouteSheets();
+    } catch (err: any) {
+      showSnackbar(err?.message || "Error al eliminar hoja de ruta", "error");
+    } finally {
+      setShowDeleteRouteSheetModal(false);
+      setRouteSheetToDelete(null);
+    }
+  };
+
+  const handleCloseRouteSheetForm = () => {
+    setSelectedRouteSheet(null);
+    setShowRouteSheetForm(false);
+  };
+
+  const handleFormSuccess = (msg: string) => {
+    showSnackbar(msg, "success");
+    setShowRouteSheetForm(false);
+    setSelectedRouteSheet(null);
+    fetchRouteSheets();
+  };
+
   const handleSort = (column: string) => {
     const idx = sortBy.indexOf(column);
     if (idx === -1) {
@@ -81,6 +163,38 @@ const DeliveriesPage: React.FC = () => {
     setPage(1);
   };
 
+  const handleRouteSheetSort = (column: string) => {
+    const idx = routeSheetSortBy.indexOf(column);
+    if (idx === -1) {
+      setRouteSheetSortBy([...routeSheetSortBy, column]);
+      setRouteSheetSortDirection([...routeSheetSortDirection, "asc"]);
+    } else if (routeSheetSortDirection[idx] === "asc") {
+      const newDirections = [...routeSheetSortDirection];
+      newDirections[idx] = "desc";
+      setRouteSheetSortDirection(newDirections);
+    } else if (routeSheetSortDirection[idx] === "desc") {
+      setRouteSheetSortBy(routeSheetSortBy.filter((_, i) => i !== idx));
+      setRouteSheetSortDirection(routeSheetSortDirection.filter((_, i) => i !== idx));
+    }
+    setRouteSheetPage(1);
+  };
+
+  const handleDownloadRouteSheet = async (routeSheet: any) => {
+    try {
+      const res = await printRouteSheet({
+        route_sheet_id: routeSheet.route_sheet_id,
+        format: "pdf",
+        include_map: true,
+        include_signature_field: true,
+        include_product_details: true,
+      });
+      // Descarga el archivo PDF
+      window.open(res.url, "_blank");
+    } catch (err: any) {
+      showSnackbar("Error al descargar hoja de ruta", "error");
+    }
+  };
+
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
   }
@@ -91,6 +205,9 @@ const DeliveriesPage: React.FC = () => {
 
   const start = (page - 1) * (deliveries.length || 1) + (deliveries.length > 0 ? 1 : 0);
   const end = (page - 1) * (deliveries.length || 1) + deliveries.length;
+
+  const routeSheetStart = (routeSheetPage - 1) * (routeSheets.length || 1) + (routeSheets.length > 0 ? 1 : 0);
+  const routeSheetEnd = (routeSheetPage - 1) * (routeSheets.length || 1) + routeSheets.length;
 
   const titlePage = "deliveries";
 
@@ -125,7 +242,7 @@ const DeliveriesPage: React.FC = () => {
               Filtros
             </button>
             <button
-              onClick={() => {/* lógica para generar hoja de ruta */}}
+              onClick={() => navigate("/hojas-de-ruta/nueva-hoja-de-ruta")}
               className={`page-new-button ${titlePage+"-page-new-button"}`}
             >
               <img
@@ -158,6 +275,92 @@ const DeliveriesPage: React.FC = () => {
           label="entregas"
           className={titlePage+"-page-pagination"}
         />
+      
+      
+      
+      
+      
+      
+      {/* Panel de la tabla de hojas de ruta */}
+      <div className="route-sheets-section-container">
+        <h2 className="page-title">Hojas de Ruta</h2>
+        {errorRouteSheets && <div className="text-red-500 p-2">{errorRouteSheets}</div>}
+        <DataTable
+          data={routeSheets.map(r => ({ ...r, id: r.route_sheet_id }))}
+          columns={routeSheetColumns}
+          onView={handleViewRouteSheet}
+          onEdit={handleEditRouteSheet}
+          onDelete={handleDeleteRouteSheet}
+          onDownload={handleDownloadRouteSheet} // <-- NUEVO
+          class="route-sheets"
+          sortBy={routeSheetSortBy}
+          sortDirection={routeSheetSortDirection}
+          onSort={handleRouteSheetSort}
+        />
+        <PaginationControls
+          page={routeSheetPage}
+          totalPages={routeSheetTotalPages}
+          onPageChange={setRouteSheetPage}
+          start={routeSheetStart}
+          end={routeSheetEnd}
+          total={routeSheetTotal}
+          label="hojas de ruta"
+          className="route-sheets-pagination"
+        />
+      </div>
+
+      {/* Panel del formulario de hoja de ruta */}
+      <div
+        className={`form-container route-sheets-form-container
+          ${showRouteSheetForm ? "translate-x-0" : "translate-x-full"}
+        `}>
+        <div className="form-wrapper route-sheets-form-wrapper">
+          <div className="form-header route-sheets-form-header">
+            <button
+              onClick={handleCloseRouteSheetForm}
+              className="form-close-button route-sheets-form-close-button">
+              <img src="/assets/icons/back.svg" alt="Volver" className="form-icon-cancel route-sheets-form-icon-cancel" />
+            </button>
+            <h2 className="form-title route-sheets-form-title">
+              {selectedRouteSheet ? "Editar Hoja de Ruta" : "Nueva Hoja de Ruta"}
+            </h2>
+          </div>
+          <RouteSheetForm
+            driverOptions={[]} // Debes pasar las opciones reales desde el estado
+            vehicleOptions={[]} // Debes pasar las opciones reales desde el estado
+            orderOptions={[]} // Debes pasar las opciones reales desde el estado
+            onSubmit={selectedRouteSheet
+              ? async (values) => {
+                  await updateRouteSheet(selectedRouteSheet.route_sheet_id, values);
+                  handleFormSuccess("Hoja de ruta editada correctamente.");
+                }
+              : async (values) => {
+                  await createRouteSheet(values);
+                  handleFormSuccess("Hoja de ruta creada correctamente.");
+                }
+            }
+            onCancel={handleCloseRouteSheetForm}
+            isEditing={!!selectedRouteSheet}
+            routeSheetToEdit={selectedRouteSheet}
+            loading={isLoadingRouteSheets}
+            error={errorRouteSheets}
+            className="route-sheet-form"
+            onSuccess={handleFormSuccess}
+          />
+        </div>
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
       </div>
 
       {/* Modal de Vista */}
@@ -171,6 +374,30 @@ const DeliveriesPage: React.FC = () => {
         class={titlePage}
         config={deliveryModalConfig}
         data={selectedDelivery}
+      />
+
+     
+
+      {/* Modal de Vista de hoja de ruta */}
+      <Modal
+        isOpen={showRouteSheetModal}
+        onClose={() => {
+          setShowRouteSheetModal(false);
+          setSelectedRouteSheet(null);
+        }}
+        title="Detalles de la Hoja de Ruta"
+        class="route-sheets"
+        config={routeSheetModalConfig}
+        data={selectedRouteSheet}
+      />
+
+      {/* Modal de Eliminar hoja de ruta */}
+      <ModalDeleteConfirm
+        isOpen={showDeleteRouteSheetModal}
+        onClose={() => setShowDeleteRouteSheetModal(false)}
+        onDelete={handleConfirmDeleteRouteSheet}
+        content="hoja de ruta"
+        genere="F"
       />
 
       {/* Drawer de filtros */}

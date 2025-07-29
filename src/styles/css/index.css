@@ -103,3 +103,7 @@ button:focus-visible {
 .dashboard-container .table-td-2{
   padding-right: 0;
 }
+
+.input:-internal-autofill-selected{
+  color: red;
+}

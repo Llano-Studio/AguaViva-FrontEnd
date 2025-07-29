@@ -15,6 +15,7 @@
     background: #F7FBFF;
     border-radius: 12px;
     border: 1px solid #D4D7E3;
+    color: var(--text-color-1) !important;
 }
 
 .login-container input:focus-visible{
@@ -28,7 +29,7 @@
 .login-container .submit{
     font-size: 20px;
     font-weight: 400;
-    background: #403A92;
+    background: var(--acent-color-1);
     border-radius: 12px;
 }
 
@@ -71,10 +72,23 @@
 }
 
 .login-container .eye-button:hover {
-    color: #403A92;
+    color: var(--acent-color-1);
 }
 
 .login-container .eye-button svg {
     width: 20px;
     height: 20px;
 }
+
+.login-container input:-webkit-autofill,
+.login-container input:-webkit-autofill:focus,
+.login-container input:-webkit-autofill:hover,
+.login-container input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #F7FBFF inset !important; /* mismo fondo que tu input */
+    box-shadow: 0 0 0 1000px #F7FBFF inset !important;
+    -webkit-text-fill-color: var(--text-color-1) !important;
+    color: var(--text-color-1) !important;
+    border-radius: 12px;
+    border: 1px solid #D4D7E3;
+    transition: background-color 5000s ease-in-out 0s;
+}   

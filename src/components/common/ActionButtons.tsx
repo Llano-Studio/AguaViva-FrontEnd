@@ -16,3 +16,6 @@ export const ViewButton = ({ onClick }: { onClick: () => void }) => (
   <IconButton onClick={onClick} icon="/assets/icons/view.svg" alt="Ver" />
 );
 
+export const DownloadButton = ({ onClick }: { onClick: () => void }) => (
+  <IconButton onClick={onClick} icon="/assets/icons/view.svg" alt="Descargar PDF" />
+);

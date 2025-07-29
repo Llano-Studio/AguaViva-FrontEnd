@@ -26,6 +26,7 @@ const NewSubscriptionPlanPage = React.lazy(() => import("../pages/subscriptionPl
 const PriceLists = React.lazy(() => import("../pages/priceLists/PriceListsPage"));
 const NewPriceListPage = React.lazy(() => import("../pages/priceLists/NewPriceListPage"));
 const ProfilePage = React.lazy(() => import("../pages/profile/ProfilePage"));
+const NewRouteSheet = React.lazy(() => import("../pages/routeSheets/NewRouteSheetPage"));
 
 
 const AppRouter: React.FC = () => {
@@ -55,6 +56,7 @@ const AppRouter: React.FC = () => {
             <Route path="clientes" element={<ClientsPage />} />
             <Route path="clientes/nuevo-cliente" element={<NewClientPage/>} />
             <Route path="entregas" element={<DeliveriesPage />} />
+            <Route path="hojas-de-ruta/nueva-hoja-de-ruta" element={<NewRouteSheet />} />
             <Route path="moviles" element={<VehiclesPage />} />
             <Route path="moviles/nuevo-movil" element={<NewVehiclePage />} />
             <Route path="zonas" element={<ZonesPage />} />

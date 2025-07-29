@@ -1,7 +1,8 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { vehicleZonesFields, VehicleZoneFormData } from "../../config/vehicles/vehicleZonesFieldsConfig";
-import { Field, ItemForm } from "../common/ItemForm";
+import { Field } from "../../interfaces/Common";
+import { ItemForm } from "../common/ItemForm"
 import { getDependentLocationOptions, handleDependentLocationChange } from "../../config/common/dependentLocationLogic";
 import { useDependentLocationFields } from "../../hooks/useDependentLocationFields";
 
