@@ -19,23 +19,25 @@ export function useFormOrder() {
   const [loadingClient, setLoadingClient] = useState(false);
 
   // Buscar clientes usando el servicio real
-  const fetchClients = async (query: string) => {
-    const response = await clientService.getClients({ search: query });
+  const fetchClients = async (params: any = {}, clientType: "PLAN" | "INDIVIDUAL" = "PLAN") => {
+    console.log("Fetching clients with params:", params, "and clientType:", clientType);
+    const response = await clientService.getClients({ ...params, type: clientType });
     return response?.data || [];
   };
 
-  // Buscar productos (puedes mantener tu simulación o usar tu servicio real)
+  // Buscar productos
   const fetchProducts = async (query: string) => {
     const response = await productService.getProducts({ search: query });
     return response?.data || [];
   };
 
+  // Buscar producto por ID
   const fetchProductById = async (productId: number) => {
     if (!productId) return null;
     return await productService.getProductById(productId);
   };
 
-  // Traer detalles del cliente seleccionado
+  // Traer detalles del cliente seleccionado (con tipo)
   const fetchClientDetails = async (clientId: number) => {
     if (!clientId) return null;
     setLoadingClient(true);
@@ -61,7 +63,6 @@ export function useFormOrder() {
 
   const fetchSubscriptionsByCustomer = async (customerId: number, query?: string) => {
     if (!customerId) return [];
-    // Si el servicio no soporta search, no lo envíes
     const response = await subscriptionService.getSubscriptionsByCustomer(customerId, {});
     return response?.data || [];
   };

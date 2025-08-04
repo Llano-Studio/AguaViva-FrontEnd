@@ -159,7 +159,7 @@ const VehiclesPage: React.FC = () => {
   const titlePage = "vehicles";
 
   return (
-    <div className={`page-container ${titlePage+"-page-container"}`}>
+    <div className={`table-scroll page-container ${titlePage+"-page-container"}`}>
       <div
         className={`page-content ${titlePage+"-page-content"}
           ${showForm ? "-translate-x-full" : "translate-x-0"}
@@ -230,7 +230,7 @@ const VehiclesPage: React.FC = () => {
       </div>
 
       <div
-        className={`table-scroll form-container ${titlePage+"-form-container"}
+        className={`form-container ${titlePage+"-form-container"}
           ${showForm ? "translate-x-0" : "translate-x-full"}
         `}>
         <div className={`form-wrapper ${titlePage+"-form-wrapper"}`}>

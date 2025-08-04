@@ -6,6 +6,7 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import useOrders from "../../hooks/useOrders";
 import useOrdersOneOff from "../../hooks/useOrdersOneOff";
 import "../../styles/css/pages/newPages.css";
+import "../../styles/css/pages/orders/newOrderPage.css";
 
 const NewOrderPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const NewOrderPage: React.FC = () => {
   };
 
   return (
-    <div className={`new-page-container ${titlePage}-page-container`}>
+    <div className={`table-scroll new-page-container ${titlePage}-page-container`}>
       <div className={`new-page-header ${titlePage}-page-header`}>
         <button
           onClick={() => navigate(-1)}
@@ -29,10 +30,11 @@ const NewOrderPage: React.FC = () => {
           <img src="/assets/icons/back.svg" alt="Volver" className={`new-page-icon-cancel ${titlePage}-page-icon-cancel`} />
         </button>
         <h2 className={`new-page-title ${titlePage}-page-title`}>Nuevo Pedido</h2>
-        <div className="tabs">
-          <button onClick={() => setActiveTab("ORDER")} className={activeTab === "ORDER" ? "active" : ""}>Pedido Regular</button>
-          <button onClick={() => setActiveTab("ONE_OFF")} className={activeTab === "ONE_OFF" ? "active" : ""}>Compra Única</button>
-        </div>
+      </div>
+      <div className="tabs-form">
+      <div className="tabs">
+        <button onClick={() => setActiveTab("ORDER")} className={activeTab === "ORDER" ? "active" : ""}>Pedido Regular</button>
+        <button onClick={() => setActiveTab("ONE_OFF")} className={activeTab === "ONE_OFF" ? "active" : ""}>Compra Única</button>
       </div>
       {activeTab === "ORDER" && (
         <OrderForm
@@ -40,7 +42,7 @@ const NewOrderPage: React.FC = () => {
           onCancel={() => navigate("/pedidos")}
           isEditing={false}
           refreshOrders={async () => {}}
-          class={titlePage}
+          class={activeTab === "ORDER" ? `order-form-radius ${titlePage}` : titlePage}
           onSuccess={handleSuccess}
         />
       )}
@@ -54,6 +56,7 @@ const NewOrderPage: React.FC = () => {
           onSuccess={handleSuccess}
         />
       )}
+      </div>
     </div>
   );
 };

@@ -11,6 +11,7 @@ import { OrderClientSection } from "./OrderClientSection";
 import { OrderPedidoSection } from "./OrderPedidoSection";
 import { OrderArticlesSection } from "./OrderArticlesSection";
 import { calculatePriceTotalOrder } from "../../utils/calculatePriceTotalOrder";
+import useOrders from "../../hooks/useOrders";
 import "../../styles/css/components/orders/orderForm.css";
 
 interface OrderFormProps {
@@ -46,6 +47,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const [selectedProductName, setSelectedProductName] = useState<string>("");
   const [selectedPriceListName, setSelectedPriceListName] = useState<string>("");
 
+  const { fetchDeliveryPreferences } = useOrders();
+  const [deliveryPreferences, setDeliveryPreferences] = useState<any>(null);
+
   // Hook de lógica
   const {
     fetchClientDetails,
@@ -73,10 +77,12 @@ const OrderForm: React.FC<OrderFormProps> = ({
       customer_id: orderToEdit?.customer_id ?? 0,
       contract_id: orderToEdit?.contract_id,
       subscription_id: orderToEdit?.subscription_id,
-      sale_channel_id: orderToEdit?.sale_channel_id ?? 0,
+      sale_channel_id: orderToEdit?.sale_channel_id ?? 1,
       order_date: orderToEdit?.order_date ?? new Date().toISOString().slice(0, 10),
       scheduled_delivery_date: orderToEdit?.scheduled_delivery_date ?? new Date().toISOString().slice(0, 10),
       delivery_time: orderToEdit?.delivery_time ?? "",
+      delivery_time_start: orderToEdit?.delivery_time?.split("-")[0] ?? "",
+      delivery_time_end: orderToEdit?.delivery_time?.split("-")[1] ?? "",
       total_amount: orderToEdit?.total_amount ?? "0",
       paid_amount: orderToEdit?.paid_amount ?? "0",
       order_type: orderToEdit?.order_type ?? "HYBRID",
@@ -85,8 +91,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
       items: [],
       customer_address: "",
       customer_id_display: undefined,
-      zone: "",
-      mobile: "",
+      zone_name: "",
+      zone_id: "",
+      mobile: [],
     }
   });
 
@@ -97,33 +104,55 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
   // Handler para submit
   const handleSubmit = async (values: CreateOrderDTO | FormData) => {
+    const v = values as any;
+    const delivery_time = `${v.delivery_time_start}-${v.delivery_time_end}`;
+
+    // Filtrar solo los campos necesarios para cada item
+    const items = articles.map(a => ({
+      product_id: a.product_id,
+      quantity: Number(a.quantity),
+      price_list_id: a.price_list_id,
+      notes: a.notes
+    }));
+
     const data: CreateOrderDTO = {
-      ...values as CreateOrderDTO,
       customer_id: selectedClient?.id ?? form.getValues("customer_id"),
-      items: articles,
+      contract_id: v.contract_id,
+      subscription_id: v.subscription_id,
+      sale_channel_id: v.sale_channel_id,
+      order_date: v.order_date,
+      scheduled_delivery_date: v.scheduled_delivery_date,
+      delivery_time,
+      total_amount: v.total_amount,
+      paid_amount: v.paid_amount,
+      order_type: v.order_type,
+      status: v.status,
+      notes: v.notes,
+      items, // Solo los campos requeridos
     };
+
     if (isEditing && orderToEdit) {
       setPendingValues(data);
       setShowUpdateConfirm(true);
       return;
     }
-    try {
-      const result = await onSubmit(data);
-      if (result) {
-        if (refreshOrders) await refreshOrders();
-        if (onSuccess) onSuccess("Pedido creado correctamente.");
-        showSnackbar("Pedido creado correctamente.", "success");
-        onCancel();
-      } else {
-        setError("Error al guardar el pedido");
-        showSnackbar("Error al guardar el pedido", "error");
-      }
-    } catch (err: any) {
-      setError(err?.message || "Error al guardar el pedido");
-      showSnackbar(err?.message || "Error al guardar el pedido", "error");
-      console.error(err);
+  try {
+    const result = await onSubmit(data);
+    if (result) {
+      if (refreshOrders) await refreshOrders();
+      if (onSuccess) onSuccess("Pedido creado correctamente.");
+      showSnackbar("Pedido creado correctamente.", "success");
+      onCancel();
+    } else {
+      setError("Error al guardar el pedido");
+      showSnackbar("Error al guardar el pedido", "error");
     }
-  };
+  } catch (err: any) {
+    setError(err?.message || "Error al guardar el pedido");
+    showSnackbar(err?.message || "Error al guardar el pedido", "error");
+    console.error(err);
+  }
+};
 
   // Handler para confirmar edición
   const handleConfirmUpdate = async () => {
@@ -140,6 +169,19 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
   };
 
+  const handleSubscriptionChange = async (subscription_id: number) => {
+    if (!selectedClient?.person_id) return;
+    const prefs = await fetchDeliveryPreferences(selectedClient.person_id, subscription_id);
+    setDeliveryPreferences(prefs); // Guardar las preferencias
+    if (prefs?.preferred_time_range) {
+      const [start, end] = prefs.preferred_time_range.split("-");
+      form.setValue("delivery_time_start", start, { shouldDirty: true, shouldTouch: true });
+      form.setValue("delivery_time_end", end, { shouldDirty: true, shouldTouch: true });
+    }
+  };
+
+  console.log("OrderForm selectedClient:", selectedClient);
+  
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className={classForm}>
       {/* Datos del cliente */}
@@ -151,7 +193,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
       {/* Datos del pedido */}
       <OrderPedidoSection
+        key={JSON.stringify(deliveryPreferences) || "pedido"}
         form={form}
+        deliveryPreferences={deliveryPreferences}
       />
 
       {/* Sección Datos de artículos */}
@@ -168,6 +212,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         setSelectedProductName={setSelectedProductName}
         selectedPriceListName={selectedPriceListName}
         setSelectedPriceListName={setSelectedPriceListName}
+        handleSubscriptionChange={handleSubscriptionChange} // <-- NUEVO
       />
 
       <ItemFormOrder

@@ -3,6 +3,7 @@
     border-radius: 12px;
     border: solid 1.5px var(--bg-color-2);
     padding: 30px;
+    margin-bottom: 80px;
 }
 
 .new-order .form{
@@ -71,4 +72,19 @@
 
 .listItem-empty{
     display: none;
+}
+
+.order-section .form-field:nth-child(5),
+.order-section .form-field:nth-child(6){
+    width: 10.75%;
+}
+
+.order-pedido-section-legend{
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.order-form-radius {
+  border-radius: 0 12px 12px 12px;
 }

@@ -233,9 +233,30 @@ export function ItemFormOrder<T extends FieldValues>({
               setValue(field.name as any, valueToSet, { shouldValidate: true, shouldDirty: true });
               if (searchProps.onChange) searchProps.onChange(val);
             }}
+            disabled={field.disabled} // <-- AGREGA ESTA LÍNEA
           />
         );
       }
+      case 'time':
+        if (field.disabled) {
+          return (
+            <input
+              type="time"
+              value={watch(field.name as any) ?? ""}
+              className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+              disabled
+              readOnly
+              tabIndex={-1}
+            />
+          );
+        }
+        return (
+          <input
+            type="time"
+            {...register(field.name as any, validationRules)}
+            className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+          />
+        );
       default:
         if (field.disabled) {
           return (

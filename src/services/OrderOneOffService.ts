@@ -4,7 +4,7 @@ import { OrderOneOff, OrdersOneOffResponse, CreateOrderOneOffDTO } from "../inte
 export class OrderOneOffService {
   private ordersUrl = "/multi-one-off-purchases";
 
-  async getOrders(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<OrdersOneOffResponse> {
+  async getOrdersOneOff(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<OrdersOneOffResponse> {
     const safeParams = {
       ...params,
       page: Number(params?.page) || 1,
@@ -13,7 +13,7 @@ export class OrderOneOffService {
     return await httpAdapter.get<OrdersOneOffResponse>(this.ordersUrl, { params: safeParams });
   }
 
-  async getOrderById(id: number): Promise<OrderOneOff | null> {
+  async getOrderOneOffById(id: number): Promise<OrderOneOff | null> {
     try {
       return await httpAdapter.get<OrderOneOff>(`${this.ordersUrl}/${id}`);
     } catch (error) {
@@ -21,7 +21,7 @@ export class OrderOneOffService {
     }
   }
 
-  async createOrder(order: CreateOrderOneOffDTO): Promise<OrderOneOff> {
+  async createOrderOneOff(order: CreateOrderOneOffDTO): Promise<OrderOneOff> {
     try {
       return await httpAdapter.post<OrderOneOff>(order, this.ordersUrl);
     } catch (error: any) {
@@ -29,16 +29,7 @@ export class OrderOneOffService {
     }
   }
 
-  // Si tu backend soporta update y delete, ajusta los endpoints:
-  async updateOrder(id: number, order: Partial<CreateOrderOneOffDTO>): Promise<OrderOneOff | null> {
-    try {
-      return await httpAdapter.patch<OrderOneOff>(order, `${this.ordersUrl}/${id}`);
-    } catch (error: any) {
-      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar orden One-Off");
-    }
-  }
-
-  async deleteOrder(id: number): Promise<boolean> {
+  async deleteOrderOneOff(id: number): Promise<boolean> {
     try {
       await httpAdapter.delete(`${this.ordersUrl}/${id}`);
       return true;

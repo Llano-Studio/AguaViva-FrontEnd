@@ -91,7 +91,7 @@ const DashboardLayout: React.FC = () => {
         </div>        
       
 
-        <main className="content">
+        <main className="table-scroll content">
           <Outlet /> {/* Esto renderiza las rutas hijas */}
         </main>
       </div>

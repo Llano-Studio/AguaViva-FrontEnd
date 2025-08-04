@@ -17,7 +17,7 @@ const NewPriceListPage: React.FC = () => {
   };
 
   return (
-    <div className={`new-page-container ${titlePage+"-page-container"}`}>
+    <div className={`table-scroll new-page-container ${titlePage+"-page-container"}`}>
       <div className={`new-page-header ${titlePage+"-page-header"}`}>
         <button
           onClick={() => navigate(-1)}

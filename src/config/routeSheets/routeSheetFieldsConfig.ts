@@ -3,6 +3,30 @@ import { Column } from "../../interfaces/Common";
 import { RouteSheet } from "../../interfaces/RouteSheet";
 import { sortByOrder } from "../../utils/sortByOrder";
 import { formatDateForView } from "../../utils/formateDateForView";
+import { OrderStatusEnum, OrderStatusValues } from "../../interfaces/Order";
+
+
+const DeliveryStatusLabels: Record<string, string> = {
+  [OrderStatusEnum.PENDING]: "Pendiente",
+  [OrderStatusEnum.DELIVERED]: "Entregado",
+  [OrderStatusEnum.CANCELLED]: "Cancelado",
+};
+
+const allowedDeliveryStatuses = [
+  OrderStatusEnum.PENDING,
+  OrderStatusEnum.DELIVERED,
+  OrderStatusEnum.CANCELLED,
+] as const;
+
+export const DeliveryStatusOptions = OrderStatusValues
+  .filter((status): status is typeof allowedDeliveryStatuses[number] =>
+    allowedDeliveryStatuses.includes(status as typeof allowedDeliveryStatuses[number])
+  )
+  .map(status => ({
+    label: DeliveryStatusLabels[status] || status,
+    value: status,
+  }));
+
 
 
 export const routeSheetFields: Field<any>[] = [
@@ -53,11 +77,7 @@ export const routeSheetDetailFields: Field<any>[] = [
     name: "delivery_status",
     label: "Estado de entrega",
     type: "select",
-    options: [
-      { label: "Pendiente", value: "PENDING" },
-      { label: "Entregado", value: "DELIVERED" },
-      { label: "Cancelado", value: "CANCELLED" },
-    ],
+    options: DeliveryStatusOptions,
     validation: { required: true },
     order: 1,
   },
@@ -90,3 +110,5 @@ export const routeSheetColumns: Column<RouteSheet>[] = sortByOrder([
     render: (details: any[]) => details?.length ?? 0
   },
 ]);
+
+

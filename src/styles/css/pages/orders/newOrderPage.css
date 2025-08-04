@@ -1,0 +1,22 @@
+.tabs{
+    transform: translate(0px, 2px);
+    font-size: 18px;
+    color: #7E7E7E;
+}
+
+
+.tabs .active{
+    background: white;
+    border-radius: 12px 12px 0 0;
+    border: solid 1.5px var(--bg-color-2);
+    border-bottom: none;
+    color: var(--text-color-3);
+}
+
+.tabs button{
+    padding: 15px 50px;
+    transition: border-color 0s;
+     font-weight: 600;
+}
+
+

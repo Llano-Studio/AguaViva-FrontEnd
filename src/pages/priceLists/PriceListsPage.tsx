@@ -137,7 +137,7 @@ const PriceListsPage: React.FC = () => {
   const titlePage = "priceLists";
 
   return (
-    <div className={`page-container ${titlePage+"-page-container"}`}>
+    <div className={`table-scroll page-container ${titlePage+"-page-container"}`}>
       <div
         className={`page-content ${titlePage+"-page-content"}
           ${showForm ? "-translate-x-full" : "translate-x-0"}

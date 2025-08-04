@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import '../../styles/css/components/common/searchBarWithDropdown.css';
 
 interface SearchBarWithDropdownProps<T> {
@@ -10,6 +10,7 @@ interface SearchBarWithDropdownProps<T> {
   fetchOptions: (query: string) => Promise<T[]>;
   renderOption: (option: T) => React.ReactNode;
   onOptionSelect: (option: T) => void;
+  disabled?: boolean;
 }
 
 function SearchBarWithDropdownInner<T>(
@@ -22,6 +23,7 @@ function SearchBarWithDropdownInner<T>(
     fetchOptions,
     renderOption,
     onOptionSelect,
+    disabled = false,
   }: SearchBarWithDropdownProps<T>,
   ref: React.Ref<HTMLInputElement>
 ) {
@@ -29,54 +31,124 @@ function SearchBarWithDropdownInner<T>(
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [options, setOptions] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [hasFetchedGeneral, setHasFetchedGeneral] = useState(false);
 
+  // Desbloquea el input siempre que el dropdown se abre
+  useEffect(() => {
+    if (dropdownOpen) {
+      setBlocked(false);
+    }
+  }, [dropdownOpen]);
+
+  // Bloquea el input si hay texto, desbloquea si está vacío o deshabilitado por prop
+  useEffect(() => {
+    if (inputValue) {
+      setBlocked(true);
+    } else {
+      setBlocked(disabled);
+    }
+  }, [inputValue, disabled]);
+
+  // Sincroniza el valor externo cuando se cierra el dropdown
   useEffect(() => {
     if (!dropdownOpen) {
       setInputValue(value);
     }
   }, [value, dropdownOpen]);
 
+  // Debounce para onChange
   useEffect(() => {
-    // Solo dispara onChange si el inputValue fue cambiado por el usuario, no por el prop value externo
     if (inputValue !== value) {
       const handler = setTimeout(() => {
         onChange(inputValue);
       }, debounceMs);
       return () => clearTimeout(handler);
     }
-    // eslint-disable-next-line
-  }, [inputValue]);
+  }, [inputValue, value, onChange, debounceMs]);
 
-  // Fetch options when dropdown opens or input changes
+  // Fetch de opciones: busca normalmente o fetch general si abres el dropdown vacío
   useEffect(() => {
-    if (dropdownOpen) {
+    // Si el input tiene valor, busca normalmente
+    if (inputValue) {
       setLoading(true);
-      fetchOptions(inputValue)
+      fetchOptions(String(inputValue))
         .then(setOptions)
         .finally(() => setLoading(false));
+      setHasFetchedGeneral(false); // resetea el flag si el usuario escribe
+      return;
     }
-  }, [dropdownOpen, inputValue, fetchOptions]);
+
+    // Si el input está vacío y el dropdown está abierto, solo fetch si no lo hicimos antes
+    if (dropdownOpen && !inputValue && !hasFetchedGeneral) {
+      setLoading(true);
+      fetchOptions("")
+        .then(setOptions)
+        .finally(() => setLoading(false));
+      setHasFetchedGeneral(true);
+      return;
+    }
+
+    // Si el input está vacío y el dropdown está cerrado, limpia opciones y flag
+    if (!dropdownOpen && !inputValue) {
+      setOptions([]);
+      setLoading(false);
+      setHasFetchedGeneral(false);
+    }
+  }, [inputValue, dropdownOpen, fetchOptions, hasFetchedGeneral]);
+
+  // Focus automático al abrir el dropdown
+  useEffect(() => {
+    if (dropdownOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [dropdownOpen]);
+
+  // Cierra el dropdown al hacer click fuera
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   return (
-    <div className={`search-bar-dropdown ${classSearchBar ? classSearchBar + "search-bar-dropdown" : ""}`} style={{ position: "relative" }}>
+    <div ref={containerRef} className={`search-bar-dropdown ${classSearchBar ? classSearchBar + "search-bar-dropdown" : ""}`} style={{ position: "relative" }}>
       <input
-        ref={ref}
+        ref={inputRef}
         type="text"
         value={inputValue}
         onChange={e => {
           setInputValue(e.target.value);
+          setDropdownOpen(true);
         }}
         placeholder={placeholder || "Buscar..."}
         className={`search-bar-dropdown-input ${classSearchBar ? classSearchBar + '-search-bar-dropdown-input' : ''}`}
+        disabled={blocked} 
       />
       <button
         type="button"
         className={`search-bar-dropdown-btn ${classSearchBar ? classSearchBar + '-search-bar-dropdown-btn' : ''}`}
-      onClick={() => {
-        setDropdownOpen(open => !open);
-        setInputValue(""); // Limpiar el buscador al abrir/cerrar
-        onChange("");      // Notificar al padre que el input está vacío
-      }}
+        onClick={() => {
+          setDropdownOpen(open => !open);
+          setInputValue(""); 
+          onChange("");
+          setBlocked(true);
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 0); 
+        }}
       >
         <img
           src="/assets/icons/arrow-down-blue.svg"

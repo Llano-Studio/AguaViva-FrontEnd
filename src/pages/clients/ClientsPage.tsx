@@ -139,7 +139,7 @@ const ClientsPage: React.FC = () => {
   const titlePage = "clients";
 
   return (
-    <div className={`page-container ${titlePage+"-page-container"}`}>
+    <div className={`table-scroll page-container ${titlePage+"-page-container"}`}>
       {/* Panel de la tabla */}
       <div
         className={`page-content ${titlePage+"-page-content"}

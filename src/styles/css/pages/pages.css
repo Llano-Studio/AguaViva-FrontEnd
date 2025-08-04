@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 .page-container{
-  @apply relative overflow-hidden min-h-[500px] h-[100%];
+  @apply relative min-h-[500px] h-[100%];
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .page-content{
@@ -13,7 +15,6 @@
 
 .page-content,
 .form-container{
-  overflow: overlay;
   max-height: 100%;
   padding-bottom: 80px;
   padding-top: 2rem;
@@ -86,7 +87,7 @@
 
 .form-wrapper{
   @apply h-full flex flex-col;
-
+  padding-bottom: 90px;
 }
 
 .form-header{

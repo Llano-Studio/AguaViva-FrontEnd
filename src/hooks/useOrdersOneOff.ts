@@ -34,7 +34,7 @@ export const useOrdersOneOff = () => {
     ) => {
         try {
         setIsLoading(true);
-        const response = await orderService.getOrders({
+        const response = await orderService.getOrdersOneOff({
             page: pageParam,
             limit: limitParam,
             search: searchParam,
@@ -67,7 +67,7 @@ export const useOrdersOneOff = () => {
   const createOrder = async (orderData: CreateOrderOneOffDTO) => {
     try {
       setIsLoading(true);
-      const newOrder = await orderService.createOrder(orderData);
+      const newOrder = await orderService.createOrderOneOff(orderData);
       await fetchOrders(page, limit, search, filters, getSortParams());
       return true;
     } catch (err: any) {
@@ -78,28 +78,10 @@ export const useOrdersOneOff = () => {
     }
   };
 
-  const updateOrder = async (id: number, orderData: Partial<CreateOrderOneOffDTO>) => {
-    try {
-      setIsLoading(true);
-      const updatedOrder = await orderService.updateOrder(id, orderData);
-      if (updatedOrder) {
-        await fetchOrders(page, limit, search, filters, getSortParams());
-        setSelectedOrder(null);
-        return true;
-      }
-      return false;
-    } catch (err: any) {
-      setError(err?.message || "Error al actualizar orden One-Off");
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const deleteOrder = async (id: number) => {
     try {
       setIsLoading(true);
-      await orderService.deleteOrder(id);
+      await orderService.deleteOrderOneOff(id);
       await fetchOrders(page, limit, search, filters, getSortParams());
       setSelectedOrder(null);
       return true;
@@ -118,7 +100,6 @@ export const useOrdersOneOff = () => {
     isLoading,
     error,
     deleteOrder,
-    updateOrder,
     createOrder,
     refreshOrders: () => fetchOrders(page, limit, search, filters, getSortParams()),
     page,

@@ -1,5 +1,19 @@
-export type OrderType = "HYBRID" | "SUBSCRIPTION" | "CONTRACT_DELIVERY";
-export type OrderStatus = "PENDING" | "CONFIRMED" | "IN_PREPARATION" | "READY_FOR_DELIVERY" | "IN_DELIVERY" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+export type OrderType = "HYBRID" | "ONE_OFF" | "CONTRACT_DELIVERY";
+
+export const OrderStatusEnum = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  IN_PREPARATION: "IN_PREPARATION",
+  READY_FOR_DELIVERY: "READY_FOR_DELIVERY",
+  IN_DELIVERY: "IN_DELIVERY",
+  DELIVERED: "DELIVERED",
+  CANCELLED: "CANCELLED",
+  REFUNDED: "REFUNDED",
+} as const;
+
+export type OrderStatus = typeof OrderStatusEnum[keyof typeof OrderStatusEnum];
+export const OrderStatusValues: OrderStatus[] = Object.values(OrderStatusEnum);
+
 
 export interface OrderItem {
   order_item_id: number;
@@ -73,8 +87,11 @@ export interface OrderItemInput {
 export interface CreateOrderFormDTO extends CreateOrderDTO {
   customer_address?: string;
   customer_id_display?: number;
-  zone?: string;
-  mobile?: string;
+  zone_name?: string;
+  zone_id?: string;
+  mobile?: string[]
+  delivery_time_start?: string;
+  delivery_time_end?: string;
 }
 
 export interface OrderItemInputForm extends OrderItemInput {
@@ -86,4 +103,12 @@ export interface OrderItemInputForm extends OrderItemInput {
   image_url?: string;
   is_returnable?: boolean;
   price_list_name?: string;
+}
+
+export interface AvailableCredit {
+  product_id: number;
+  product_description: string;
+  planned_quantity: number;
+  delivered_quantity: number;
+  remaining_balance: number;
 }

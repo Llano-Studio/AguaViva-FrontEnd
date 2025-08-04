@@ -1,5 +1,5 @@
 import { httpAdapter } from "./httpAdapter";
-import { Order, OrdersResponse, CreateOrderDTO } from "../interfaces/Order";
+import { Order, OrdersResponse, CreateOrderDTO, AvailableCredit } from "../interfaces/Order";
 
 export class OrderService {
   private ordersUrl = "/orders";
@@ -43,6 +43,15 @@ export class OrderService {
       return true;
     } catch (error: any) {
       throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar orden");
+    }
+  }
+
+  async getAvailableCreditsBySubscription(subscriptionId: number): Promise<AvailableCredit[]> {
+    try {
+      const url = `${this.ordersUrl}/subscription/${subscriptionId}/available-credits`;
+      return await httpAdapter.get<AvailableCredit[]>(url);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al obtener créditos disponibles");
     }
   }
 }

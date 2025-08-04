@@ -65,7 +65,7 @@
     padding: 0 2rem 2rem 2rem;
     overflow-y: auto;
     height: 100%;
-    overflow: hidden;
+    overflow: overlay;
   }
 
   .main-container{

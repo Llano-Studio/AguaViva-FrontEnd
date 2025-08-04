@@ -14,8 +14,9 @@ import useRouteSheets from "../../hooks/useRouteSheets";
 import { routeSheetColumns } from "../../config/routeSheets/routeSheetFieldsConfig";
 import { routeSheetModalConfig } from "../../config/routeSheets/routeSheetModalConfig";
 import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
-import RouteSheetForm from "../../components/routeSheets/RouteSheetForm";
+import {RouteSheetForm} from "../../components/routeSheets/RouteSheetForm";
 import { routeSheetFields } from "../../config/routeSheets/routeSheetFieldsConfig";
+import { CreateRouteSheetDTO, UpdateRouteSheetDTO } from "../../interfaces/RouteSheet";
 import "../../styles/css/pages/deliveries/deliveriesPage.css";
 import { useNavigate } from "react-router-dom";
 
@@ -212,7 +213,7 @@ const DeliveriesPage: React.FC = () => {
   const titlePage = "deliveries";
 
   return (
-    <div className={`page-container ${titlePage+"-page-container"}`}>
+    <div className={`table-scroll page-container ${titlePage+"-page-container"}`}>
       {/* Panel de la tabla */}
       <div className={`page-content ${titlePage+"-page-content"}`}>
         <div>
@@ -322,19 +323,16 @@ const DeliveriesPage: React.FC = () => {
               <img src="/assets/icons/back.svg" alt="Volver" className="form-icon-cancel route-sheets-form-icon-cancel" />
             </button>
             <h2 className="form-title route-sheets-form-title">
-              {selectedRouteSheet ? "Editar Hoja de Ruta" : "Nueva Hoja de Ruta"}
+              {selectedRouteSheet ? "Editar hoja de ruta" : "Generar hoja de ruta"}
             </h2>
           </div>
           <RouteSheetForm
-            driverOptions={[]} // Debes pasar las opciones reales desde el estado
-            vehicleOptions={[]} // Debes pasar las opciones reales desde el estado
-            orderOptions={[]} // Debes pasar las opciones reales desde el estado
             onSubmit={selectedRouteSheet
-              ? async (values) => {
+              ? async (values: UpdateRouteSheetDTO) => {
                   await updateRouteSheet(selectedRouteSheet.route_sheet_id, values);
                   handleFormSuccess("Hoja de ruta editada correctamente.");
                 }
-              : async (values) => {
+              : async (values: CreateRouteSheetDTO) => {
                   await createRouteSheet(values);
                   handleFormSuccess("Hoja de ruta creada correctamente.");
                 }

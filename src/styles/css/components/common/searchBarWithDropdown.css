@@ -59,6 +59,14 @@
     font-weight: 400;
 }
 
+.search-bar-dropdown-empty,
+.search-bar-dropdown-loading{
+    padding: 8px;
+    padding-left: 16px;
+    font-size: 12px;
+    font-weight: 400;
+}
+
 
 
 

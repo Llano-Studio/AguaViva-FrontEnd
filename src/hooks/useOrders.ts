@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { Order, CreateOrderDTO } from "../interfaces/Order";
+import { Order, CreateOrderDTO, AvailableCredit } from "../interfaces/Order";
 import { OrderService } from "../services/OrderService";
+import { ClientSubscriptionService } from "../services/ClientSubscriptionService";
 
 export const useOrders = () => {
   const orderService = new OrderService();
+  const clientSubscriptionService = new ClientSubscriptionService();
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -111,6 +113,29 @@ export const useOrders = () => {
     }
   };
 
+  const fetchDeliveryPreferences = async (customer_id: number, subscription_id: number) => {
+    console.log("entre a fetchDeliveryPreferences");
+    try {
+      console.log("fetchDeliveryPreferences customerId:", customer_id);
+      const res = await clientSubscriptionService.getSubscriptionsByCustomer(customer_id);
+      console.log("fetchDeliveryPreferences res:", res);
+      const found = res.data?.find((sub: any) => sub.subscription_id === subscription_id);
+      console.log("fetchDeliveryPreferences found:", found);
+      return found?.delivery_preferences ?? null;
+    } catch (err) {
+      return null;
+    }
+  };
+
+  const getAvailableCreditsBySubscription = async (subscriptionId: number): Promise<AvailableCredit[]> => {
+    try {
+      return await orderService.getAvailableCreditsBySubscription(subscriptionId);
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener créditos disponibles");
+      return [];
+    }
+  };
+
   return {
     orders,
     selectedOrder,
@@ -121,6 +146,8 @@ export const useOrders = () => {
     updateOrder,
     createOrder,
     refreshOrders: () => fetchOrders(page, limit, search, filters, getSortParams()),
+    fetchDeliveryPreferences,
+    getAvailableCreditsBySubscription,
     page,
     setPage,
     limit,
