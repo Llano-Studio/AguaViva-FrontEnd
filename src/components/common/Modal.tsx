@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "../../styles/css/components/common/modal.css";
+import { ListItem } from "./ListItem";
 
 interface ModalConfigItem {
   label: string;
@@ -18,6 +19,9 @@ interface ModalProps {
   class?: string;
   config?: ModalConfigItem[];
   data?: any;
+  itemsForList?: any[];
+  itemsConfig?: { header: string; accessor: string; render?: (item: any) => React.ReactNode }[]; // Configuración de los campos
+  itemsTitle?: string; // Título para los productos en comodato
 }
 
 function getNestedValue(obj: any, path: string) {
@@ -31,10 +35,12 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   class: classModal,
   config,
-  data
+  data,
+  itemsForList,
+  itemsConfig,
+  itemsTitle,
 }) => {
   if (!isOpen) return null;
-  console.log("Modal data:", data);
 
   return ReactDOM.createPortal(
     <div className={`modal-container ${classModal ? classModal+"-modal-container" : ""}`}>
@@ -75,6 +81,18 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
         ) : (
           children
+        )}
+
+        {/* Renderizar Items */}
+        {itemsForList && itemsForList.length > 0 && itemsConfig && (
+          <div className="modal-items-list-container">
+            {itemsTitle && <h3>{itemsTitle}</h3>}
+            <ListItem
+              items={itemsForList}
+              columns={itemsConfig}
+              getKey={(item) => item.product_id}
+            />
+          </div>
         )}
       </div>
     </div>,

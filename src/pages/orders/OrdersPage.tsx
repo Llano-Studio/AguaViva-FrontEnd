@@ -11,7 +11,7 @@ import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/pages.css";
 import PaginationControls from "../../components/common/PaginationControls";
-import { orderModalConfig } from "../../config/orders/orderModalConfig";
+import { orderModalConfig, orderProductsConfig } from "../../config/orders/orderModalConfig";
 import { Modal } from "../../components/common/Modal";
 
 
@@ -34,6 +34,7 @@ const OrdersPage: React.FC = () => {
     setSortDirection: setSortDirectionRegular,
     fetchOrders: fetchRegularOrders,
     deleteOrder: deleteRegularOrder,
+    productsOfOrder, // Función para obtener productos de una orden
   } = useOrders();
 
   const {
@@ -65,7 +66,7 @@ const OrdersPage: React.FC = () => {
   const { showSnackbar } = useSnackbar();
   const [showViewModal, setShowViewModal] = useState(false);
   const [orderToView, setOrderToView] = useState<any>(null);
-
+  const [orderProducts, setOrderProducts] = useState<any[]>([]); // Productos de la orden
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -111,9 +112,16 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  const handleViewClick = (order: any) => {
+  const handleViewClick = async (order: any) => {
     setOrderToView(order);
     setShowViewModal(true);
+
+    try {
+      const products = await productsOfOrder(order.order_id || order.purchase_id); // Obtener productos de la orden
+      setOrderProducts(products); // Guardar productos en el estado
+    } catch (error) {
+      console.error("Error al obtener productos de la orden:", error);
+    }
   };
 
   const handleEditClick = (order: any) => {
@@ -266,11 +274,15 @@ const OrdersPage: React.FC = () => {
         onClose={() => {
           setShowViewModal(false);
           setOrderToView(null);
+          setOrderProducts([]); 
         }}
         title="Detalles del Pedido"
         class={titlePage}
         config={orderModalConfig}
         data={orderToView}
+        itemsForList={orderProducts} 
+        itemsConfig={orderProductsConfig} 
+        itemsTitle="Productos del Pedido"
       />
 
       {/* Modal de Eliminar */}

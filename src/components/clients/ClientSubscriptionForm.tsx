@@ -1,7 +1,8 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { clientSubscriptionFields } from "../../config/clients/clientSubscriptionFieldsConfig";
-import { Field, ItemForm } from "../common/ItemForm";
+import { ItemForm } from "../common/ItemForm";
+import { Field } from "../../interfaces/Common";
 import { formatTimeRangeFields } from "../../utils/formatTimeRangeFields"; 
 
 interface ClientSubscriptionFormProps {
@@ -23,6 +24,27 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
   error,
   isEditing,
 }) => {
+  // Calcular fechas por defecto solo para nuevas suscripciones
+  const getDefaultDates = () => {
+    if (isEditing || Object.keys(initialValues).length > 0) {
+      return initialValues;
+    }
+
+    const today = new Date();
+    const startDate = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    
+    // Calcular fecha 50 años después
+    const endDateCalculated = new Date(today);
+    endDateCalculated.setFullYear(today.getFullYear() + 50);
+    const endDate = endDateCalculated.toISOString().split('T')[0];
+
+    return {
+      ...initialValues,
+      start_date: startDate,
+      end_date: endDate,
+    };
+  };
+
   // Inyectar dinámicamente las opciones de planes
   const fields: Field<any>[] = clientSubscriptionFields.map(field =>
     field.name === "subscription_plan_id"
@@ -32,7 +54,7 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
 
   // Usar useForm y pasar el resultado a ItemForm
   const form = useForm({
-    defaultValues: initialValues
+    defaultValues: getDefaultDates()
   });
 
   // Handler para armar los rangos de horario antes de enviar a la API

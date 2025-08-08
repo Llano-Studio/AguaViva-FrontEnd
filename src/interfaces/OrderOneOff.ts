@@ -1,11 +1,8 @@
 import {OrderType, OrderStatus} from "./Order";
 
 export interface OrderOneOffItem {
-  purchase_item_id?: number;
   product_id: number;
   quantity: number;
-  price_list_id?: number;
-  notes?: string;
   unit_price?: string;
   subtotal?: string;
   product?: {
@@ -14,10 +11,6 @@ export interface OrderOneOffItem {
     price: string;
     is_returnable: boolean;
   };
-  price_list?: {
-    price_list_id: number;
-    name: string;
-  };
 }
 
 export interface OrderOneOffItemInputForm extends OrderOneOffItem {
@@ -25,30 +18,36 @@ export interface OrderOneOffItemInputForm extends OrderOneOffItem {
 }
 
 export interface OrderOneOff {
-  purchase_header_id: number;
+  purchase_id: number;
   person_id: number;
   sale_channel_id: number;
+  locality_id: number;
+  zone_id: number;
   purchase_date: string;
+  scheduled_delivery_date: string;
+  delivery_time: string;
   total_amount: string;
-  paid_amount: string;
-  delivery_address: string;
-  notes?: string;
-  status: string;
-  payment_status: string;
-  delivery_status: string;
-  created_at: string;
-  updated_at: string;
+  product: {
+    product_id: number;
+    description: string;
+    price: string;
+  };
   person: {
     person_id: number;
     name: string;
-    phone: string;
-    tax_id: string;
   };
   sale_channel: {
     sale_channel_id: number;
     name: string;
   };
-  purchase_items: OrderOneOffItem[];
+  locality: {
+    locality_id: number;
+    name: string;
+  };
+  zone: {
+    zone_id: number;
+    name: string;
+  };
 }
 
 export interface OrdersOneOffResponse {
@@ -62,23 +61,34 @@ export interface OrdersOneOffResponse {
 }
 
 export interface CreateOrderOneOffDTO {
-  person_id: number;
-  sale_channel_id: number;
+  customer: {
+    name: string;
+    phone: string;
+    alias?: string;
+    address: string;
+    taxId?: string;
+    localityId: number;
+    zoneId: number;
+    type: string;
+  };
   items: {
     product_id: number;
     quantity: number;
-    price_list_id?: number;
-    notes?: string;
   }[];
+  sale_channel_id: number;
+  requires_delivery: boolean;
+  price_list_id: number;
   delivery_address: string;
-  notes?: string;
-  paid_amount: string | number;
+  locality_id: number;
+  zone_id: number;
+  purchase_date: string;
+  scheduled_delivery_date: string;
+  delivery_time: string;
 }
 
 export interface CreateOrderOneOffFormDTO extends CreateOrderOneOffDTO {
   customer_id_display?: number;
   zone_name?: string;
-  zone_id?: string;
   mobile?: string[]
   delivery_time_start?: string;
   delivery_time_end?: string;

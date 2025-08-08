@@ -26,3 +26,21 @@ export const clientModalConfig = [
   },
   { label: "Semáforo de pago", accessor: "payment_semaphore_status", className: "modal-item-9", order: 9 },
 ].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+export const loanedProductsConfig = [
+  { 
+    header: "Imagen", 
+    accessor: "image", 
+    render: (item: any) => (
+      <img 
+        src={item.image} 
+        alt="Producto" 
+        style={{ width: 50, height: 50, objectFit: "cover", borderRadius: "4px" }} 
+      />
+    )
+  },
+  { header: "Descripción", accessor: "description" },
+  { header: "Cantidad", accessor: "loaned_quantity" },
+  { header: "Fecha de Adquisición", accessor: "acquisition_date" },
+  { header: "Estado del Pedido", accessor: "order_status" },
+];

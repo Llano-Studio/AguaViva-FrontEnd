@@ -9,7 +9,7 @@ import { clientColumns } from "../../config/clients/clientFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { clientFilters } from "../../config/clients/clientFiltersConfig";
-import { clientModalConfig } from "../../config/clients/clientModalConfig";
+import { clientModalConfig ,loanedProductsConfig } from "../../config/clients/clientModalConfig";
 import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import Switch from "../../components/common/Switch";
 import { useSnackbar } from "../../context/SnackbarContext";
@@ -37,6 +37,8 @@ const ClientsPage: React.FC = () => {
     setSortDirection,
     fetchClients,
     deleteClient,
+    fetchLoanedProducts,
+    loanedProducts, // Productos en comodato enriquecidos
   } = useClients();
   
   const [showViewModal, setShowViewModal] = useState(false);
@@ -125,6 +127,17 @@ const ClientsPage: React.FC = () => {
     fetchClients();
   };
 
+  const handleViewClient = async (client: Client) => {
+    setSelectedClient(client);
+    setShowViewModal(true);
+
+    try {
+      await fetchLoanedProducts(client.person_id); // Obtiene los productos en comodato enriquecidos
+    } catch (error) {
+      console.error("Error al obtener productos en comodato:", error);
+    }
+  };
+
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
   }
@@ -198,10 +211,7 @@ const ClientsPage: React.FC = () => {
         <DataTable
           data={clients.map(c => ({ ...c, id: c.person_id }))}
           columns={clientColumns}
-          onView={(client) => {
-            setSelectedClient(client);
-            setShowViewModal(true);
-          }}
+          onView={handleViewClient}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
           class={titlePage}
@@ -268,6 +278,9 @@ const ClientsPage: React.FC = () => {
         class={titlePage}
         config={clientModalConfig}
         data={selectedClient}
+        itemsForList={loanedProducts} // Productos en comodato
+        itemsConfig={loanedProductsConfig} // Configuración de los productos
+        itemsTitle="Productos en Comodato" // Título para los productos
       />
 
       {/* Modal de Eliminar */}

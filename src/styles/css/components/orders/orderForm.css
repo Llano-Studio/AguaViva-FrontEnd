@@ -52,7 +52,8 @@
 .order-actions-button-submit{
     font-size: 12px;
     font-weight: 500;
-    width: 129px;
+    min-width: 129px;
+    width: fit-content;
     height: 31px;
     border-radius: 6px;
     display: flex;

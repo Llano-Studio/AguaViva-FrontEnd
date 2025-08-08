@@ -19,6 +19,7 @@ import { routeSheetFields } from "../../config/routeSheets/routeSheetFieldsConfi
 import { CreateRouteSheetDTO, UpdateRouteSheetDTO } from "../../interfaces/RouteSheet";
 import "../../styles/css/pages/deliveries/deliveriesPage.css";
 import { useNavigate } from "react-router-dom";
+import { saveAs } from "file-saver";
 
 const DeliveriesPage: React.FC = () => {
   const {
@@ -189,8 +190,13 @@ const DeliveriesPage: React.FC = () => {
         include_signature_field: true,
         include_product_details: true,
       });
-      // Descarga el archivo PDF
-      window.open(res.url, "_blank");
+
+      // Descarga el archivo usando fetch y file-saver
+      const response = await fetch(res.url);
+      const contentType = response.headers.get("content-type");
+      console.log("tipo de contenido: ",contentType); 
+      const blob = await response.blob();
+      saveAs(blob, res.filename);
     } catch (err: any) {
       showSnackbar("Error al descargar hoja de ruta", "error");
     }

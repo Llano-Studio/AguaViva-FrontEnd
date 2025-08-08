@@ -21,3 +21,26 @@ export const orderModalConfig = sortByOrder([
   { label: "Total", accessor: "total_amount", order: 7 },
   { label: "Notas", accessor: "notes", order: 8 },
 ]);
+
+// Configuración de los productos de la orden
+export const orderProductsConfig = [
+  { 
+    header: "", 
+    accessor: "image_url", 
+    render: (item: any) => (
+      <img 
+        src={item.image_url} 
+        alt="Producto" 
+        style={{ width: 50, height: 50, objectFit: "cover", borderRadius: "4px" }} 
+      />
+    )
+  },
+  { 
+    header: "Descripción", 
+    accessor: "product.description", 
+    render: (item: any) => item.product?.description || "Sin descripción"
+  },
+  { header: "Cantidad", accessor: "quantity" },
+  { header: "Precio Unitario", accessor: "unit_price" },
+  { header: "Subtotal", accessor: "subtotal" },
+];

@@ -17,10 +17,15 @@
     @apply flex justify-between items-center mb-4;
 }
 
-.modal-title{
+.modal-title,
+.modal-items-list-container h3{
     color: var(--text-color-3);
     font-size: 16px;
     font-weight: 600;
+}
+
+.modal-items-list-container h3{
+    margin-bottom: 10px;
 }
 
 .modal-button-close{
@@ -49,4 +54,8 @@
 .modal-label-value{
     font-size: 12px;
     font-weight: 400;
+}
+
+.modal-items-list-container{
+    margin-top: 20px;
 }

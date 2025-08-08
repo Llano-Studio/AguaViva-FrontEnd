@@ -1,17 +1,14 @@
 import React, { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { CreateOrderOneOffDTO, CreateOrderOneOffFormDTO, OrderOneOff } from "../../interfaces/OrderOneOff";
-import { orderOneOffNotesFields } from "../../config/orders/orderFieldsConfig";
 import { useSnackbar } from "../../context/SnackbarContext";
 import useOrdersOneOff from "../../hooks/useOrdersOneOff";
+import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 import { OrderOneOffClientSection } from "./OrderOneOffClientSection";
 import { OrderOneOffPedidoSection } from "./OrderOneOffPedidoSection";
 import { OrderOneOffArticlesSection } from "./OrderOneOffArticlesSection";
-import { ItemFormOrder } from "../common/ItemFormOrder";
-import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 
 interface OrderOneOffFormProps {
-  onSubmit?: (orderData: CreateOrderOneOffDTO) => Promise<boolean>;
   onCancel: () => void;
   isEditing?: boolean;
   orderToEdit?: OrderOneOff | null;
@@ -26,40 +23,56 @@ const getInitialValues = (
 ): CreateOrderOneOffFormDTO => {
   if (isEditing && orderToEdit) {
     return {
-      person_id: orderToEdit.person_id,
-      sale_channel_id: orderToEdit.sale_channel_id,
-      delivery_address: orderToEdit.delivery_address,
-      notes: orderToEdit.notes ?? "",
-      paid_amount: orderToEdit.paid_amount,
-      items: orderToEdit.purchase_items?.map(item => ({
-        product_id: item.product_id,
-        quantity: item.quantity,
-        price_list_id: item.price_list_id,
-        notes: item.notes,
-      })) ?? [],
-      customer_id_display: orderToEdit.person?.person_id,
-      zone_name: "",
-      zone_id: "",
-      mobile: [],
-      delivery_time_start: "",
-      delivery_time_end: "",
+      customer: {
+        name: orderToEdit.person?.name || "",
+        phone: "",
+        alias: "",
+        address: "",
+        taxId: "",
+        localityId: orderToEdit.locality?.locality_id || 0,
+        zoneId: orderToEdit.zone?.zone_id || 0,
+        type: "INDIVIDUAL",
+      },
+      items: [
+        {
+          product_id: orderToEdit.product.product_id,
+          quantity: orderToEdit.quantity || 1,
+        },
+      ],
+      sale_channel_id: orderToEdit.sale_channel.sale_channel_id,
+      requires_delivery: true,
+      price_list_id: 1,
+      delivery_address: "",
+      locality_id: orderToEdit.locality.locality_id,
+      zone_id: orderToEdit.zone.zone_id,
+      purchase_date: orderToEdit.purchase_date,
+      scheduled_delivery_date: orderToEdit.scheduled_delivery_date,
+      delivery_time: orderToEdit.delivery_time,
       order_type: "ONE_OFF",
       status: "PENDING",
     };
   }
   return {
-    person_id: 0,
-    sale_channel_id: 1,
-    delivery_address: "",
-    notes: "",
-    paid_amount: "",
+    customer: {
+      name: "",
+      phone: "",
+      alias: "",
+      address: "",
+      taxId: "",
+      localityId: 0,
+      zoneId: 0,
+      type: "INDIVIDUAL",
+    },
     items: [],
-    customer_id_display: undefined,
-    zone_name: "",
-    zone_id: "",
-    mobile: [],
-    delivery_time_start: "",
-    delivery_time_end: "",
+    sale_channel_id: 1,
+    requires_delivery: true,
+    price_list_id: 1,
+    delivery_address: "",
+    locality_id: 0,
+    zone_id: 0,
+    purchase_date: "",
+    scheduled_delivery_date: "",
+    delivery_time: "",
     order_type: "ONE_OFF",
     status: "PENDING",
   };
@@ -78,7 +91,7 @@ const OrderOneOffForm: React.FC<OrderOneOffFormProps> = ({
   const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
   const [pendingValues, setPendingValues] = useState<CreateOrderOneOffDTO | null>(null);
 
-  const { createOrder } = useOrdersOneOff();
+  const { createOrder, updateOrder } = useOrdersOneOff();
   const [selectedClient, setSelectedClient] = useState<any>(null);
 
   const initialValues = useMemo(
@@ -90,25 +103,35 @@ const OrderOneOffForm: React.FC<OrderOneOffFormProps> = ({
     defaultValues: initialValues,
   });
 
-  // Artículos agregados
   const [articles, setArticles] = useState<any[]>(initialValues.items ?? []);
 
-  // Handler para submit
-  const handleSubmit = async (values: CreateOrderOneOffFormDTO | FormData) => {
+  const handleSubmit = async (values: CreateOrderOneOffFormDTO) => {
     const items = articles.map(a => ({
       product_id: a.product_id,
       quantity: Number(a.quantity),
-      price_list_id: a.price_list_id,
-      notes: a.notes
     }));
 
     const data: CreateOrderOneOffDTO = {
-      person_id: selectedClient?.person_id ?? form.getValues("person_id"),
-      sale_channel_id: form.getValues("sale_channel_id"),
-      delivery_address: form.getValues("delivery_address"),
-      notes: form.getValues("notes"),
-      paid_amount: form.getValues("paid_amount"),
+      customer: {
+        name: selectedClient?.name || form.getValues("customer.name"),
+        phone: selectedClient?.phone || form.getValues("customer.phone"),
+        alias: form.getValues("customer.alias"),
+        address: form.getValues("customer.address"),
+        taxId: form.getValues("customer.taxId"),
+        localityId: form.getValues("customer.localityId"),
+        zoneId: form.getValues("customer.zoneId"),
+        type: form.getValues("customer.type"),
+      },
       items,
+      sale_channel_id: form.getValues("sale_channel_id"),
+      requires_delivery: form.getValues("requires_delivery"),
+      price_list_id: form.getValues("price_list_id"),
+      delivery_address: form.getValues("delivery_address"),
+      locality_id: form.getValues("locality_id"),
+      zone_id: form.getValues("zone_id"),
+      purchase_date: form.getValues("purchase_date"),
+      scheduled_delivery_date: form.getValues("scheduled_delivery_date"),
+      delivery_time: form.getValues("delivery_time"),
     };
 
     if (isEditing && orderToEdit) {
@@ -130,46 +153,49 @@ const OrderOneOffForm: React.FC<OrderOneOffFormProps> = ({
   };
 
   const handleConfirmUpdate = async () => {
-    setShowUpdateConfirm(false);
-    setPendingValues(null);
-    // Implementa updateOrderOneOff aquí si lo necesitas
+    if (!pendingValues || !orderToEdit) return;
+    try {
+      await updateOrder(orderToEdit.purchase_id, pendingValues);
+      if (refreshOrders) await refreshOrders();
+      if (onSuccess) onSuccess("Pedido One-Off actualizado correctamente.");
+      showSnackbar("Pedido One-Off actualizado correctamente.", "success");
+      onCancel();
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar el pedido One-Off");
+      showSnackbar(err?.message || "Error al actualizar el pedido One-Off", "error");
+      console.error(err);
+    } finally {
+      setShowUpdateConfirm(false);
+      setPendingValues(null);
+    }
   };
 
   return (
     <>
       <form onSubmit={form.handleSubmit(handleSubmit)} className={classForm}>
-        {/* Datos del cliente */}
         <OrderOneOffClientSection
           form={form}
           selectedClient={selectedClient}
           setSelectedClient={setSelectedClient}
         />
 
-        {/* Datos del pedido */}
-        <OrderOneOffPedidoSection
-          form={form}
-        />
+        <OrderOneOffPedidoSection form={form} />
 
-        {/* Sección Datos de artículos */}
         <OrderOneOffArticlesSection
           form={form}
           setArticles={setArticles}
           articles={articles}
         />
 
-        <ItemFormOrder
-          {...form}
-          fields={orderOneOffNotesFields}
-          hideActions={true}
-          onSubmit={() => {}}
-          class="notes-order"
-        />
-
         {error && <div className="error-message">{error}</div>}
 
         <div className="order-actions">
-          <button type="submit" className="order-actions-button-submit">Agregar pedido One-Off</button>
-          <button type="button" onClick={onCancel} className="order-actions-button-cancel">Cancelar</button>
+          <button type="submit" className="order-actions-button-submit">
+            {isEditing ? "Actualizar pedido" : "Agregar pedido"}
+          </button>
+          <button type="button" onClick={onCancel} className="order-actions-button-cancel">
+            Cancelar
+          </button>
         </div>
 
         <ModalUpdateConfirm

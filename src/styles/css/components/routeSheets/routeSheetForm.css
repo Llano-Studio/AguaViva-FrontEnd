@@ -73,3 +73,23 @@
 .routeSheet-form .table-tr :nth-child(1){
     width: 15px;
 }
+
+.routeSheet-form-date-wrapper{
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 7px 10px;
+    background: #E7E5FF;
+    border-radius: 6px;
+    display: flex;
+}
+
+.routeSheet-form-date-display{
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+}
+
+.routeSheet-form-date-selector{
+    font-size: 0;
+}

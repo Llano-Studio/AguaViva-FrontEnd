@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { Order, CreateOrderDTO, AvailableCredit } from "../interfaces/Order";
 import { OrderService } from "../services/OrderService";
 import { ClientSubscriptionService } from "../services/ClientSubscriptionService";
+import { ProductService } from "../services/ProductService";
 
 export const useOrders = () => {
   const orderService = new OrderService();
   const clientSubscriptionService = new ClientSubscriptionService();
+  const productService = new ProductService(); // Instancia del servicio de productos
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -113,14 +115,50 @@ export const useOrders = () => {
     }
   };
 
-  const fetchDeliveryPreferences = async (customer_id: number, subscription_id: number) => {
-    console.log("entre a fetchDeliveryPreferences");
+  const fetchOrderById = async (id: number): Promise<Order | null> => {
     try {
-      console.log("fetchDeliveryPreferences customerId:", customer_id);
+      setIsLoading(true);
+      const order = await orderService.getOrderById(id);
+      return order;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener la orden");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const productsOfOrder = async (orderId: number) => {
+    try {
+      setIsLoading(true);
+      const order = await fetchOrderById(orderId);
+      if (!order || !order.order_item) {
+        throw new Error("No se encontraron productos en la orden");
+      }
+
+      const enrichedItems = await Promise.all(
+        order.order_item.map(async (item) => {
+          const imageUrl = await productService.getProductImage(item.product_id);
+          return {
+            ...item,
+            image_url: imageUrl || null,
+          };
+        })
+      );
+
+      return enrichedItems;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener productos de la orden");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchDeliveryPreferences = async (customer_id: number, subscription_id: number) => {
+    try {
       const res = await clientSubscriptionService.getSubscriptionsByCustomer(customer_id);
-      console.log("fetchDeliveryPreferences res:", res);
       const found = res.data?.find((sub: any) => sub.subscription_id === subscription_id);
-      console.log("fetchDeliveryPreferences found:", found);
       return found?.delivery_preferences ?? null;
     } catch (err) {
       return null;
@@ -145,6 +183,8 @@ export const useOrders = () => {
     deleteOrder,
     updateOrder,
     createOrder,
+    fetchOrderById,
+    productsOfOrder,
     refreshOrders: () => fetchOrders(page, limit, search, filters, getSortParams()),
     fetchDeliveryPreferences,
     getAvailableCreditsBySubscription,

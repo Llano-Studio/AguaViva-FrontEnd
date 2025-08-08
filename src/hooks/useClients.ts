@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { Client, CreateClientDTO } from "../interfaces/Client";
+import { Client, CreateClientDTO, LoanedProduct } from "../interfaces/Client";
 import { ClientService } from "../services/ClientService";
+import { ProductService } from "../services/ProductService";
 
 export const useClients = () => {
   const clientService = new ClientService();
+  const productService = new ProductService(); // Instancia del servicio de productos
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [loanedProducts, setLoanedProducts] = useState<LoanedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +28,7 @@ export const useClients = () => {
       .join(",");
   };
 
-const fetchClients = useCallback(
+  const fetchClients = useCallback(
     async (
       pageParam = page,
       limitParam = limit,
@@ -80,7 +83,6 @@ const fetchClients = useCallback(
     }
   };
 
-
   const updateClient = async (id: number, clientData: Partial<CreateClientDTO>) => {
     try {
       setIsLoading(true);
@@ -114,6 +116,48 @@ const fetchClients = useCallback(
     }
   };
 
+  // Obtener productos en comodato y enriquecerlos con detalles del producto
+  const fetchLoanedProducts = async (clientId: number) => {
+    try {
+      setIsLoading(true);
+      const products = await clientService.getLoanedProducts(clientId);
+
+      // Enriquecer productos con detalles (como imagen)
+      const enrichedProducts = await Promise.all(
+        products.map(async (product) => {
+          const productDetails = await productService.getProductById(product.product_id);
+          return {
+            ...product,
+            image: productDetails?.image_url || null, // Agregar imagen si está disponible
+          };
+        })
+      );
+
+      setLoanedProducts(enrichedProducts);
+      return enrichedProducts;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener productos en comodato");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cancelar suscripción
+  const cancelSubscription = async (personId: number, subscriptionId: number) => {
+    try {
+      setIsLoading(true);
+      const updatedClient = await clientService.cancelSubscription(personId, subscriptionId);
+      await fetchClients(page, limit, search, filters, getSortParams());
+      return updatedClient;
+    } catch (err: any) {
+      setError(err?.message || "Error al cancelar la suscripción");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     clients,
     selectedClient,
@@ -123,6 +167,9 @@ const fetchClients = useCallback(
     deleteClient,
     updateClient,
     createClient,
+    fetchLoanedProducts,
+    loanedProducts,
+    cancelSubscription,
     refreshClients: () => fetchClients(page, limit, search, filters, getSortParams()),
     page,
     setPage,

@@ -11,6 +11,7 @@ import useProducts from "../../hooks/useProducts";
 import { usePriceListItems } from "../../hooks/usePriceListItem";
 import "../../styles/css/components/priceLists/priceListForm.css";
 import { PriceListUpdatePrice } from "./PriceListUpdatePrice";
+import { PriceListItemUpdatePrice } from "./PriceListItemUpdatePrice";
 import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { formatDateForInput } from "../../utils/formatDateForInput";
@@ -65,6 +66,8 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
 
   const { addItem, removeItem } = usePriceListItems(priceListToEdit?.price_list_id || 0);
   const [showUpdatePriceModal, setShowUpdatePriceModal] = useState(false);
+  const [showEditItemModal, setShowEditItemModal] = useState(false); // Estado para el modal de edición
+  const [itemToEdit, setItemToEdit] = useState<any | null>(null); // Ítem seleccionado para editar
   const [error, setError] = useState<string | null>(null);
   const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
   const [pendingValues, setPendingValues] = useState<CreatePriceListDTO | null>(null);
@@ -116,6 +119,12 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
     if (priceListToEdit) {
       await fetchPriceListById(priceListToEdit.price_list_id);
     }
+  };
+
+  // Editar producto en la lista de precios
+  const handleEditProduct = (item: any) => {
+    setItemToEdit(item);
+    setShowEditItemModal(true);
   };
 
   // Submit handler
@@ -191,7 +200,7 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
         }}>
         <div className="priceListForm-actions-container">
           <AddItem<any, { unit_price: number }>
-            title="Agregar producto a la lista"
+            title="Agregar artículo a la lista"
             placeholder="Buscar producto..."
             onSearch={handleSearchProducts}
             onAdd={(product, data) => handleAddProduct(product, data.unit_price)}
@@ -245,11 +254,22 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
             columns={priceListItemListColumns}
             getKey={item => item.price_list_item_id}
             onRemove={handleRemoveProduct}
+            onEdit={handleEditProduct} // Pasar la función de edición
             content="Producto"
             genere="M"
           />
         </div>
       )}
+      <PriceListItemUpdatePrice
+        isOpen={showEditItemModal}
+        onClose={() => setShowEditItemModal(false)}
+        item={itemToEdit} // Asegúrate de que itemToEdit no sea null
+        classForm={classForm}
+        onUpdated={async () => {
+          await fetchPriceListById(priceListToEdit?.price_list_id || 0);
+          showSnackbar("Precio del ítem actualizado correctamente.", "success");
+        }}
+      />
       <ModalUpdateConfirm
         isOpen={showUpdateConfirm}
         onClose={() => setShowUpdateConfirm(false)}

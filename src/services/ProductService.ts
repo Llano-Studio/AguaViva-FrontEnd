@@ -22,6 +22,16 @@ export class ProductService {
     }
   }
 
+  async getProductImage(id: number): Promise<string | null> {
+    try {
+      const response = await httpAdapter.get<{ product_id: number; image_url: string }>(`${this.productsUrl}/${id}/image`);
+      return response.image_url; // Devuelve solo la URL de la imagen
+    } catch (error) {
+      console.error("Error en getProductImage:", error);
+      return null;
+    }
+  }
+
   async createProduct(product: FormData | CreateProductDTO, isFormData = false): Promise<Product | null> {
     try {
       return await httpAdapter.post<Product>(product, this.productsUrl, isFormData ? { isFormData: true } : undefined);

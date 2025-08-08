@@ -2,7 +2,7 @@ import { httpAdapter } from "./httpAdapter";
 import { OrderOneOff, OrdersOneOffResponse, CreateOrderOneOffDTO } from "../interfaces/OrderOneOff";
 
 export class OrderOneOffService {
-  private ordersUrl = "/multi-one-off-purchases";
+  private ordersUrl = "/api/one-off-purchases/one-off";
 
   async getOrdersOneOff(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<OrdersOneOffResponse> {
     const safeParams = {
@@ -29,10 +29,17 @@ export class OrderOneOffService {
     }
   }
 
-  async deleteOrderOneOff(id: number): Promise<boolean> {
+  async updateOrderOneOff(id: number, order: CreateOrderOneOffDTO): Promise<OrderOneOff> {
     try {
-      await httpAdapter.delete(`${this.ordersUrl}/${id}`);
-      return true;
+      return await httpAdapter.patch<OrderOneOff>(order, `${this.ordersUrl}/${id}`);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar orden One-Off");
+    }
+  }
+
+  async deleteOrderOneOff(id: number): Promise<{ message: string; deleted: boolean }> {
+    try {
+      return await httpAdapter.delete<{ message: string; deleted: boolean }>(`${this.ordersUrl}/${id}`);
     } catch (error: any) {
       throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar orden One-Off");
     }

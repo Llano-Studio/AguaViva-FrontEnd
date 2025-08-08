@@ -1,4 +1,4 @@
-import { Client, CreateClientDTO, ClientsResponse } from "../interfaces/Client";
+import { Client, CreateClientDTO, ClientsResponse, LoanedProduct } from "../interfaces/Client";
 import { httpAdapter } from "./httpAdapter";
 
 export class ClientService {
@@ -44,6 +44,25 @@ export class ClientService {
       return true;
     } catch (error: any) {
       throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar cliente");
+    }
+  }
+
+  // Obtener productos en comodato para un cliente
+  async getLoanedProducts(clientId: number): Promise<LoanedProduct[]> {
+    try {
+      return await httpAdapter.get<LoanedProduct[]>(`${this.clientsUrl}/${clientId}/loaned-products-detail`);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al obtener productos en comodato");
+    }
+  }
+
+  // Cancelar suscripción de un cliente
+  async cancelSubscription(personId: number, subscriptionId: number): Promise<Client> {
+    try {
+      const url = `${this.clientsUrl}/${personId}/subscriptions/${subscriptionId}/cancel`;
+      return await httpAdapter.patch<Client>({}, url); // Pasa un objeto vacío como `data` si no necesitas enviar datos
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al cancelar la suscripción");
     }
   }
 }
