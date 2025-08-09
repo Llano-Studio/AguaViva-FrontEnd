@@ -4,8 +4,9 @@
  * @returns Fecha formateada en español.
  */
 export const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  console.log("Formatted Date:", date);
+  // Asegura que se interprete como local, no UTC
+  const [year, month, day] = dateString.split("-");
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
   return new Intl.DateTimeFormat("es-ES", {
     day: "2-digit",
     month: "long",

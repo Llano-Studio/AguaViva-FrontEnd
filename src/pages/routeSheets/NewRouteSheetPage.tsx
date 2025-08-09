@@ -13,37 +13,9 @@ const NewRouteSheetPage: React.FC = () => {
   const { showSnackbar } = useSnackbar();
   const { createRouteSheet, isLoading, error } = useRouteSheets();
 
-  const [driverOptions, setDriverOptions] = useState<{ label: string; value: number }[]>([]);
-  const [vehicleOptions, setVehicleOptions] = useState<{ label: string; value: number }[]>([]);
-  const [orderOptions, setOrderOptions] = useState<{ label: string; value: number }[]>([]);
-
-  useEffect(() => {
-    // Traer choferes
-    new UserService().getUsers({ role: "DRIVERS" }).then(res => {
-      setDriverOptions(res.data.map((u: any) => ({
-        label: u.name + " (" + u.email + ")",
-        value: u.id,
-      })));
-    });
-    // Traer vehículos
-    new VehicleService().getVehicles().then(res => {
-      setVehicleOptions(res.data.map((v: any) => ({
-        label: v.name + " (" + v.code + ")",
-        value: v.vehicle_id,
-      })));
-    });
-    // Traer pedidos
-    new OrderService().getOrders().then(res => {
-      setOrderOptions(res.data.map((o: any) => ({
-        label: `#${o.order_id} - ${o.customer?.name ?? ""}`,
-        value: o.order_id,
-      })));
-    });
-  }, []);
-
   const handleSuccess = (msg: string) => {
     showSnackbar(msg, "success");
-    navigate("/hojas-de-ruta");
+    navigate("/entregas");
   };
 
   const handleSubmit = async (values: any) => {
@@ -68,7 +40,7 @@ const NewRouteSheetPage: React.FC = () => {
       </div>
       <RouteSheetForm
         onSubmit={handleSubmit}
-        onCancel={() => navigate("/hojas-de-ruta")}
+        onCancel={() => navigate("/entregas")}
         loading={isLoading}
         error={error}
         className="route-sheet-form"

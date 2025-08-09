@@ -234,7 +234,6 @@ const OrdersPage: React.FC = () => {
               value={filterType}
               onChange={e => setFilterType(e.target.value as any)}
               className={`page-type-filter ${titlePage}-page-type-filter`}
-              style={{ marginLeft: "1rem" }}
             >
               {(orderFiltersConfig[0]?.options ?? [])
                 .filter(opt => opt && (typeof opt.value === "string" || typeof opt.value === "number"))

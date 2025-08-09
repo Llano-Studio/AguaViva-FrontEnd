@@ -51,6 +51,13 @@ export const orderClientFields: Field<CreateOrderFormDTO>[] = [
   },
 ];
 
+// Campos para formulario de órdenes One-Off (multi-one-off-purchases)
+export const orderOneOffClientFields: Field<CreateOrderOneOffFormDTO>[] = [
+  { name: "customer.name", label: "Nombre y apellido", type: "search", validation: { required: false }, order: 0 },
+  { name: "customer.address", label: "Dirección", type: "search", validation: { required: false }, order: 1 },
+  { name: "customer.phone", label: "Teléfono", type: "search", validation: { required: false }, order: 2 },
+];
+
 export const orderPedidoFields: Field<CreateOrderFormDTO>[] = [
   { name: "order_date", label: "Fecha del pedido", type: "date", validation: { required: true }, order: 0 },
   { name: "scheduled_delivery_date", label: "Fecha de entrega", type: "date", validation: { required: true }, order: 1 },
@@ -60,10 +67,10 @@ export const orderPedidoFields: Field<CreateOrderFormDTO>[] = [
   { name: "delivery_time_end", label: "final", type: "time", validation: { required: true }, order: 5 },
 ];
 
-export const orderOneOffPedidoFields: Field<CreateOrderFormDTO>[] = [
-  { name: "order_date", label: "Fecha del pedido", type: "date", validation: { required: true }, order: 0 },
+export const orderOneOffPedidoFields: Field<CreateOrderOneOffFormDTO>[] = [
+  { name: "purchase_date", label: "Fecha del pedido", type: "date", validation: { required: true }, order: 0 },
   { name: "scheduled_delivery_date", label: "Fecha de entrega", type: "date", validation: { required: true }, order: 1 },
-  { name: "zone_name", label: "Zona", type: "text", validation: { required: false }, order: 2, disabled: true },
+  { name: "zone_id", label: "Zona", type: "search", validation: { required: false }, order: 2,},
   { name: "mobile", label: "Movil", type: "select", validation: { required: false }, order: 3 },
   { name: "delivery_time_start", label: "Horario inicial", type: "time", validation: { required: true }, order: 4 },
   { name: "delivery_time_end", label: "final", type: "time", validation: { required: true }, order: 5 },
@@ -77,37 +84,6 @@ export const orderOneOffNotesFields: Field<CreateOrderOneOffFormDTO>[] = [
   { name: "notes", label: "Observaciones", type: "textarea", validation: { required: false }, order: 1 },
 ];
 
-// Campos para formulario de órdenes One-Off (multi-one-off-purchases)
-export const orderOneOffClientFields = (): Field<CreateOrderOneOffFormDTO>[] => sortByOrder([
-  {
-    name: "person_id",
-    label: "ID Cliente",
-    type: "search",
-    validation: { required: false },
-    order: 0,
-  },
-  {
-    name: "customer_name",
-    label: "Nombre y apellido",
-    type: "search",
-    validation: { required: false },
-    order: 1,
-  },
-  {
-    name: "delivery_address",
-    label: "Dirección",
-    type: "search",
-    validation: { required: false },
-    order: 2,
-  },
-  {
-    name: "phone",
-    label: "Teléfono",
-    type: "search",
-    validation: { required: false },
-    order: 3,
-  },
-]);
 
 // Columnas para la tabla unificada de órdenes y One-Off
 export const orderTableColumns: Column<{ [key: string]: any }>[] = sortByOrder([

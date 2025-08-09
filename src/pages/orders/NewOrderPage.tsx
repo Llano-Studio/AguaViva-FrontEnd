@@ -48,7 +48,14 @@ const NewOrderPage: React.FC = () => {
       )}
       {activeTab === "ONE_OFF" && (
         <OrderOneOffForm
-          onSubmit={createOrderOneOff}
+          onSubmit={async (orderData) => {
+            try {
+              await createOrderOneOff(orderData);
+              return true;
+            } catch {
+              return false;
+            }
+          }}
           onCancel={() => navigate("/pedidos")}
           isEditing={false}
           refreshOrders={async () => {}}

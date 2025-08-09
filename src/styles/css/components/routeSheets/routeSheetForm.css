@@ -74,22 +74,24 @@
     width: 15px;
 }
 
-.routeSheet-form-date-wrapper{
-    align-items: center;
-    gap: 5px;
-    height: 28px;
-    padding: 7px 10px;
-    background: #E7E5FF;
-    border-radius: 6px;
-    display: flex;
+.routeSheet-form-header-content select {
+  /* Aumenta el padding para que la flecha tenga espacio */
+  padding-right: 32px !important;
+  /* Para navegadores modernos: mueve la flecha 3px a la derecha */
+  background-position: right 13px center;
 }
 
-.routeSheet-form-date-display{
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--text-color-1);
+.routeSheet-form-header-content select::-webkit-input-placeholder { color: inherit; }
+.routeSheet-form-header-content select::-ms-expand {
+  right: 3px;
 }
 
-.routeSheet-form-date-selector{
-    font-size: 0;
+.routeSheet-form-header-content select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-repeat: no-repeat;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M1 1L5 5L9 1' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-size: 10px 6px;
+  background-position: right 13px center; /* 10px (flecha) + 3px extra */
 }

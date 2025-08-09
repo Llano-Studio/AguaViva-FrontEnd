@@ -42,8 +42,13 @@ export function useFormRouteSheet() {
     );
   };
 
-  const fetchOrders = async (search = "", zoneId?: number | null, additionalParams?: { [key: string]: any }) => {
-    const params: any = { search, ...additionalParams };
+  const fetchOrders = async (
+    search = "",
+    zoneId?: number | null,
+    additionalParams?: { [key: string]: any }
+  ) => {
+    // Siempre incluir status: "PENDING"
+    const params: any = { search, status: "PENDING", ...additionalParams };
     if (zoneId) params.zoneId = zoneId;
     const res = await orderService.getOrders(params);
     setOrders(

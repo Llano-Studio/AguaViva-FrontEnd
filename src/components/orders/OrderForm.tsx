@@ -212,7 +212,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         setSelectedProductName={setSelectedProductName}
         selectedPriceListName={selectedPriceListName}
         setSelectedPriceListName={setSelectedPriceListName}
-        handleSubscriptionChange={handleSubscriptionChange} // <-- NUEVO
+        handleSubscriptionChange={handleSubscriptionChange}
       />
 
       <ItemFormOrder

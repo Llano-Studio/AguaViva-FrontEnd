@@ -61,7 +61,13 @@ button {
 }
 
 button:focus,
-button:focus-visible {
+button:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible {
   outline: none;
 }
 

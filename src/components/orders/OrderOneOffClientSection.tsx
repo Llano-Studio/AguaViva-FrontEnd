@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { ItemFormOrder } from "../common/ItemFormOrder";
 import { orderOneOffClientFields } from "../../config/orders/orderFieldsConfig";
 import { useFormOrder } from "../../hooks/useFormOrder";
@@ -14,84 +14,71 @@ export const OrderOneOffClientSection: React.FC<OrderOneOffClientSectionProps> =
   selectedClient,
   setSelectedClient,
 }) => {
-  const { fetchClients } = useFormOrder();
-  const [clientLocked, setClientLocked] = useState(false);
+  const { fetchClients, fetchClientDetails } = useFormOrder();
 
-  const getFetchOptions = (field: string) => async (query: string) => {
-    let params: any = {};
-    if (field === "customer_id" && query) params.personId = query;
-    if (field === "customer_address" && query) params.address = query;
-    if (field === "phone" && query) params.phone = query;
-    if (field === "customer_name" && query) params.name = query;
-    console.log("Llamando fetchClients con INDIVIDUAL");
-    return (await fetchClients(params, "INDIVIDUAL")) || [];
-    };
-
-  const handleClientSelect = (client: any) => {
+  // Selección de cliente: setea todos los campos relacionados, igual que OrderClientSection
+  const handleClientSelect = async (client: any) => {
     setSelectedClient({ ...client });
-    setClientLocked(true);
-    form.setValue("person_id", client.person_id);
-    form.setValue("customer_name", client.name || "");
-    form.setValue("customer_address", client.address || "");
-    form.setValue("phone", client.phone || "");
-  };
+    form.setValue("customer.name", client.name || "");
+    form.setValue("customer.phone", client.phone || "");
+    form.setValue("customer.address", client.address || "");
+    form.setValue("customer.alias", client.alias || "");
+    form.setValue("customer.taxId", client.taxId || "");
+    form.setValue("customer.localityId", client.localityId || 0);
+    form.setValue("customer.zoneId", client.zoneId || 0);
+    form.setValue("customer.type", client.type || "INDIVIDUAL");
 
-  const handleFieldFocus = () => {
-    setClientLocked(false);
-    setSelectedClient(null);
-    form.setValue("person_id", "");
-    form.setValue("customer_name", "");
-    form.setValue("customer_address", "");
-    form.setValue("phone", "");
+    // Si necesitas traer detalles adicionales (como zona), puedes hacerlo aquí
+    if (client.person_id) {
+      const details = await fetchClientDetails(client.person_id);
+      if (details?.zone?.zone_id) {
+        form.setValue("customer.zoneId", details.zone.zone_id);
+        form.setValue("zone_id", details.zone.zone_id);
+        form.setValue("zone_name", details.zone.name);
+      }
+      if (details?.locality?.locality_id) {
+        form.setValue("customer.localityId", details.locality.locality_id);
+        form.setValue("locality_id", details.locality.locality_id);
+        console.log("form values after fetching details:", form.getValues());
+      }
+    }
   };
 
   return (
     <fieldset className="order-section">
       <legend>Datos del cliente</legend>
-        <ItemFormOrder
+      <ItemFormOrder
         {...form}
-        fields={orderOneOffClientFields().map(f => ({
-            ...f,
-            disabled: clientLocked,
-            onFocus: handleFieldFocus,
-        }))}
+        fields={orderOneOffClientFields}
         hideActions
         onSubmit={() => {}}
         searchFieldProps={{
-            customer_id: {
-            value: form.watch("person_id") ? String(form.watch("person_id")) : "",
-            fetchOptions: getFetchOptions("customer_id"),
-            renderOption: (client: any) => <span>{client.person_id}</span>,
-            onOptionSelect: handleClientSelect,
-            placeholder: "Buscar por ID...",
-            class: "order"
-            },
-            customer_name: {
-            value: form.watch("customer_name") || "",
-            fetchOptions: getFetchOptions("customer_name"),
+          "customer.name": {
+            value: form.watch("customer.name") || "",
+            fetchOptions: (query: string) => fetchClients({ personId: query }, "INDIVIDUAL"),
             renderOption: (client: any) => <span>{client.name}</span>,
             onOptionSelect: handleClientSelect,
             placeholder: "Buscar por nombre...",
             class: "order"
-            },
-            customer_address: {
-            value: form.watch("customer_address") || "",
-            fetchOptions: getFetchOptions("customer_address"),
-            renderOption: (client: any) => <span>{client.address}</span>,
-            onOptionSelect: handleClientSelect,
-            placeholder: "Buscar por dirección...",
-            class: "order"
-            },
-            phone: {
-            value: form.watch("phone") || "",
-            fetchOptions: getFetchOptions("phone"),
+          },
+          "customer.phone": {
+            value: form.watch("customer.phone") || "",
+            fetchOptions: (query: string) => fetchClients({ phone: query }, "INDIVIDUAL"),
             renderOption: (client: any) => <span>{client.phone}</span>,
             onOptionSelect: handleClientSelect,
             placeholder: "Buscar por teléfono...",
             class: "order"
-            },
+          },
+          "customer.address": {
+            value: form.watch("customer.address") || "",
+            fetchOptions: (query: string) => fetchClients({ address: query }, "INDIVIDUAL"),
+            renderOption: (client: any) => <span>{client.address}</span>,
+            onOptionSelect: handleClientSelect,
+            placeholder: "Buscar por dirección...",
+            class: "order"
+          }
         }}
-        />
+      />
     </fieldset>
   );
 };

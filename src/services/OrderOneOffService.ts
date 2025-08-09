@@ -1,8 +1,12 @@
 import { httpAdapter } from "./httpAdapter";
-import { OrderOneOff, OrdersOneOffResponse, CreateOrderOneOffDTO } from "../interfaces/OrderOneOff";
+import {
+  OrderOneOff,
+  OrdersOneOffResponse,
+  CreateOrderOneOffDTO,
+} from "../interfaces/OrderOneOff";
 
 export class OrderOneOffService {
-  private ordersUrl = "/api/one-off-purchases/one-off";
+  private ordersUrl = "/one-off-purchases/one-off";
 
   async getOrdersOneOff(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<OrdersOneOffResponse> {
     const safeParams = {

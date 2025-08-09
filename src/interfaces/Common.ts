@@ -17,6 +17,10 @@ interface FieldValidation {
   required?: boolean;
   isEmail?: boolean;
   minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: RegExp | string;
 }
 
 // Definición de un campo del formulario

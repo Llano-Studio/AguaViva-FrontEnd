@@ -8,7 +8,8 @@ import "../../styles/css/components/common/itemForm.css";
 import SearchBar from "../common/SearchBar";
 import { RouteSheet, CreateRouteSheetDTO } from "../../interfaces/RouteSheet";
 import { useNavigate } from "react-router-dom";
-import { formatDate } from "../../utils/formatDate"; 
+import { formatDate } from "../../utils/formatDate";
+import { DatePickerWithLabel } from "../common/DatePickerWithLabel";
 
 
 interface RouteSheetFormProps {
@@ -184,18 +185,11 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
           />
         </div>
         <div className={`${className}-form-header-content`}>
-          <div className={`${className}-form-date-wrapper`}>
-            <img src="/assets/icons/calendar.svg" alt="Calendar Icon" />
-            <div className={`${className}-form-date-display`}>
-              {formattedDate} {/* Mostrar la fecha formateada */}
-            </div>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className={`${className}-form-date-selector`}
-            />
-          </div>
+          <DatePickerWithLabel
+            value={selectedDate}
+            onChange={setSelectedDate}
+            className={className}
+          />
 
           <select
             value={selectedVehicleId}

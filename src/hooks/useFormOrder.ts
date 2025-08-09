@@ -50,6 +50,16 @@ export function useFormOrder() {
     }
   };
 
+  const fetchZones = async (params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }) => {
+    try {
+      const response = await zoneService.getZones(params);
+      return response?.data || [];
+    } catch (error) {
+      console.error("Error al obtener zonas:", error);
+      return [];
+    }
+  };
+
   // Traer móviles de la zona
   const fetchZoneMobiles = async (zoneId: number) => {
     if (!zoneId) {
@@ -94,6 +104,7 @@ export function useFormOrder() {
     fetchSubscriptionsByCustomer,
     fetchProductsBySubscriptionPlan,
     fetchPriceLists,
+    fetchZones,
     clientDetails,
     zoneMobiles,
     loadingClient,
