@@ -1,84 +1,78 @@
-import { API_URL } from "../config"; 
-import { IAuthService } from "../interfaces/IAuthService";
+import { API_URL } from "../config";
+import {
+  IAuthService,
+  PasswordRecoveryResponse,
+  ResetPasswordResponse,
+  UpdatePasswordResponse,
+} from "../interfaces/IAuthService";
+import { httpAdapter } from "./httpAdapter";
 
 export class AuthService implements IAuthService {
   private apiUrl: string;
 
   constructor() {
-    this.apiUrl = API_URL; 
+    this.apiUrl = API_URL;
   }
 
-  // Implementación del login con JWT
   async login(email: string, password: string): Promise<{ user: any; accessToken: string } | null> {
     try {
-      const response = await fetch(`${this.apiUrl}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data && data.user && data.accessToken) {
-        // Almacenamos el token JWT en localStorage
-        localStorage.setItem("accessToken", data.accessToken);
-        return { user: data.user, accessToken: data.accessToken };
-      } else {
-        console.error("Error en el login desde el servicio:", data?.message || "Respuesta no exitosa o datos incompletos");
-        return null;
+      const response = await httpAdapter.post<{ user: any; accessToken: string }>(
+        { email, password },
+        "/auth/login"
+      );
+      if (response && response.user && response.accessToken) {
+        return response;
       }
+      return null;
     } catch (error) {
       console.error("Error al intentar iniciar sesión en el servicio:", error);
       return null;
     }
   }
 
-  // Implementación del logout con eliminación del JWT
-  async logout(): Promise<boolean> {
+  async recoverPassword(email: string): Promise<PasswordRecoveryResponse> {
     try {
-   
-      localStorage.removeItem("accessToken");
-      console.log("Token eliminado localmente. Sesión cerrada en AuthService.");
-      return true;
-    } catch (error) {
-      console.error("Error al intentar cerrar sesión en AuthService:", error);
-      return false; 
-    }
-  }
-
-  // Implementación de la recuperación de contraseña
-  async recoverPassword(email: string): Promise<{ success: boolean }> {
-    try {
-      const response = await fetch(`${this.apiUrl}/recover-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        return { success: true };
-      }
-
-      return { success: false };
-    } catch (error) {
+      const response = await httpAdapter.post<PasswordRecoveryResponse>(
+        { email },
+        "/auth/recover-password"
+      );
+      return { success: !!response.success, message: response.message };
+    } catch (error: any) {
       console.error("Error al intentar recuperar la contraseña:", error);
-      return { success: false };
+      let errorMessage = "Error de red o servidor";
+      if (error.message === "Failed to fetch") {
+        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
+      }
+      return { success: false, message: errorMessage };
     }
   }
 
-  // Método para obtener el token JWT almacenado
-  private getToken(): string | null {
-    return localStorage.getItem("accessToken");
+  async resetPassword(token: string, newPassword: string): Promise<ResetPasswordResponse> {
+    try {
+      const response = await httpAdapter.post<ResetPasswordResponse>(
+        { token, password: newPassword },
+        "/auth/reset-password"
+      );
+      return { success: !!response.success, message: response.message };
+    } catch (error: any) {
+      console.error("Error al intentar restablecer la contraseña:", error);
+      let errorMessage = "Error de red o servidor";
+      if (error.message === "Failed to fetch") {
+        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
+      }
+      return { success: false, message: errorMessage };
+    }
   }
 
-  // Método para verificar si el token JWT existe
-  isAuthenticated(): boolean {
-    return this.getToken() !== null;
+  async updatePassword(currentPassword: string, newPassword: string): Promise<UpdatePasswordResponse> {
+    try {
+      const response = await httpAdapter.post<UpdatePasswordResponse>(
+        { currentPassword, newPassword },
+        "/auth/update-password"
+      );
+      return response;
+    } catch (error: any) {
+      throw new Error(error?.message || "Error al actualizar la contraseña.");
+    }
   }
 }

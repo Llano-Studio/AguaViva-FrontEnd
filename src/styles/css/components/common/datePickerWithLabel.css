@@ -1,0 +1,70 @@
+.date-wrapper {
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 7px 10px;
+    background: #E7E5FF;
+    border-radius: 6px;
+    display: flex;
+    position: relative;
+}
+
+.date-display {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+}
+
+.date-selector {
+    font-size: 0;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+    /* Oculta el texto del input */
+    color: transparent;
+}
+
+/* Chrome, Safari, Edge */
+.date-selector::-webkit-input-placeholder { color: transparent; }
+.date-selector::-webkit-datetime-edit,
+.date-selector::-webkit-inner-spin-button,
+.date-selector::-webkit-clear-button {
+    display: none;
+}
+.date-selector::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* Firefox */
+.date-selector::-moz-placeholder { color: transparent; }
+.date-selector::-moz-focus-inner { border: 0; }
+.date-selector::-moz-calendar-picker-indicator {
+    opacity: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* Imagen personalizada sobre el botón */
+.date-arrow-down-img {
+    position: absolute;
+    right: 8px;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+    z-index: 3;
+    pointer-events: none;
+}

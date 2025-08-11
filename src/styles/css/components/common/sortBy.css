@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+.sortBy-button{
+    @apply focus:outline-none;
+    padding: 0px;
+}
+
+.sortBy-icon{
+    margin-left: 7px;
+}

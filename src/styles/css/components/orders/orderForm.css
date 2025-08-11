@@ -1,0 +1,91 @@
+.new-order{
+    background: var(--bg-color-3);
+    border-radius: 12px;
+    border: solid 1.5px var(--bg-color-2);
+    padding: 30px;
+    margin-bottom: 80px;
+}
+
+.new-order .form{
+    border: none;
+    padding: 20px 0; 
+}
+ 
+.new-order legend{
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color-3);
+}
+
+.order-section .form-actions {
+    justify-content: end;
+}
+
+.total-order{
+    color: var(--text-color-3);
+    justify-self: end;
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.total-order b{
+    color: var(--text-color-1);
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.notes-order-form-field{
+    width: 100%;
+}
+
+.notes-order-form-textarea{
+    height: 94px;
+}
+
+.order-actions{
+    display: flex;
+    gap: 10px;
+}
+
+.order-actions-button-cancel,
+.order-actions-button-submit{
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 129px;
+    width: fit-content;
+    height: 31px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.order-actions-button-submit{
+    color: var(--text-color-2);
+    background: var(--acent-color-1);
+}
+
+.order-actions-button-cancel{
+    color: var(--text-color-3);
+    border: solid 1px var(--acent-color-1);
+}
+
+.listItem-empty{
+    display: none;
+}
+
+.order-section .form-field:nth-child(5),
+.order-section .form-field:nth-child(6){
+    width: 10.75%;
+}
+
+.order-pedido-section-legend{
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.order-form-radius {
+  border-radius: 0 12px 12px 12px;
+}

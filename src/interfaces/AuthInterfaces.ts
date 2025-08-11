@@ -1,12 +1,15 @@
-export interface User {
+export interface AuthUser {
     id: number;
     email: string;
     name: string;
+    role: string;
+    profileImageUrl?: string;
   }
   
   export interface AuthContextType {
-    user: User | null;
+    user: AuthUser | null;
     login: (email: string, password: string) => Promise<boolean>;
     logout: () => void;
+    isLoading: boolean;
   }
   

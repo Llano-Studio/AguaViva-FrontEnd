@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+.pagination{
+  @apply flex justify-between items-center mt-4;
+  margin-top: 15px;
+}
+
+.pagination-legend{
+  font-size: 12px;
+  font-weight: 200;
+  color: var(--text-color-1);
+  margin-left: 20px;
+}
+
+.pagination-controls{
+  @apply flex space-x-1;
+  background: var(--bg-color-3);
+  border: solid 1px var(--bg-color-2);
+  border-radius: 3px;
+  padding: 2px;
+
+}
+
+.pagination-button{
+  font-size: 13px;
+  padding: 3px 13px;
+  border-radius: 3px;
+}
+
+
+.pagination-button-next,
+.pagination-botton-prev{
+  color: white;
+  background: var(--acent-color-1);
+  border-radius: 3px;
+  font-size: 13px;
+  padding: 3px 13px;
+}
+
+.pagination-button-next:hover,
+.pagination-botton-prev:hover{
+  opacity: 0.8;
+}

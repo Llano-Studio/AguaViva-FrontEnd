@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+.filter-container{
+    @apply fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-50 transition-transform duration-300 translate-x-0; 
+    padding: 80px 52px 52px 52px;
+}
+
+.filter-header{
+    margin-bottom: 45px;
+    display: block;
+}
+
+.filter-title{
+    @apply flex items-center gap-2;
+    font-size: 23px;
+    font-weight: 600;
+    color: var(--text-color-3);
+    margin-top: 25px;
+}
+
+.filter-title-img{
+    @apply w-5 h-5;
+}
+
+.filter-button-close{
+    @apply text-2xl flex items-center p-1;
+    justify-self: end;
+    padding: 0;
+}
+
+.filter-content{
+    @apply space-y-4;
+}
+
+.filter-label-container{
+    margin-bottom: 35px;
+}
+
+.filter-label{
+    @apply block;
+    color: var(--text-color-1);
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.filter-checkbox-group{
+    @apply flex flex-col gap-1;
+}
+
+.filter-checkbox-label{
+    @apply flex items-center gap-2;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.checkbox{
+
+}
+
+.filter-actions{
+    @apply flex justify-between pt-2;
+}
+
+.filter-button-clear, .filter-button-apply{
+    @apply px-3 py-1;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    width: 101px;
+    height: 27.5px;
+}
+
+.filter-button-clear:hover, .filter-button-apply:hover{
+    opacity: 0.8;
+}
+
+.filter-button-apply{
+    background: var(--acent-color-1);
+    color: var(--text-color-2);
+}
+
+.filter-button-clear{
+    border: solid 1.5px var(--acent-color-1);
+    color: var(--text-color-3);
+}
+
+.filter-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 14px;
+  color: #374151;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.filter-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-select:hover {
+  border-color: #9ca3af;
+}
+
+/* Opcional: Estilo para option disabled */
+.filter-select option:disabled {
+  color: #9ca3af;
+}

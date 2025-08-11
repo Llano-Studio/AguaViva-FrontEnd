@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",  // Define el nivel de JavaScript que se va a generar (es5 es lo más compatible).
-    "lib": ["dom", "es2015"],  // Define qué bibliotecas se van a usar (dom y es2015 son necesarios para React).
+    "target": "es2019",  // Define el nivel de JavaScript que se va a generar (es5 es lo más compatible).
+    "lib": ["dom", "es2019"],  // Define qué bibliotecas se van a usar (dom y es2015 son necesarios para React).
     "jsx": "react-jsx",  // Usamos el nuevo JSX Transform de React 17 en adelante.
     "moduleResolution": "node",  // Resuelve los módulos como Node.js.
     "strict": true,  // Habilita las comprobaciones estrictas de TypeScript (muy recomendable).

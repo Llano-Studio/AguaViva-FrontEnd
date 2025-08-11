@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+.dashboard-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .logo-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-color-3);
+    padding-top: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #E6E6E6;
+  }
+
+  .logo{
+    @apply w-32 h-auto;
+    width: 93px;
+  }
+  
+  .sidebar {
+    width: 250px;
+    background: var(--bg-color-3);
+    color: #0C1421;
+    padding-bottom: 1rem;
+    height: 100%;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar-li {
+    @apply w-5 h-5;
+    font-size: 13px;
+    font-weight: 400;
+    border-bottom: 1px solid #E6E6E6;
+  }
+  
+  .sidebar a {
+    font-size: 13px;
+    font-weight: 400;
+    color: #0C1421;
+    text-decoration: none;
+    display: flex;
+    padding: 1rem 1rem 1rem 2rem;
+        border-bottom: solid 1px var(--bg-color-2);
+  }
+  
+  .sidebar a.active {
+    background: #F8F8F8;
+    border-left: 8px solid #403A92;
+  }
+  
+  .sidebar a img{
+    margin-right: 0.7rem;
+  }
+
+  .content {
+    flex-grow: 1;
+    padding: 0 2rem 2rem 2rem;
+    overflow-y: auto;
+    height: 100%;
+    overflow: overlay;
+  }
+
+  .main-container{
+    width: 100%;
+  }
+  
+  .navbar-container{
+    height: 78px;
+    background: #F8F8F8;
+    box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 15;
+  }

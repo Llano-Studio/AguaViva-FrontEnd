@@ -1,10 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { AuthService } from "../services/AuthService";
-import { AuthContextType, User } from "../interfaces/AuthInterfaces";
-// API_URL no es necesaria aquí si AuthService la maneja internamente
-
-// AuthService se instancia sin argumentos, ya que toma API_URL internamente.
-const authService = new AuthService();
+import { AuthContextType, AuthUser } from "../interfaces/AuthInterfaces";
+import { AuthStorage } from "../utils/AuthStorage";
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -12,65 +9,55 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const authService = new AuthService();
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Verificación del token y el estado de la sesión al iniciar
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("accessToken"); // Usar "accessToken"
+    const storedUser = AuthStorage.getUser();
+    const storedToken = AuthStorage.getToken();
 
-    if (storedUser && storedToken) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (!isTokenExpired(storedToken)) {
-          setUser(parsedUser);
-        } else {
-          logout(); // Si el token está expirado, hacer logout
-        }
-      } catch (error) {
-        console.error("Error al parsear el usuario almacenado o token expirado:", error);
-        logout(); // Limpiar en caso de error
-      }
+    // Verificamos que el usuario y el token existen y que el token no haya expirado
+    if (storedUser && storedToken && !isTokenExpired(storedToken)) {
+      setUser(storedUser); // Aquí guardamos el usuario con la propiedad 'role'
+    } else {
+      logout();
     }
+
+    setIsLoading(false);
   }, []);
 
-  // Verificar si el JWT ha expirado
-  const isTokenExpired = (token: string) => {
+  const isTokenExpired = (token: string): boolean => {
     try {
       const decoded: any = JSON.parse(atob(token.split(".")[1]));
       const exp = decoded.exp * 1000;
       return exp < Date.now();
     } catch (e) {
-      console.error("Error al decodificar el token:", e);
-      return true; // Considerar el token como expirado si hay error en decodificación
+      return true;
     }
   };
 
-  // Método de login
   const login = async (email: string, password: string): Promise<boolean> => {
-    const loginResult = await authService.login(email, password);
-    if (loginResult && loginResult.user && loginResult.accessToken) {
-      setUser(loginResult.user);
-      localStorage.setItem("user", JSON.stringify(loginResult.user));
-      localStorage.setItem("accessToken", loginResult.accessToken); // Guardar "accessToken"
+    const result = await authService.login(email, password);
+    if (result && result.accessToken && result.user) {
+      setUser(result.user); // Aquí guardamos el usuario que tiene la propiedad 'role'
+      AuthStorage.saveToken(result.accessToken);
+      AuthStorage.saveUser(result.user);
       return true;
     }
-    // authService.login ya loguea el error si falla
     return false;
   };
 
-  // Método de logout
   const logout = () => {
-    authService.logout(); // AuthService se encarga de remover "accessToken"
     setUser(null);
-    localStorage.removeItem("user");
-    // localStorage.removeItem("accessToken") // Ya no es necesario aquí, AuthService.logout lo hace.
-    console.log("Usuario deslogueado y datos locales limpiados en AuthContext.");
+    AuthStorage.removeToken();
+    AuthStorage.removeUser();
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

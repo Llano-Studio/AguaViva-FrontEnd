@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+.form-checkbox{
+    @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+}
+
+.form-input,
+.form-select,
+.form-textarea{
+    @apply w-full focus:outline-none;
+    height: 30px;
+    min-height: 30px;
+    border: solid 1px var(--bg-color-2);
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+    padding-left: 7px;
+    padding-right: 7px;
+    margin-top: 3px;
+}
+
+.form-textarea{
+    height: fit-content;
+}
+
+.form-select option{
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+    padding-left: 7px
+}
+
+.form{
+    @apply space-y-4;
+    background: var(--bg-color-3);
+    border-radius: 12px;
+    border: solid 1.5px var(--bg-color-2);
+    padding: 30px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2%;
+}
+
+.form-field{
+    width: 23.5%;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field-label{
+    @apply block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color-1);
+}
+
+.form-field-error{
+    @apply text-red-500 text-sm;
+}
+
+.form-actions{
+    @apply flex justify-start space-x-2 pt-4;
+    width: 100%;
+}
+
+.form-cancel,
+.form-submit{
+    min-width: fit-content;
+    font-size: 11px;
+    font-weight: 600;
+    width: 129px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-cancel{
+    color: var(--text-color-3);
+    border: solid 1px var(--acent-color-1);
+}
+
+.form-submit{
+    color: var(--text-color-2);
+    background: var(--acent-color-1);
+}
+
+.form-label{
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.form-checkbox{
+    margin-top: 10px;
+    width: 20px;
+    height: 20px;
+}
+
+/* REACT SELECT */
+/* Control principal */
+.react-select__control {
+  border-radius: 7px;
+  border: 1px solid var(--bg-color-2);
+  min-height: 30px;
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-color-3);
+}
+
+/* Opción seleccionada */
+.react-select__multi-value {
+  background: var(--acent-color-1);
+  color: var(--text-color-2);
+  border-radius: 5px;
+}
+
+/* Texto de la opción seleccionada */
+.react-select__multi-value__label {
+  color: var(--text-color-2);
+  font-size: 12px;
+}
+
+/* Botón de quitar opción */
+.react-select__multi-value__remove {
+  color: var(--text-color-2);
+  cursor: pointer;
+}
+
+/* Opciones del menú */
+.react-select__option {
+  font-size: 12px;
+  color: var(--text-color-1);
+  background: var(--bg-color-3);
+}
+.react-select__option--is-selected {
+  background: var(--acent-color-1);
+  color: var(--text-color-2);
+}
+.react-select__option--is-focused {
+  background: var(--bg-color-2);
+}
+
+.form-file-container{
+  flex-wrap: wrap;
+  display: flex;
+  max-width: 100%;
+}
+
+.form-file{
+  max-width: 100%;
+  font-size: 14px;
+}

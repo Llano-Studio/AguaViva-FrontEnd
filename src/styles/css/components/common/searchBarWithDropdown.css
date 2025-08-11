@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+.search-bar-dropdown{
+    @apply relative w-full;
+    width: 100%;
+    display: flex;
+    z-index: 11;
+}
+
+.search-bar-dropdown-input{
+    @apply border px-3 py-2 rounded w-full pr-10 focus:outline-none;
+    height: 30px;
+    min-height: 30px;
+    border: solid 1px var(--bg-color-2);
+    border-radius: 7px 0px 0px 7px;
+    border-right: none;
+    font-size: 12px;
+    font-weight: 400;
+    padding-left: 16px;
+    background: var(--bg-color-3);
+    margin-top: 3px;
+}
+
+.search-bar-dropdown-btn{
+    padding: 0;
+    border-top: solid 1px var(--bg-color-2);
+    border-right: solid 1px var(--bg-color-2);
+    border-bottom: solid 1px var(--bg-color-2);
+    border-radius: 0 7px 7px 0;
+    width: 34px;
+    background: var(--bg-color-3);
+    margin-top: 3px;
+}
+
+.search-bar-dropdown-img{
+    @apply pointer-events-none;
+    justify-self: center;
+}
+
+.search-bar-dropdown-menu{
+    position: absolute;
+    top: 82%;
+    left: 0px;
+    right: 0px;
+    background: rgb(255, 255, 255);
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 0 0 8px 8px;
+    z-index: -1;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+.search-bar-dropdown-option{
+    padding: 8px;
+    padding-left: 16px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.search-bar-dropdown-empty,
+.search-bar-dropdown-loading{
+    padding: 8px;
+    padding-left: 16px;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+
+
+

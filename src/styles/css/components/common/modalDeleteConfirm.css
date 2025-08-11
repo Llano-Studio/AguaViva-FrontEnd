@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+.modalDeleteConfirm-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 80%);
+}
+
+.modalDeleteConfirm{
+    @apply rounded shadow-lg;
+    width: 400px;
+    height: 144px;
+    background: var(--bg-color-3);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 20px 17px 20px;
+}
+
+.modalDeleteConfirm-title{
+    @apply text-lg font-bold mb-4 text-red-600 capitalize;
+}
+
+.modalDeleteConfirm-legend-1{
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color-3);
+}
+
+.modalDeleteConfirm-legend-2{
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-color-1);
+    width: 14rem;
+    text-align: center;
+}
+
+.modalDeleteConfirm-actions{
+    @apply flex justify-center gap-2;
+}
+
+.modalDeleteConfirm-button-cancel, .modalDeleteConfirm-button-delete{
+    font-size: 11px;
+    min-width: 146px;
+    height: 28px;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalDeleteConfirm-button-delete{
+    background: var(--acent-color-3);
+    color: var(--text-color-2);
+}
+
+.modalDeleteConfirm-button-cancel{
+    border: 1.5px solid var(--text-color-3);
+    color: var(--text-color-3);
+}
