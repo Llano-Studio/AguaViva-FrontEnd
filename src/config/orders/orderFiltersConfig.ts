@@ -8,7 +8,7 @@ export const orderFiltersConfig: FilterField[] = [
     options: [
       { label: "Todos", value: "ALL" },
       { label: "Regulares", value: "ORDER" },
-      { label: "One-Off", value: "ONE_OFF" },
+      { label: "Compra Única", value: "ONE_OFF" },
     ],
   },
   // Agrega más filtros aquí, asegurándote de usar los tipos correctos

@@ -7,7 +7,7 @@ import { ProductService } from "../services/ProductService";
 export const useOrders = () => {
   const orderService = new OrderService();
   const clientSubscriptionService = new ClientSubscriptionService();
-  const productService = new ProductService(); // Instancia del servicio de productos
+  const productService = new ProductService(); 
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(false);

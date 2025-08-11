@@ -55,6 +55,7 @@ const OrdersPage: React.FC = () => {
     setSortDirection: setSortDirectionOneOff,
     fetchOrders: fetchOneOffOrders,
     deleteOrder: deleteOneOffOrder,
+    productsOfOrderOneOff: productsOfOrderOneOff,
   } = useOrdersOneOff();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -117,8 +118,17 @@ const OrdersPage: React.FC = () => {
     setShowViewModal(true);
 
     try {
-      const products = await productsOfOrder(order.order_id || order.purchase_id); // Obtener productos de la orden
-      setOrderProducts(products); // Guardar productos en el estado
+      if(order.order_id){
+        const products = await productsOfOrder(order.order_id);
+        setOrderProducts(products);
+        console.log("Productos de la orden:", products);
+      }
+      if(order.purchase_id){
+        const products = await productsOfOrderOneOff(order.purchase_id);
+        setOrderProducts(products);
+        console.log("Productos de la orden One-Off:", products);
+      } 
+
     } catch (error) {
       console.error("Error al obtener productos de la orden:", error);
     }

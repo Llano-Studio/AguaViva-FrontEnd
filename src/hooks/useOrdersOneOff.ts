@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { OrderOneOff, CreateOrderOneOffDTO } from "../interfaces/OrderOneOff";
 import { OrderOneOffService } from "../services/OrderOneOffService";
+import { ProductService } from "../services/ProductService";
+
 
 export const useOrdersOneOff = () => {
   const orderService = new OrderOneOffService();
+  const productService = new ProductService(); 
   const [orders, setOrders] = useState<OrderOneOff[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<OrderOneOff | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +63,19 @@ export const useOrdersOneOff = () => {
     [page, limit, search, filters, sortBy, sortDirection]
   );
 
+  const fetchOrderById = async (id: number): Promise<OrderOneOff | null> => {
+    try {
+      setIsLoading(true);
+      const order = await orderService.getOrderOneOffById(id);
+      return order;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener la orden");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
   }, [page, limit, search, filters, sortBy, sortDirection, fetchOrders]);
@@ -107,6 +123,33 @@ export const useOrdersOneOff = () => {
     }
   };
 
+  const productsOfOrderOneOff = async (orderId: number) => {
+    try {
+      setIsLoading(true);
+      const order = await fetchOrderById(orderId);
+      if (!order || !order.products) {
+        throw new Error("No se encontraron productos en la orden");
+      }
+
+      const enrichedItems = await Promise.all(
+        order.products.map(async (item) => {
+          const imageUrl = await productService.getProductImage(item.product_id);
+          return {
+            ...item,
+            image_url: imageUrl || null,
+          };
+        })
+      );
+
+      return enrichedItems;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener productos de la orden");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     orders,
     selectedOrder,
@@ -132,6 +175,7 @@ export const useOrdersOneOff = () => {
     setSortBy,
     sortDirection,
     setSortDirection,
+    productsOfOrderOneOff
   };
 };
 

@@ -3,6 +3,8 @@ import { Order, CreateOrderFormDTO } from "../../interfaces/Order";
 import { OrderOneOff, CreateOrderOneOffFormDTO } from "../../interfaces/OrderOneOff";
 import { sortByOrder } from "../../utils/sortByOrder";
 import { formatDateForView } from "../../utils/formateDateForView"; // <-- Agrega este import
+import { renderStatusOrderLabel } from "../../utils/statusOrderLabels";
+import { renderTypeOrderLabel } from "../../utils/typeOrderLabels";
 
 
 // Campos para formulario de artículos de la orden
@@ -46,7 +48,7 @@ export const orderClientFields: Field<CreateOrderFormDTO>[] = [
     name: "phone",
     label: "Teléfono",
     type: "search",
-    validation: { required: false },
+    validation: { required: false },  
     order: 3,
   },
 ];
@@ -87,23 +89,30 @@ export const orderOneOffNotesFields: Field<CreateOrderOneOffFormDTO>[] = [
 
 // Columnas para la tabla unificada de órdenes y One-Off
 export const orderTableColumns: Column<{ [key: string]: any }>[] = sortByOrder([
-  { header: "ID", accessor: "id", order: 0 },
+  
   { header: "Cliente", accessor: "customer.name", order: 1 },
-  { header: "Tipo", accessor: "order_type", order: 2 },
+  { header: "Telefono", accessor: "customer.phone", order: 2 },
+  { header: "Tipo", accessor: "order_type", order: 3,
+    render: (value: string) => renderTypeOrderLabel(value)
+   },
   { 
-    header: "Fecha", 
+    header: "Fecha pedido", 
     accessor: "order_date", 
-    order: 3,
-    render: (value: string) => formatDateForView(value)
-  },
-  { 
-    header: "Entrega", 
-    accessor: "scheduled_delivery_date", 
     order: 4,
     render: (value: string) => formatDateForView(value)
   },
-  { header: "Estado", accessor: "status", order: 5 },
+  { 
+    header: "Fecha entrega", 
+    accessor: "scheduled_delivery_date", 
+    order: 5,
+    render: (value: string) => formatDateForView(value)
+  },
   { header: "Total", accessor: "total_amount", order: 6 },
+  { header: "Pedido ID", accessor: "id", order: 7 },
+  { header: "Estado", accessor: "status", order: 8,
+    render: (value: string) => renderStatusOrderLabel(value)
+   },
+ 
 ]);
 
 export type OrderTableRow = Order | OrderOneOff;

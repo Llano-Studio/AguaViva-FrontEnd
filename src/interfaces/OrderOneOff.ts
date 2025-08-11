@@ -44,7 +44,6 @@ export interface OneOffZone {
   name: string;
 }
 
-
 export interface OneOffProductForm extends OneOffProduct {
   image_url?: string;
 }
@@ -57,6 +56,8 @@ export interface OrderOneOff {
   delivery_time: string;
   total_amount: string;
   paid_amount: string;
+  status: string;
+  requires_delivery: boolean;
   notes?: string;
   products: OneOffProduct[];
   person: OneOffPerson;
@@ -86,13 +87,16 @@ export interface CreateOrderOneOffDTO {
   purchase_date: string;
   scheduled_delivery_date: string;
   delivery_time: string;
+  total_amount: string;
   paid_amount: string;
   notes?: string;
+  status: string;
 }
 
 export interface OrderOneOffItemInput {
   product_id: number;
   quantity: number;
+  price_list_id: number;
 }
 
 export interface OrderOneOffItemInputForm extends OrderOneOffItemInput {
@@ -102,7 +106,6 @@ export interface OrderOneOffItemInputForm extends OrderOneOffItemInput {
   image_url?: string;
   is_returnable?: boolean;
   price_list_name?: string;
-  price_list_id?: number;
   notes?: string;
 }
 
@@ -113,5 +116,4 @@ export interface CreateOrderOneOffFormDTO extends CreateOrderOneOffDTO {
   delivery_time_start?: string;
   delivery_time_end?: string;
   order_type: OrderType;
-  status: OrderStatus;
 }

@@ -49,7 +49,7 @@
 
 .modalUpdateConfirm-button-cancel, .modalUpdateConfirm-button-confirm{
     font-size: 11px;
-    width: 146px;
+    min-width: 146px;
     height: 28px;
     text-transform: capitalize;
     display: flex;

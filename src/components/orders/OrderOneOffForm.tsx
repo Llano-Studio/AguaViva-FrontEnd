@@ -44,19 +44,21 @@ const getInitialValues = (
       items: orderToEdit.products.map((prod) => ({
         product_id: prod.product_id,
         quantity: prod.quantity,
+        price_list_id: prod.price_list.price_list_id,
       })),
       sale_channel_id: orderToEdit.sale_channel.sale_channel_id,
-      requires_delivery: true,
+      requires_delivery: orderToEdit.requires_delivery,
       delivery_address: "",
       locality_id: orderToEdit.locality.locality_id,
       zone_id: orderToEdit.zone.zone_id,
-      purchase_date: orderToEdit.purchase_date ?? new Date().toISOString().slice(0, 10),
-      scheduled_delivery_date: orderToEdit.scheduled_delivery_date ?? new Date().toISOString().slice(0, 10),
+      purchase_date: orderToEdit.purchase_date ? new Date(orderToEdit.purchase_date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+      scheduled_delivery_date: orderToEdit.scheduled_delivery_date ? new Date(orderToEdit.scheduled_delivery_date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
       delivery_time: orderToEdit.delivery_time,
+      total_amount: orderToEdit.total_amount,
       paid_amount: orderToEdit.paid_amount,
       notes: orderToEdit.notes || "",
       order_type: "ONE_OFF",
-      status: "PENDING",
+      status: orderToEdit.status || "PENDING",
     };
   }
   return {
@@ -80,7 +82,8 @@ const getInitialValues = (
     purchase_date: new Date().toISOString().slice(0, 10),
     scheduled_delivery_date: new Date().toISOString().slice(0, 10),
     delivery_time: "",
-    paid_amount: "",
+    total_amount: "0",
+    paid_amount: "0",
     notes: "",
     order_type: "ONE_OFF",
     status: "PENDING",
@@ -119,13 +122,13 @@ const OrderOneOffForm: React.FC<OrderOneOffFormProps> = ({
 
   const [articles, setArticles] = useState<OrderOneOffItemInputForm[]>(orderToEdit?.products?.map((oi: any) => ({
     product_id: oi.product_id,
-    product_name: oi.product_name || "",
+    product_name: oi.description || "",
     quantity: oi.quantity,
-    price_list_id: oi.price_list_id,
-    price_list_name: oi.price_list_name,
-    notes: oi.notes,
-    price_unit: oi.price_unit || "0",
-    price_total_item: oi.price_total_item || "0",
+    price_list_id: oi.price_list?.price_list_id || 0,
+    price_list_name: oi.price_list?.name || "",
+    notes: oi.notes || "",
+    price_unit: oi.price_list?.unit_price || "0",
+    price_total_item: (Number(oi.price_list?.unit_price || 0) * Number(oi.quantity)).toString(),
     image_url: oi.image_url || "",
     is_returnable: oi.is_returnable || false,
   })) ?? []);
@@ -133,54 +136,58 @@ const OrderOneOffForm: React.FC<OrderOneOffFormProps> = ({
   // Calcular total del pedido
   useEffect(() => {
     const total = calculatePriceTotalOrder(articles);
+    form.setValue("total_amount", total);
     form.setValue("paid_amount", total);
   }, [articles]);
 
   // Handler para submit
-const handleSubmit = async (values: CreateOrderOneOffFormDTO) => {
-  const items = articles.map((a) => ({
-    product_id: a.product_id,
-    quantity: Number(a.quantity),
-  }));
+  const handleSubmit = async (values: CreateOrderOneOffFormDTO) => {
+    const items = articles.map((a) => ({
+      product_id: a.product_id,
+      quantity: Number(a.quantity),
+      price_list_id: a.price_list_id,
+    }));
 
-  const v = values as any;
-  let delivery_time = `${v.delivery_time_start}-${v.delivery_time_end}`;
-  let delivery_address = form.getValues("customer.address");
-  let locality_id = form.getValues("locality_id");
-  let zone_id = form.getValues("zone_id");
-  let scheduled_delivery_date = form.getValues("scheduled_delivery_date");
+    const v = values as any;
+    let delivery_time = `${v.delivery_time_start}-${v.delivery_time_end}`;
+    let delivery_address = form.getValues("customer.address");
+    let locality_id = form.getValues("locality_id");
+    let zone_id = form.getValues("zone_id");
+    let scheduled_delivery_date = form.getValues("scheduled_delivery_date");
 
-  if (!form.getValues("requires_delivery")) {
-    delivery_time = "";
-    delivery_address = "";
-    locality_id = 0;
-    zone_id = 0;
-    scheduled_delivery_date = "";
-  }
+    if (!form.getValues("requires_delivery")) {
+      delivery_time = "";
+      delivery_address = "";
+      locality_id = 0;
+      zone_id = 0;
+      scheduled_delivery_date = "";
+    }
 
-  const data: CreateOrderOneOffDTO = {
-    customer: {
-      name: selectedClient?.name || form.getValues("customer.name"),
-      phone: selectedClient?.phone || form.getValues("customer.phone"),
-      alias: form.getValues("customer.alias"),
-      address: form.getValues("customer.address"),
-      taxId: form.getValues("customer.taxId"),
-      localityId: form.getValues("customer.localityId"),
-      zoneId: form.getValues("customer.zoneId"),
-      type: form.getValues("customer.type"),
-    },
-    items,
-    sale_channel_id: form.getValues("sale_channel_id"),
-    requires_delivery: form.getValues("requires_delivery"),
-    delivery_address,
-    locality_id,
-    zone_id,
-    purchase_date: form.getValues("purchase_date"),
-    scheduled_delivery_date,
-    delivery_time,
-    paid_amount: form.getValues("paid_amount"),
-    notes: form.getValues("notes"),
-  };
+    const data: CreateOrderOneOffDTO = {
+      customer: {
+        name: selectedClient?.name || form.getValues("customer.name"),
+        phone: selectedClient?.phone || form.getValues("customer.phone"),
+        alias: form.getValues("customer.alias") || "",
+        address: form.getValues("customer.address"),
+        taxId: form.getValues("customer.taxId") || "",
+        localityId: form.getValues("customer.localityId"),
+        zoneId: form.getValues("customer.zoneId"),
+        type: form.getValues("customer.type"),
+      },
+      items,
+      sale_channel_id: form.getValues("sale_channel_id"),
+      requires_delivery: form.getValues("requires_delivery"),
+      delivery_address,
+      locality_id,
+      zone_id,
+      purchase_date: form.getValues("purchase_date"),
+      scheduled_delivery_date,
+      delivery_time,
+      total_amount: form.getValues("total_amount"),
+      paid_amount: form.getValues("paid_amount"),
+      notes: form.getValues("notes") || "",
+      status: "",
+    };
 
     if (isEditing && orderToEdit) {
       setPendingValues(data);
@@ -266,7 +273,7 @@ const handleSubmit = async (values: CreateOrderOneOffFormDTO) => {
 
       {/* Total */}
       <h3 className="total-order">
-        Total Pedido: <b>${form.watch("paid_amount")}</b>
+        Total Pedido: <b>${form.watch("total_amount")}</b>
       </h3>
 
       {error && <div className="error-message">{error}</div>}
