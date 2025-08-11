@@ -69,17 +69,40 @@ const OrdersPage: React.FC = () => {
   const [orderToView, setOrderToView] = useState<any>(null);
   const [orderProducts, setOrderProducts] = useState<any[]>([]); // Productos de la orden
 
-  useEffect(() => {
-    if (searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [regularOrders, oneOffOrders]);
+  // Agregar estado para el ordenamiento local cuando filterType es "ALL"
+  const [localSortBy, setLocalSortBy] = useState<string[]>([]);
+  const [localSortDirection, setLocalSortDirection] = useState<("asc" | "desc")[]>([]);
+
+  const sortOrdersLocally = (orders: any[], sortBy: string[], sortDirection: ("asc" | "desc")[]) => {
+    if (sortBy.length === 0) return orders;
+    
+    return [...orders].sort((a, b) => {
+      for (let i = 0; i < sortBy.length; i++) {
+        const column = sortBy[i];
+        const direction = sortDirection[i];
+        
+        let aValue = column.split('.').reduce((obj, key) => obj?.[key], a);
+        let bValue = column.split('.').reduce((obj, key) => obj?.[key], b);
+        
+        // Convertir a string para comparación
+        aValue = aValue?.toString() || '';
+        bValue = bValue?.toString() || '';
+        
+        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  };
 
   // Unifica los pedidos según el filtro
   const orders = (() => {
     if (filterType === "ORDER") return regularOrders;
     if (filterType === "ONE_OFF") return oneOffOrders;
-    return [...regularOrders, ...oneOffOrders];
+    
+    // Para "ALL", aplicar ordenamiento local
+    const allOrders = [...regularOrders, ...oneOffOrders];
+    return sortOrdersLocally(allOrders, localSortBy, localSortDirection);
   })();
 
   // Unifica paginación y totales según el filtro
@@ -87,6 +110,13 @@ const OrdersPage: React.FC = () => {
   const setPage = filterType === "ORDER" ? setPageRegular : filterType === "ONE_OFF" ? setPageOneOff : () => {};
   const totalPages = filterType === "ORDER" ? totalPagesRegular : filterType === "ONE_OFF" ? totalPagesOneOff : 1;
   const total = filterType === "ORDER" ? totalRegular : filterType === "ONE_OFF" ? totalOneOff : orders.length;
+
+
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [regularOrders, oneOffOrders]);
 
   const handleDeleteClick = (id: number) => {
     const order = orders.find((o: any) => o.order_id === id || o.purchase_id === id);
@@ -121,12 +151,10 @@ const OrdersPage: React.FC = () => {
       if(order.order_id){
         const products = await productsOfOrder(order.order_id);
         setOrderProducts(products);
-        console.log("Productos de la orden:", products);
       }
       if(order.purchase_id){
         const products = await productsOfOrderOneOff(order.purchase_id);
         setOrderProducts(products);
-        console.log("Productos de la orden One-Off:", products);
       } 
 
     } catch (error) {
@@ -160,11 +188,38 @@ const OrdersPage: React.FC = () => {
     setPage(1);
   };
 
+  const getLastWordAfterDot = (field: string): string => {
+    if (field.includes('.')) {
+      return field.split('.').pop() || field;
+    }
+    return field;
+  };
+
   const handleSort = (column: string) => {
-    if (filterType === "ORDER") {
-      const idx = sortByRegular.indexOf(column);
+    // Extraer solo la última palabra después del punto para comparación
+    const processedColumn = getLastWordAfterDot(column);
+
+    if (filterType === "ALL") {
+      // Manejar ordenamiento local para "ALL"
+      const idx = localSortBy.indexOf(processedColumn);
       if (idx === -1) {
-        setSortByRegular([...sortByRegular, column]);
+        setLocalSortBy([...localSortBy, processedColumn]);
+        setLocalSortDirection([...localSortDirection, "asc"]);
+      } else if (localSortDirection[idx] === "asc") {
+        const newDirections = [...localSortDirection];
+        newDirections[idx] = "desc";
+        setLocalSortDirection(newDirections);
+      } else if (localSortDirection[idx] === "desc") {
+        setLocalSortBy(localSortBy.filter((_, i) => i !== idx));
+        setLocalSortDirection(localSortDirection.filter((_, i) => i !== idx));
+      }
+      return;
+    }
+
+    if (filterType === "ORDER") {
+      const idx = sortByRegular.indexOf(processedColumn);
+      if (idx === -1) {
+        setSortByRegular([...sortByRegular, processedColumn]);
         setSortDirectionRegular([...sortDirectionRegular, "asc"]);
       } else if (sortDirectionRegular[idx] === "asc") {
         const newDirections = [...sortDirectionRegular];
@@ -176,9 +231,9 @@ const OrdersPage: React.FC = () => {
       }
       setPageRegular(1);
     } else if (filterType === "ONE_OFF") {
-      const idx = sortByOneOff.indexOf(column);
+      const idx = sortByOneOff.indexOf(processedColumn);
       if (idx === -1) {
-        setSortByOneOff([...sortByOneOff, column]);
+        setSortByOneOff([...sortByOneOff, processedColumn]);
         setSortDirectionOneOff([...sortDirectionOneOff, "asc"]);
       } else if (sortDirectionOneOff[idx] === "asc") {
         const newDirections = [...sortDirectionOneOff];
@@ -261,8 +316,8 @@ const OrdersPage: React.FC = () => {
           onDelete={order => handleDeleteClick(getOrderRowId(order))}
           className={titlePage}
           columns={orderTableColumns}
-          sortBy={filterType === "ORDER" ? sortByRegular : sortByOneOff}
-          sortDirection={filterType === "ORDER" ? sortDirectionRegular : sortDirectionOneOff}
+          sortBy={filterType === "ALL" ? localSortBy : (filterType === "ORDER" ? sortByRegular : sortByOneOff)}
+          sortDirection={filterType === "ALL" ? localSortDirection : (filterType === "ORDER" ? sortDirectionRegular : sortDirectionOneOff)}
           onSort={handleSort}
           onView={handleViewClick}
         />

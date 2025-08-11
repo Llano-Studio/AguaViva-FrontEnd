@@ -122,10 +122,8 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
       fetchDrivers(selectedVehicleId).then(() => {
         // Solo establecer automáticamente el primer chofer si está activada la selección automática
         if (isDriverAutoSelected && drivers.length > 0) {
-          console.log("Choferes disponibles:", drivers);
       
             setSelectedDriverId(drivers[0].value);
-            console.log("Chofer seleccionado automáticamente:", selectedDriverId);
           
         } else if (drivers.length === 0) {
           setSelectedDriverId(""); // Si no hay choferes, limpiar el estado
@@ -140,7 +138,6 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   const handleDriverChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newDriverId = Number(e.target.value);
     setSelectedDriverId(newDriverId); // Actualizar el estado del chofer seleccionado
-    console.log("Nuevo chofer seleccionado:", newDriverId);
     setIsDriverAutoSelected(false); // Cambiar a selección manual
   };
 

@@ -15,7 +15,7 @@ export const OrderListItemColumns = sortByOrder([
             ) : (
             <span style={{ color: "#aaa", width: 48, height: 48, display: "inline-block" }}>Sin imagen</span>)}
             <span>
-                {item?.product_name ?? "Sin descripción"}
+                {item?.product_name ?? item?.description ?? "Sin descripción"}
             </span>
         </div>
     ),

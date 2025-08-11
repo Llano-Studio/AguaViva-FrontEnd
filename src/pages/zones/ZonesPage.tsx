@@ -14,6 +14,8 @@ import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
+import useLocations from "../../hooks/useLocations"; // Importar el hook de ubicaciones
+
 
 const ZonesPage: React.FC = () => {
   const { 
@@ -64,10 +66,8 @@ const ZonesPage: React.FC = () => {
     if (zoneToDelete) {
       try {
         await deleteZone(zoneToDelete.zone_id);
-        console.log("zona eliminada");
         showSnackbar("Zona eliminada correctamente.", "success");
         await fetchZones();
-        console.log("pase fetchzone");
       } catch (err: any) {
         showSnackbar(err?.message || "Error al eliminar zona", "error");
       } finally {
@@ -91,7 +91,17 @@ const ZonesPage: React.FC = () => {
     setFilters((prev: any) => ({ ...prev, [name]: value }));
   };
 
+
   const handleApplyFilters = () => {
+    const transformedFilters = { ...filters };
+
+    // Cambiar el nombre del filtro de "locality" a "locality_id"
+    if (filters.locality) {
+      transformedFilters.locality_id = filters.locality; // Renombrar el filtro
+      delete transformedFilters.locality; // Eliminar el campo original
+    }
+
+    setFilters(transformedFilters); // Guardar los filtros transformados
     setShowFilters(false);
     setPage(1);
   };
@@ -101,6 +111,25 @@ const ZonesPage: React.FC = () => {
     setShowFilters(false);
     setPage(1);
   };
+
+  const { localities, fetchLocalities } = useLocations();
+
+  useEffect(() => {
+    fetchLocalities();
+  }, []);
+
+  const dynamicZoneFilters = zoneFilters.map((filter) => {
+    if (filter.name === "locality_ids") {
+      return {
+        ...filter,
+        options: localities.map((locality) => ({
+          label: locality.name,
+          value: locality.locality_id.toString(),
+        })),
+      };
+    }
+    return filter;
+  });
 
   const handleSort = (column: string) => {
     const idx = sortBy.indexOf(column);
@@ -266,7 +295,7 @@ const ZonesPage: React.FC = () => {
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        fields={zoneFilters}
+        fields={dynamicZoneFilters} // Usar filtros dinámicos
         values={filters}
         onChange={handleFilterChange}
         onApply={handleApplyFilters}

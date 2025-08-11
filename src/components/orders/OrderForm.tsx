@@ -179,8 +179,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
       form.setValue("delivery_time_end", end, { shouldDirty: true, shouldTouch: true });
     }
   };
-
-  console.log("OrderForm selectedClient:", selectedClient);
   
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className={classForm}>

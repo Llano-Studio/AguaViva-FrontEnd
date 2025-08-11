@@ -19,7 +19,6 @@ export const OrderClientSection: React.FC<OrderClientSectionProps> = (props) => 
 
 const handleClientSelect = async (client: any) => {
   setSelectedClient({ ...client });
-  console.log("Cliente seleccionado:", client);
   form.setValue("customer_id", client.person_id);
   form.setValue("customer_address", client.address || "");
   form.setValue("customer_id_display", client.person_id || "");
@@ -28,7 +27,6 @@ const handleClientSelect = async (client: any) => {
 
   // Traer detalles del cliente y móviles de la zona
   const details = await fetchClientDetails(client.person_id);
-  console.log("Detalles del cliente:", details);
   if (details?.zone?.zone_id) {
     form.setValue("zone_name", details.zone.name || "");
     form.setValue("zone_id", details.zone.zone_id || "");

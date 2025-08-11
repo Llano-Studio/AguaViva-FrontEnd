@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User, CreateUserDTO } from '../interfaces/User';
 import { UserService } from '../services/UserService';
+import { cleanFilters } from '../utils/filterUtils';
 
 export const useUsers = () => {
   const userService = new UserService();
@@ -35,12 +36,16 @@ export const useUsers = () => {
     ) => {
       try {
         setIsLoading(true);
+        
+        // Limpiar filtros antes de enviar
+        const cleanedFilters = cleanFilters(filtersParam);
+        
         const response = await userService.getUsers({
           page: pageParam,
           limit: limitParam,
           search: searchParam,
           sortBy: sortByParam,
-          ...filtersParam,
+          ...cleanedFilters,
         });
         if (response?.data) {
           setUsers(response.data);

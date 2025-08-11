@@ -1,6 +1,8 @@
 import { formatDateForView } from "../../utils/formateDateForView";
+import { renderPaymentSemaphoreLabel } from "../../utils/paymentSemaphoreLabels";
 
 export const clientModalConfig = [
+  { label: "ID cliente", accessor: "person_id", className: "modal-item-1", order: 0 },
   { label: "Nombre", accessor: "name", className: "modal-item-1", order: 0 },
   { label: "Teléfono", accessor: "phone", className: "modal-item-2", order: 1 },
   { label: "Dirección", accessor: "address", className: "modal-item-3", order: 2 },
@@ -24,7 +26,9 @@ export const clientModalConfig = [
     order: 8,
     render: (value: string) => value === "PLAN" ? "Abono" : "Individual" 
   },
-  { label: "Semáforo de pago", accessor: "payment_semaphore_status", className: "modal-item-9", order: 9 },
+  { label: "Estado de pago", accessor: "payment_semaphore_status", className: "modal-item-9", order: 9,
+    render: (value: string) => renderPaymentSemaphoreLabel(value)
+  },
 ].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
 export const loanedProductsConfig = [

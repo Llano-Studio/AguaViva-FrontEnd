@@ -176,7 +176,7 @@ export function ItemForm<T extends FieldValues>({
         );
       case 'file':
         return (
-          <div>
+          <div className={`form-file-container ${classForm ? classForm+"-form-file-container" : ""}`}>
             <input
               type="file"
               {...register(field.name as any, validationRules)}

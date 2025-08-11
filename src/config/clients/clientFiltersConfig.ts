@@ -10,7 +10,7 @@ export const clientFilters: FilterField[] = [
   {
     name: "type",
     label: "Tipo",
-    type: "select" as const,
+    type: "checkbox" as const,
     order: 1,
     options: [
       { label: "Individual", value: "INDIVIDUAL" },
@@ -18,27 +18,18 @@ export const clientFilters: FilterField[] = [
     ],
   },
   {
-    name: "zoneId",
+    name: "zoneIds",
     label: "Zona",
-    type: "select" as const,
+    type: "checkbox" as const,
     order: 2,
     // Puedes agregar options dinámicamente si lo necesitas
   },
   {
-    name: "localityId",
+    name: "localityIds",
     label: "Localidad",
     type: "select" as const,
     order: 3,
     // Puedes agregar options dinámicamente si lo necesitas
   },
-  {
-    name: "isActive",
-    label: "Activo",
-    type: "checkbox" as const,
-    order: 4,
-    options: [
-      { label: "Sí", value: "true" },
-      { label: "No", value: "false" },
-    ],
-  },
+
 ].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));

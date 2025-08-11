@@ -2,6 +2,7 @@ import { Field, Column } from "../../interfaces/Common";
 import { CreateClientDTO, Client } from "../../interfaces/Client";
 import { sortByOrder } from "../../utils/sortByOrder";
 import { dependentLocationFields } from "../common/dependentLocationFields";
+import { renderPaymentSemaphoreLabel } from "../../utils/paymentSemaphoreLabels";
 
 export const clientFields = (
   countries: { label: string; value: number }[],
@@ -50,15 +51,9 @@ export const clientColumns: Column<Client>[] = sortByOrder([
     render: (value: string) => value === 'PLAN' ? 'Abono' : 'Individual'
   },
   { 
-    header: 'Semáforo de pago', 
+    header: 'Estado de pago', 
     accessor: 'payment_semaphore_status',
     order: 9,
-    render: (value: string) => {
-      if (value === "GREEN") return "Al dia";
-      if (value === "YELLOW") return "Atrasado";
-      if (value === "RED") return "Vencido";
-      if (value === "NONE") return "-";
-      return value;
-    }
+    render: (value: string) => renderPaymentSemaphoreLabel(value)
   }
 ]);

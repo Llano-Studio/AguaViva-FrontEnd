@@ -18,7 +18,6 @@ export function usePriceListItems(priceListId: number) {
     try {
       const res = await service.getByList(priceListId);
       setItems(res.data);
-      console.log("Items fetched:", res.data);
     } catch (err: any) {
       setError(err.message || "Error al obtener items");
     } finally {

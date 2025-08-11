@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Vehicle, CreateVehicleDTO } from "../interfaces/Vehicle";
 import { VehicleService } from "../services/VehicleService";
+import { cleanFilters } from "../utils/filterUtils";
 
 export const useVehicles = () => {
   const vehicleService = new VehicleService();
@@ -35,12 +36,16 @@ export const useVehicles = () => {
     ) => {
       try {
         setIsLoading(true);
+        
+        // Limpiar filtros antes de enviar
+        const cleanedFilters = cleanFilters(filtersParam);
+        
         const response = await vehicleService.getVehicles({
           page: pageParam,
           limit: limitParam,
           search: searchParam,
           sortBy: sortByParam,
-          ...filtersParam,
+          ...cleanedFilters,
         });
         setVehicles(response.data);
         setTotal(response.total);

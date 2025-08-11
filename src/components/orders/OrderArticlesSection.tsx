@@ -55,8 +55,6 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
     getAvailableCreditsBySubscription
   } = useOrders();
 
-  console.log("OrderArticlesSection selectedClient:", selectedClient);
-
   const initialArticle = { product_id: 0, quantity: 1, price_list_id: 1, notes: "", abono_id: "" };
   const [articleData, setArticleData] = useState<OrderItemInput & { abono?: string }>(initialArticle);
   // Form para artículos
@@ -82,7 +80,6 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
   }, [abonoSubscriptionId]);
 
   useEffect(() => {
-    console.log("Cliente seleccionado, estableciendo abono por defecto");
     setDefaultAbono();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClient]);
@@ -94,13 +91,9 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
       setAbonoSelected(null);
       setAbonoSubscriptionId(null);
 
-      console.log("Reseteando abono y artículos");
-
       // Si hay cliente seleccionado, busca sus abonos
       if (selectedClient?.person_id) {
-        console.log("Buscando abonos para el cliente:", selectedClient.person_id);
         const subs = await fetchSubscriptionsByCustomer(selectedClient.person_id, "");
-        console.log("Abonos del cliente:", subs);
         const firstSub = subs && subs.length > 0 ? subs[0] : null;
         if (firstSub) {
           articleForm.setValue("abono", firstSub.subscription_plan?.subscription_plan_id);

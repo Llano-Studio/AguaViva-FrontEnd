@@ -66,7 +66,6 @@ export const useProductCategories = () => {
 
   const deleteCategory = async (id: number) => {
     try {
-      console.log("entre a hook deleteCategory");
       setIsLoading(true);
       await service.deleteCategory(id);
       await fetchCategories({ page, limit });

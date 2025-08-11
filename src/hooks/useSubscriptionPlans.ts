@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { SubscriptionPlan, CreateSubscriptionPlanDTO } from "../interfaces/SubscriptionPlan";
 import { SubscriptionPlanService } from "../services/SubscriptionPlanService";
+import { cleanFilters } from "../utils/filterUtils";
 
 export const useSubscriptionPlans = () => {
   const planService = new SubscriptionPlanService();
@@ -35,12 +36,16 @@ export const useSubscriptionPlans = () => {
     ) => {
       try {
         setIsLoading(true);
+        
+        // Limpiar filtros antes de enviar
+        const cleanedFilters = cleanFilters(filtersParam);
+        
         const response = await planService.getSubscriptionPlans({
           page: pageParam,
           limit: limitParam,
           search: searchParam,
           sortBy: sortByParam,
-          ...filtersParam,
+          ...cleanedFilters,
         });
         setPlans(response.data);
         setTotal(response.meta.total);

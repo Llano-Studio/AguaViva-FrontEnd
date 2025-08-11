@@ -1,0 +1,48 @@
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  min-width: 80px;
+  font-size: 9px;
+  color: var(--text-color-1);
+  text-transform: uppercase;
+}
+
+.status-badge--pending {
+  background-color: #FFF799;
+}
+
+.status-badge--confirmed {
+  background-color: #D1FAE5;
+}
+
+.status-badge--in-preparation {
+  background-color: #DBEAFE;
+}
+
+.status-badge--ready-for-delivery {
+  background-color: #E0E7FF;
+}
+
+.status-badge--in-delivery {
+  background-color: #F3E8FF;
+}
+
+.status-badge--delivered {
+  background-color: #93FFD1;
+}
+
+.status-badge--canceled,
+.status-badge--cancelled {
+  background-color: #FF9999;
+}
+
+.status-badge--refunded {
+  background-color: #FEF3C7;
+}
+
+.status-badge--retirado {
+  background-color: #93FFD1;
+}

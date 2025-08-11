@@ -17,7 +17,8 @@ export const productModalConfig = sortByOrder([
         "Sin imagen"
       ),
   },
-  { label: "Descripción", accessor: "description", className: "modal-item-1", order: 2 },
+  { label: "Nombre", accessor: "description", className: "modal-item-1", order: 2 },
+  { label: "ID Artículo", accessor: "product_id", className: "modal-item-2", order: 3 },
   { label: "Categoría", accessor: "product_category.name", className: "modal-item-2", order: 3 },
   { label: "Volumen (L)", accessor: "volume_liters", className: "modal-item-3", order: 4 },
   { label: "Precio", accessor: "price", className: "modal-item-4", order: 5 },

@@ -15,6 +15,8 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
 import ModalCategories from "../../components/products/ModalCategories";
+import useProductCategories from "../../hooks/useProductCategories";
+
 
 const ProductsPage: React.FC = () => {
   const {
@@ -48,12 +50,17 @@ const ProductsPage: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const { showSnackbar } = useSnackbar();
+  const { categories, fetchCategories } = useProductCategories();
 
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [products]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleDeleteClick = (id: number) => {
     const product = products.find(p => p.product_id === id);
@@ -118,6 +125,20 @@ const ProductsPage: React.FC = () => {
     }
     setPage(1);
   };
+
+
+  const dynamicProductFilters = productFilters.map((filter) => {
+    if (filter.name === "categoryIds") {
+      return {
+        ...filter,
+        options: categories.map((category) => ({
+          label: category.name,
+          value: category.category_id.toString(),
+        })),
+      };
+    }
+    return filter;
+  });
 
   // Maneja el éxito en crear/editar producto
   const handleFormSuccess = (msg: string) => {
@@ -279,7 +300,7 @@ const ProductsPage: React.FC = () => {
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        fields={productFilters}
+        fields={dynamicProductFilters} // Usar filtros dinámicos
         values={filters}
         onChange={handleFilterChange}
         onApply={handleApplyFilters}

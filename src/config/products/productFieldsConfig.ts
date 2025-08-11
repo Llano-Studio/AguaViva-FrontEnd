@@ -17,7 +17,7 @@ export const productFields = (
       order: 1,
       defaultValue: defaultCategoryId, // Asigna el valor por defecto
     },
-    { name: "description", label: "Descripción", type: "text", validation: { required: true }, order: 2 },
+    { name: "description", label: "Nombre", type: "text", validation: { required: true }, order: 2 },
     { name: "volume_liters", label: "Volumen (L)", type: "number", validation: { required: true }, order: 3 },
     { name: "price", label: "Precio", type: "number", validation: { required: true }, order: 4 },
     { name: "total_stock", label: "Stock", type: "number", validation: { required: true }, order: 5 },
@@ -30,7 +30,7 @@ export const productFields = (
 
 // Columnas de la tabla de productos
 export const productColumns: Column<Product>[] = sortByOrder([
-  { header: 'Descripción', accessor: 'description', order: 1 },
+  { header: 'Nombre', accessor: 'description', order: 1 },
   { header: 'ID Artículo', accessor: 'product_id', order: 1 },
   { header: 'Categoría', accessor: 'product_category.name', order: 2 },
   { header: 'Volumen (L)', accessor: 'volume_liters', order: 3 },

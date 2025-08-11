@@ -5,6 +5,7 @@ import { sortByOrder } from "../../utils/sortByOrder";
 import { formatDateForView } from "../../utils/formateDateForView"; // <-- Agrega este import
 import { renderStatusOrderLabel } from "../../utils/statusOrderLabels";
 import { renderTypeOrderLabel } from "../../utils/typeOrderLabels";
+import '../../styles/css/components/common/statusBadge.css';
 
 
 // Campos para formulario de artículos de la orden
@@ -91,27 +92,48 @@ export const orderOneOffNotesFields: Field<CreateOrderOneOffFormDTO>[] = [
 export const orderTableColumns: Column<{ [key: string]: any }>[] = sortByOrder([
   
   { header: "Cliente", accessor: "customer.name", order: 1 },
-  { header: "Telefono", accessor: "customer.phone", order: 2 },
-  { header: "Tipo", accessor: "order_type", order: 3,
+  { 
+    header: "Dirección", 
+    accessor: "customer.address", 
+    order: 2,
+    render: (value: string, row: any) => {
+      return row.delivery_address || row.person?.address || "";
+    }
+  },
+  { 
+    header: "Telefono", 
+    accessor: "customer.phone",
+    order: 3,
+    render: (value: string, row: any) => {
+      return row.customer?.phone || row.person?.phone || "";
+    }
+  },
+  { header: "Tipo", accessor: "order_type", order: 4,
     render: (value: string) => renderTypeOrderLabel(value)
    },
   { 
     header: "Fecha pedido", 
     accessor: "order_date", 
-    order: 4,
+    order: 5,
     render: (value: string) => formatDateForView(value)
   },
   { 
     header: "Fecha entrega", 
     accessor: "scheduled_delivery_date", 
-    order: 5,
+    order: 6,
     render: (value: string) => formatDateForView(value)
   },
-  { header: "Total", accessor: "total_amount", order: 6 },
-  { header: "Pedido ID", accessor: "id", order: 7 },
-  { header: "Estado", accessor: "status", order: 8,
-    render: (value: string) => renderStatusOrderLabel(value)
-   },
+  { header: "Total", accessor: "total_amount", order: 7 },
+  { header: "Pedido ID", accessor: "id", order: 8 },
+  { 
+    header: "Estado", 
+    accessor: "status", 
+    order: 9,
+    render: (value: string) => {
+      const className = `status-badge status-badge--${value.toLowerCase().replace('_', '-')}`;
+      return <span className={className}>{renderStatusOrderLabel(value)}</span>;
+    }
+  },
  
 ]);
 

@@ -26,7 +26,6 @@ export const useClientSubscriptions = () => {
     try {
       const res = await service.getSubscriptionsByCustomer(customerId, params);
       setSubscriptions(res.data || []);
-      console.log("Suscripciones del cliente:", res.data); 
       return res;
     } catch (err: any) {
       setError(err.message || "Error al obtener suscripciones del cliente");

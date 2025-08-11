@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { PriceList, CreatePriceListDTO, UpdatePriceListDTO } from "../interfaces/PriceList";
 import { PriceListService } from "../services/PriceListService";
+import { cleanFilters } from "../utils/filterUtils";
 
 export const usePriceLists = () => {
   const priceListService = new PriceListService();
@@ -36,12 +37,16 @@ export const usePriceLists = () => {
     ) => {
       try {
         setIsLoading(true);
+        
+        // Limpiar filtros antes de enviar
+        const cleanedFilters = cleanFilters(filtersParam);
+        
         const response = await priceListService.getPriceLists({
           page: pageParam,
           limit: limitParam,
           search: searchParam,
           sortBy: sortByParam,
-          ...filtersParam,
+          ...cleanedFilters,
         });
         setPriceLists(response.data);
         setTotal(response.meta.total);

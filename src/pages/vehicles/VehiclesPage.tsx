@@ -180,18 +180,6 @@ const VehiclesPage: React.FC = () => {
           </div>
           <div className={`page-header-div-2 ${titlePage+"-page-header-div-2"}`}>
             <button
-              onClick={() => setShowFilters(true)}
-              className={`page-filter-button ${titlePage+"-page-filter-button"}`}
-            >
-              <img
-                src="/assets/icons/filter-icon.svg"
-                alt="Filtros"
-                className={`page-filter-button-icon ${titlePage+"-page-filter-button-icon"}`}
-                style={{ display: "inline-block" }}
-              />
-              Filtros
-            </button>
-            <button
               onClick={() => navigate("/moviles/nuevo-movil")}
               className={`page-new-button ${titlePage+"-page-new-button"}`}
             >
@@ -275,15 +263,6 @@ const VehiclesPage: React.FC = () => {
         genere="M"
       />
 
-      <FilterDrawer
-        isOpen={showFilters}
-        onClose={() => setShowFilters(false)}
-        fields={vehicleFilters}
-        values={filters}
-        onChange={handleFilterChange}
-        onApply={handleApplyFilters}
-        onClear={handleClearFilters}
-      />
     </div>
   );
 };

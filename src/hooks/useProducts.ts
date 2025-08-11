@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Product, CreateProductDTO } from '../interfaces/Product';
 import { ProductService } from '../services/ProductService';
+import { cleanFilters } from '../utils/filterUtils';
 
 export const useProducts = () => {
   const productService = new ProductService();
@@ -35,12 +36,16 @@ export const useProducts = () => {
     ) => {
       try {
         setIsLoading(true);
+        
+        // Limpiar filtros antes de enviar
+        const cleanedFilters = cleanFilters(filtersParam);
+        
         const response = await productService.getProducts({
           page: pageParam,
           limit: limitParam,
           search: searchParam,
           sortBy: sortByParam,
-          ...filtersParam,
+          ...cleanedFilters,
         });
         if (response?.data) {
           setProducts(response.data);

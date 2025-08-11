@@ -31,8 +31,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  console.log("User data:", user); // Para depuración
-
   return (
     <div className="profile-page">
       {/* Izquierda: Foto y logout */}

@@ -2,12 +2,6 @@ import { sortByOrder } from "../../utils/sortByOrder";
 
 export const deliveryFilters = sortByOrder([
   {
-    name: "customer_name",
-    label: "Cliente",
-    type: "text" as const,
-    order: 1,
-  },
-  {
     name: "status",
     label: "Estado",
     type: "select" as const,
@@ -18,6 +12,6 @@ export const deliveryFilters = sortByOrder([
       { label: "Entregado", value: "DELIVERED" },
       { label: "Cancelado", value: "CANCELLED" },
     ],
-    order: 2,
+    order: 1,
   },
 ]);

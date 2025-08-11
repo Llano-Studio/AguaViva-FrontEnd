@@ -191,8 +191,6 @@ const DeliveriesPage: React.FC = () => {
         include_signature_field: true,
         include_product_details: true,
       });
-
-      console.log("Respuesta de impresión:", res);
     
       await downloadPDF({
         url: res.url,

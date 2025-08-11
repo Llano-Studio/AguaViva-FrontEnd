@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { Client, CreateClientDTO, LoanedProduct } from "../interfaces/Client";
 import { ClientService } from "../services/ClientService";
 import { ProductService } from "../services/ProductService";
+import { cleanFilters } from "../utils/filterUtils";
 
 export const useClients = () => {
   const clientService = new ClientService();
-  const productService = new ProductService(); // Instancia del servicio de productos
+  const productService = new ProductService();
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [loanedProducts, setLoanedProducts] = useState<LoanedProduct[]>([]);
@@ -38,13 +39,19 @@ export const useClients = () => {
     ) => {
       try {
         setIsLoading(true);
-        const response = await clientService.getClients({
+        
+        // Limpiar filtros antes de enviar
+        const cleanedFilters = cleanFilters(filtersParam);
+        
+        const params: any = {
           page: pageParam,
           limit: limitParam,
           search: searchParam,
           sortBy: sortByParam,
-          ...filtersParam,
-        });
+          ...cleanedFilters, // Usar filtros limpiados
+        };
+
+        const response = await clientService.getClients(params);
         
         if (response?.data) {
           setClients(response.data);

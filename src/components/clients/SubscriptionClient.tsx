@@ -120,7 +120,6 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
 
       // Limpiar el payload para enviar solo los campos que la API espera
       const cleaned = cleanSubscriptionPayload(dataToSend);
-      console.log("Cleaned data to send:", cleaned);
       await updateSubscription(subscriptionToEdit.subscription_id, cleaned);
       setShowModal(false);
       setSubscriptionToEdit(null);

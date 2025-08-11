@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Zone } from "../interfaces/Locations";
 import { ZoneService, CreateZoneDTO } from "../services/ZoneService";
+import { cleanFilters } from "../utils/filterUtils";
 
 export const useZones = () => {
   const zoneService = new ZoneService();
@@ -35,13 +36,19 @@ export const useZones = () => {
     ) => {
       try {
         setIsLoading(true);
-        const response = await zoneService.getZones({
+        
+        // Limpiar filtros antes de enviar
+        const cleanedFilters = cleanFilters(filtersParam);
+        
+        const params = {
           page: pageParam,
           limit: limitParam,
           search: searchParam,
           sortBy: sortByParam,
-          ...filtersParam,
-        });
+          ...cleanedFilters, // Usar filtros limpiados
+        };
+
+        const response = await zoneService.getZones(params);
         setZones(response.data);
         setTotal(response.meta.total);
         setPage(response.meta.page);

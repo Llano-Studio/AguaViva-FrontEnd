@@ -20,7 +20,6 @@ export function useFormOrder() {
 
   // Buscar clientes usando el servicio real
   const fetchClients = async (params: any = {}, clientType: "PLAN" | "INDIVIDUAL" = "PLAN") => {
-    console.log("Fetching clients with params:", params, "and clientType:", clientType);
     const response = await clientService.getClients({ ...params, type: clientType });
     return response?.data || [];
   };

@@ -4,7 +4,7 @@ import '../../styles/css/components/common/filterDrawer.css'
 export interface FilterField {
   name: string;
   label: string;
-  type: "select" | "checkbox" | "text" | "date"; // <-- Agrega "date"
+  type: "select" | "checkbox" | "text" | "date";
   options?: { label: string; value: string | boolean }[];
 }
 
@@ -40,6 +40,33 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
     onChange(fieldName, newValue);
   };
 
+  const handleSelectChange = (fieldName: string, value: string) => {
+    // Si el valor está vacío, enviar undefined para que se elimine del objeto filters
+    if (value === "" || value === null || value === undefined) {
+      onChange(fieldName, undefined);
+    } else {
+      onChange(fieldName, value);
+    }
+  };
+
+  const handleTextChange = (fieldName: string, value: string) => {
+    // Si el valor está vacío, enviar undefined para que se elimine del objeto filters
+    if (value.trim() === "") {
+      onChange(fieldName, undefined);
+    } else {
+      onChange(fieldName, value);
+    }
+  };
+
+  const handleDateChange = (fieldName: string, value: string) => {
+    // Si el valor está vacío, enviar undefined para que se elimine del objeto filters
+    if (value === "" || value === null || value === undefined) {
+      onChange(fieldName, undefined);
+    } else {
+      onChange(fieldName, value);
+    }
+  };
+
   return (
     <div className={`filter-container`}>
       <div className="filter-header">
@@ -65,6 +92,22 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
         {fields.map(field => (
           <div key={field.name} className="filter-label-container">
             <label className="filter-label">{field.label}</label>
+            
+            {field.type === "select" && field.options && (
+              <select
+                value={values[field.name] || ""}
+                onChange={e => handleSelectChange(field.name, e.target.value)}
+                className="filter-select"
+              >
+                <option value="">Seleccionar...</option>
+                {field.options.map(opt => (
+                  <option key={String(opt.value)} value={String(opt.value)}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            )}
+            
             {field.type === "checkbox" && field.options && (
               <div className="filter-checkbox-group">
                 {field.options.map(opt => (
@@ -79,23 +122,24 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                 ))}
               </div>
             )}
+            
             {field.type === "date" && (
               <input
                 type="date"
                 value={values[field.name] || ""}
-                onChange={e => onChange(field.name, e.target.value)}
+                onChange={e => handleDateChange(field.name, e.target.value)}
                 className="filter-input"
               />
             )}
+            
             {field.type === "text" && (
               <input
                 type="text"
                 value={values[field.name] || ""}
-                onChange={e => onChange(field.name, e.target.value)}
+                onChange={e => handleTextChange(field.name, e.target.value)}
                 className="filter-input"
               />
             )}
-            {/* Puedes agregar soporte para "select" aquí si lo necesitas */}
           </div>
         ))}
         <div className="filter-actions">

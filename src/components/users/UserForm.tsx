@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { ItemForm, Field } from "../common/ItemForm";
+import { ItemForm } from "../common/ItemForm";
+import { Field } from "../../interfaces/Common"
 import { User } from "../../interfaces/User";
 import useUsers from "../../hooks/useUsers";
 import { userFields, passwordField } from "../../config/users/userFieldsConfig";

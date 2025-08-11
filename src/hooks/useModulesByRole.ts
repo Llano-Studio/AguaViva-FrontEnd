@@ -15,7 +15,6 @@ export const useModulesByRole = () => {
         try {
           setIsLoadingModules(true);
           const result = await roleService.getModulesByRole(user.role);
-          console.log("Módulos obtenidos:", result);
           setModules(result);
         } catch (error) {
           console.error("Error al obtener módulos por rol:", error);

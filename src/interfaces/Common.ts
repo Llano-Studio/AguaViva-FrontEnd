@@ -41,7 +41,7 @@ export type FieldType =
 
 export interface Column<T> {
   header: string;
-  accessor: keyof T | string;
+  accessor: string | number | ((row: T) => any);
   render?: (value: any, row: T) => React.ReactNode;
   order?: number;
 }

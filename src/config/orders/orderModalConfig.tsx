@@ -7,29 +7,47 @@ export const orderModalConfig = sortByOrder([
   { label: "ID", accessor: "id", order: 1 },
   { label: "Cliente", accessor: "customer.name", order: 2 },
   { 
+    label: "Dirección", 
+    accessor: "customer.address", // accessor básico
+    order: 2,
+    render: (value: string, row: any) => {
+      return row.delivery_address || row.person?.address || "";
+    }
+  },
+  { 
+    label: "Telefono", 
+    accessor: "customer.phone", // accessor básico
+    order: 3,
+    render: (value: string, row: any) => {
+      return row.customer?.phone || row.person?.phone || "";
+    }
+  },
+  { 
     label: "Fecha Pedido", 
     accessor: "order_date", 
-    order: 3,
+    order: 4,
     render: (value: string) => formatDateForView(value)
   },
   { 
     label: "Fecha Entrega", 
     accessor: "scheduled_delivery_date", 
-    order: 4,
+    order: 5,
     render: (value: string) => formatDateForView(value)
   },
-  { label: "Tipo", accessor: "order_type", order: 5,
+  { label: "Tipo", accessor: "order_type", order: 6,
     render: (value: string) => renderTypeOrderLabel(value)
   },
-  { label: "Estado", accessor: "status", order: 6,
+  { label: "Estado", accessor: "status", order: 7,
     render: (value: string) => renderStatusOrderLabel(value)
    },
-  { label: "Delivey", accessor: "requires_delivery", order: 7,
+  { label: "Delivey", accessor: "requires_delivery", order: 8,
     render: (value: boolean) => value ? "Sí" : "No"
    },
-  { label: "Monto pagado", accessor: "paid_amount", order: 8 },
-  { label: "Monto total", accessor: "total_amount", order: 9 },
-  { label: "Notas", accessor: "notes", order: 10 },
+  { label: "Monto pagado", accessor: "paid_amount", order: 9 },
+  { label: "Monto total", accessor: "total_amount", order: 10 },
+  { label: "Notas", accessor: "notes", order: 11
+
+   },
 ]);
 
 // Configuración de los productos de la orden
@@ -48,9 +66,13 @@ export const orderProductsConfig = [
   { 
     header: "Descripción", 
     accessor: "product.description", 
-    render: (item: any) => item.product?.description || "Sin descripción"
+    render: (item: any) => item.product?.description || item.description || "Sin nombre"
   },
   { header: "Cantidad", accessor: "quantity" },
-  { header: "Precio Unitario", accessor: "unit_price" },
-  { header: "Subtotal", accessor: "subtotal" },
+  { header: "Precio Unitario", accessor: "unit_price",
+    render: (item: any) => item.unit_price || "-"
+   },
+  { header: "Subtotal", accessor: "subtotal",
+    render: (item: any) => item.subtotal || "-"
+  },
 ];

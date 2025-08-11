@@ -3,6 +3,7 @@ import { DataTable } from '../../components/common/DataTable';
 import { Modal } from '../../components/common/Modal';
 import { Client } from '../../interfaces/Client';
 import useClients from '../../hooks/useClients';
+import useZones from '../../hooks/useZones'; // Agregar este import
 import ClientForm from '../../components/clients/ClientForm';
 import { useNavigate } from "react-router-dom";
 import { clientColumns } from "../../config/clients/clientFieldsConfig";
@@ -15,6 +16,7 @@ import Switch from "../../components/common/Switch";
 import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
+import useLocations from "../../hooks/useLocations";
 
 const ClientsPage: React.FC = () => {
   const { 
@@ -40,6 +42,9 @@ const ClientsPage: React.FC = () => {
     fetchLoanedProducts,
     loanedProducts, // Productos en comodato enriquecidos
   } = useClients();
+
+  // Hook para obtener zonas
+  const { zones, fetchZones } = useZones();
   
   const [showViewModal, setShowViewModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -51,12 +56,49 @@ const ClientsPage: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { showSnackbar } = useSnackbar();
+  const { localities, fetchLocalities } = useLocations();
 
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [clients]);
+
+  // Cargar zonas al montar el componente
+  useEffect(() => {
+    fetchZones();
+  }, []);
+
+  useEffect(() => {
+    fetchLocalities();
+  }, []);
+
+  useEffect(() => {
+    fetchZones(); 
+  }, []);
+
+  // Crear filtros dinámicos con las opciones de zona
+  const dynamicClientFilters = clientFilters.map((filter) => {
+    if (filter.name === "zoneIds") {
+      return {
+        ...filter,
+        options: zones.map((zone) => ({
+          label: zone.name,
+          value: zone.zone_id.toString(),
+        })),
+      };
+    }
+    if (filter.name === "localityIds") {
+      return {
+        ...filter,
+        options: localities.map((locality) => ({
+          label: locality.name,
+          value: locality.locality_id.toString(),
+        })),
+      };
+    }
+    return filter;
+  });
 
   const handleDeleteClick = (id: number) => {
     const client = clients.find(c => c.person_id === id);
@@ -92,7 +134,16 @@ const ClientsPage: React.FC = () => {
     setFilters((prev: any) => ({ ...prev, [name]: value }));
   };
 
+
   const handleApplyFilters = () => {
+    const transformedFilters = { ...filters };
+    // Transformar el filtro de localidades en una cadena separada por comas
+    if (filters.locality && Array.isArray(filters.locality)) {
+      transformedFilters.localityIds = filters.locality.join(",");
+      delete transformedFilters.locality; // Eliminar el campo original
+    }
+
+    setFilters(transformedFilters); // Guardar los filtros transformados
     setShowFilters(false);
     setPage(1);
   };
@@ -296,7 +347,7 @@ const ClientsPage: React.FC = () => {
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        fields={clientFilters}
+        fields={dynamicClientFilters} // Usar filtros dinámicos
         values={filters}
         onChange={handleFilterChange}
         onApply={handleApplyFilters}

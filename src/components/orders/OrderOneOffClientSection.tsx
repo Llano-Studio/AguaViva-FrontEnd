@@ -39,7 +39,6 @@ export const OrderOneOffClientSection: React.FC<OrderOneOffClientSectionProps> =
       if (details?.locality?.locality_id) {
         form.setValue("customer.localityId", details.locality.locality_id);
         form.setValue("locality_id", details.locality.locality_id);
-        console.log("form values after fetching details:", form.getValues());
       }
     }
   };
