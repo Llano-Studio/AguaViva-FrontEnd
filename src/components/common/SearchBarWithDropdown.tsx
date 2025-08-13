@@ -35,22 +35,18 @@ function SearchBarWithDropdownInner<T>(
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [hasFetchedGeneral, setHasFetchedGeneral] = useState(false);
+  
 
-  // Desbloquea el input siempre que el dropdown se abre
+  // Controla el bloqueo del input
   useEffect(() => {
     if (dropdownOpen) {
       setBlocked(false);
-    }
-  }, [dropdownOpen]);
-
-  // Bloquea el input si hay texto, desbloquea si está vacío o deshabilitado por prop
-  useEffect(() => {
-    if (inputValue) {
+    } else if (inputValue) {
       setBlocked(true);
     } else {
       setBlocked(disabled);
     }
-  }, [inputValue, disabled]);
+  }, [inputValue, disabled, dropdownOpen]);
 
   // Sincroniza el valor externo cuando se cierra el dropdown
   useEffect(() => {
@@ -69,35 +65,65 @@ function SearchBarWithDropdownInner<T>(
     }
   }, [inputValue, value, onChange, debounceMs]);
 
-  // Fetch de opciones: busca normalmente o fetch general si abres el dropdown vacío
+  // Solo busca cuando el input cambia y tiene valor
   useEffect(() => {
-    // Si el input tiene valor, busca normalmente
     if (inputValue) {
       setLoading(true);
       fetchOptions(String(inputValue))
         .then(setOptions)
         .finally(() => setLoading(false));
       setHasFetchedGeneral(false); // resetea el flag si el usuario escribe
-      return;
     }
+    // No agregues lógica para dropdownOpen aquí
+  }, [inputValue, fetchOptions]);
 
-    // Si el input está vacío y el dropdown está abierto, solo fetch si no lo hicimos antes
+
+  useEffect(() => {
     if (dropdownOpen && !inputValue && !hasFetchedGeneral) {
       setLoading(true);
       fetchOptions("")
         .then(setOptions)
         .finally(() => setLoading(false));
       setHasFetchedGeneral(true);
-      return;
     }
-
-    // Si el input está vacío y el dropdown está cerrado, limpia opciones y flag
     if (!dropdownOpen && !inputValue) {
       setOptions([]);
       setLoading(false);
       setHasFetchedGeneral(false);
     }
-  }, [inputValue, dropdownOpen, fetchOptions, hasFetchedGeneral]);
+  }, [dropdownOpen, inputValue, fetchOptions, hasFetchedGeneral]);
+
+
+
+  // // Fetch de opciones: busca normalmente o fetch general si abres el dropdown vacío
+  // useEffect(() => {
+  //   // Si el input tiene valor, busca normalmente
+  //   if (inputValue) {
+  //     setLoading(true);
+  //     fetchOptions(String(inputValue))
+  //       .then(setOptions)
+  //       .finally(() => setLoading(false));
+  //     setHasFetchedGeneral(false); // resetea el flag si el usuario escribe
+  //     return;
+  //   }
+
+  //   // Si el input está vacío y el dropdown está abierto, solo fetch si no lo hicimos antes
+  //   if (dropdownOpen && !inputValue && !hasFetchedGeneral) {
+  //     setLoading(true);
+  //     fetchOptions("")
+  //       .then(setOptions)
+  //       .finally(() => setLoading(false));
+  //     setHasFetchedGeneral(true);
+  //     return;
+  //   }
+
+  //   // Si el input está vacío y el dropdown está cerrado, limpia opciones y flag
+  //   if (!dropdownOpen && !inputValue) {
+  //     setOptions([]);
+  //     setLoading(false);
+  //     setHasFetchedGeneral(false);
+  //   }
+  // }, [inputValue, dropdownOpen, fetchOptions, hasFetchedGeneral]);
 
   // Focus automático al abrir el dropdown
   useEffect(() => {

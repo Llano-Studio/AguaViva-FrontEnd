@@ -23,8 +23,8 @@ export interface CreateClientDTO {
   name: string;
   phone: string;
   address: string;
-  alias: string;
-  taxId: string;
+  alias?: string;
+  taxId?: string;
   countryId: number; 
   provinceId: number; 
   localityId: number;

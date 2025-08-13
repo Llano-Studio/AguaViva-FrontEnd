@@ -2,7 +2,7 @@ export interface Zone {
   zone_id: number;
   name: string;
   code: string;
-  locality?: Locality;
+  locality: Locality;
 }
 
 export interface Locality {

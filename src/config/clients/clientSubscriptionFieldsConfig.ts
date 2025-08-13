@@ -89,11 +89,4 @@ export const clientSubscriptionFields: Field<any>[] = [
     validation: { required: false },
     order: 9,
   },
-  {
-    name: "notes",
-    label: "Notas",
-    type: "textarea",
-    validation: { required: false },
-    order: 10,
-  },
 ];

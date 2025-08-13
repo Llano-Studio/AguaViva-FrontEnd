@@ -15,7 +15,7 @@ export const clientFields = (
     { name: "phone", label: "Teléfono", validation: { required: true }, order: 1 },
     { name: "address", label: "Dirección", validation: { required: true }, order: 2 },
     { name: "alias", label: "Empresa", validation: { required: false }, order: 3 },
-    { name: "taxId", label: "CUIT/CUIL", validation: { required: true }, order: 4 },
+    { name: "taxId", label: "CUIT/CUIL", validation: { required: false }, order: 4 },
     ...dependentLocationFields<CreateClientDTO>(countries, provinces, localities, zones).map(f => ({ ...f, order: f.order! + 4 })),
     { name: "registrationDate", label: "Fecha de alta", type: "date", validation: { required: true }, order: 9 },
     { 
@@ -41,7 +41,7 @@ export const clientColumns: Column<Client>[] = sortByOrder([
   { header: 'Empresa', accessor: 'alias', order: 4,
     render: (value: string) => value ? value : '-' 
   },
-  { header: 'CUIT/CUIL', accessor: 'taxId', order: 5 },
+  { header: 'CUIT/CUIL', accessor: 'taxId', order: 5, require: false },
   { header: 'Localidad', accessor: 'locality.name', order: 6 },
   { header: 'Zona', accessor: 'zone.name', order: 7 },
   { 

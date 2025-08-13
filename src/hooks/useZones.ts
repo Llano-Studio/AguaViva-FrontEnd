@@ -64,6 +64,19 @@ export const useZones = () => {
     },
     [page, limit, search, filters, sortBy, sortDirection]
   );
+``
+  const fetchZoneById = async (zoneId: number) => {
+    try {
+      setIsLoading(true);
+      const zone = await zoneService.getZoneById(zoneId);
+      return zone;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener zona");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchZones();
@@ -129,6 +142,7 @@ export const useZones = () => {
     updateZone,
     createZone,
     refreshZones: () => fetchZones(page, limit, search, filters, getSortParams()),
+    fetchZoneById,
     page,
     setPage,
     limit,

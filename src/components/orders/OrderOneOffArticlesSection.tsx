@@ -35,6 +35,8 @@ export const OrderOneOffArticlesSection: React.FC<OrderOneOffArticlesSectionProp
     defaultValues: initialArticle
   });
 
+  const [productInputValue, setProductInputValue] = useState("");
+
   useEffect(() => {
     articleForm.setValue("price_list_id", 1);
     fetchPriceLists().then(lists => {
@@ -65,6 +67,7 @@ const handleAddArticle = async (values: typeof initialArticle | FormData) => {
 
   const price_list = await fetchPriceLists();
   const price_list_name = price_list.find((pl: any) => pl.price_list_id === values.price_list_id)?.name || "";
+  
 
   setArticles(prev => [
     ...prev,
@@ -103,12 +106,16 @@ const handleAddArticle = async (values: typeof initialArticle | FormData) => {
         fields={orderOneOffArticleFields}
         searchFieldProps={{
           product_id: {
-            value: selectedProductName || "",
+            value: productInputValue,
             fetchOptions: async (query: string) => await fetchProducts(query),
             renderOption: (product: any) => <span>{product.description}</span>,
             onOptionSelect: (product: any) => {
               articleForm.setValue("product_id", product.product_id);
+              setProductInputValue(product.product_description || product.description || "");
               setSelectedProductName(product.description || "");
+            },
+            onChange: (val: string) => {
+              setProductInputValue(val);
             },
             placeholder: "Buscar artículo...",
             class: "order"

@@ -66,6 +66,8 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
   const [availableCredits, setAvailableCredits] = useState<any[]>([]);
   const [abonoSubscriptionId, setAbonoSubscriptionId] = useState<number | null>(null);
 
+  const [productInputValue, setProductInputValue] = useState("");
+
   // Actualiza los créditos disponibles cada vez que cambia el abono seleccionado o los artículos
   useEffect(() => {
     const fetchCredits = async () => {
@@ -345,7 +347,7 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
             }
           }),
           product_id: {
-            value: selectedProductName || "",
+            value: productInputValue,
             fetchOptions: async (query: string) => {
               if (abonoSelected !== null) {
                 const products = await fetchProductsBySubscriptionPlan(abonoSelected);
@@ -362,7 +364,11 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
             renderOption: (product: any) => <span>{product.product_description || product.description}</span>,
             onOptionSelect: (product: any) => {
               articleForm.setValue("product_id", product.product_id);
+              setProductInputValue(product.product_description || product.description || "");
               setSelectedProductName(product.product_description || product.description || "");
+            },
+            onChange: (val: string) => {
+              setProductInputValue(val);
             },
             placeholder: "Buscar artículo...",
             class: "order"

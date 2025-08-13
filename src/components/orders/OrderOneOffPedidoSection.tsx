@@ -3,6 +3,7 @@ import { ItemFormOrder } from "../common/ItemFormOrder";
 import { orderOneOffPedidoFields } from "../../config/orders/orderFieldsConfig";
 import { useFormOrder } from "../../hooks/useFormOrder";
 import { translateDaysToSpanish } from "../../utils/dayTranslations";
+import useZones from "../../hooks/useZones";
 
 interface OrderOneOffPedidoSectionProps {
   form: any;
@@ -16,6 +17,7 @@ export const OrderOneOffPedidoSection: React.FC<OrderOneOffPedidoSectionProps> =
   const { fetchZoneMobiles, fetchZones } = useFormOrder();
   const [mobiles, setMobiles] = useState<any[]>([]);
   const [pickup, setPickup] = useState(false); // Estado para el checkbox
+  const { fetchZoneById } = useZones();
 
   // Leyenda para horarios y días preferidos
   const legend = deliveryPreferences
@@ -54,6 +56,21 @@ export const OrderOneOffPedidoSection: React.FC<OrderOneOffPedidoSectionProps> =
     }
   }, [pickup]);
 
+useEffect(() => {
+  const zoneId = form.watch("zone_id");
+  if (zoneId) {
+    fetchZoneById(zoneId).then((zone) => {
+      if (zone && zone.locality && zone.locality.locality_id) {
+        const localityId = zone.locality.locality_id;
+        form.setValue("customer.localityId", localityId);
+        form.setValue("locality_id", localityId);
+        console.log(form.getValues("customer.localityId"), "customer.localityId");
+        console.log(form.getValues("locality_id"), "locality_id");
+      }
+    });
+  }
+}, [form.watch("zone_id")]);
+
   return (
     <fieldset className="order-section">
       <legend>Datos del pedido</legend>
@@ -90,6 +107,7 @@ export const OrderOneOffPedidoSection: React.FC<OrderOneOffPedidoSectionProps> =
                 renderOption: (zone: any) => <span>{zone.name}</span>,
                 onOptionSelect: (zone: any) => {
                   form.setValue("zone_id", zone.zone_id);
+                  form.setValue("customer.zoneId", zone.zone_id);
                   form.setValue("zone_name", zone.name);
                 },
                 placeholder: "Buscar zona...",
