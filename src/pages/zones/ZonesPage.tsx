@@ -15,6 +15,7 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
 import useLocations from "../../hooks/useLocations"; // Importar el hook de ubicaciones
+import ModalLocalities from "../../components/zones/ModalLocalities";
 
 
 const ZonesPage: React.FC = () => {
@@ -47,6 +48,7 @@ const ZonesPage: React.FC = () => {
   const [zoneToDelete, setZoneToDelete] = useState<Zone | null>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [showLocalitiesModal, setShowLocalitiesModal] = useState(false);
 
   const { showSnackbar } = useSnackbar();
 
@@ -190,6 +192,12 @@ const ZonesPage: React.FC = () => {
           </div>
           <div className={`page-header-div-2 ${titlePage+"-page-header-div-2"}`}>
             <button
+              onClick={() => setShowLocalitiesModal(true)}
+              className={`page-action-button ${titlePage}-page-action-button`}
+            >
+              Localidades
+            </button>
+            <button
               onClick={() => setShowFilters(true)}
               className={`page-filter-button ${titlePage+"-page-filter-button"}`}
             >
@@ -289,6 +297,11 @@ const ZonesPage: React.FC = () => {
         onDelete={handleConfirmDelete}
         content="zona"
         genere="F"
+      />
+
+      <ModalLocalities
+        isOpen={showLocalitiesModal}
+        onClose={() => setShowLocalitiesModal(false)}
       />
 
       {/* Drawer de filtros */}

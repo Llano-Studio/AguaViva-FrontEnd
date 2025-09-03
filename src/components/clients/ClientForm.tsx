@@ -25,6 +25,7 @@ const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): Cre
     return {
       name: clientToEdit.name,
       phone: clientToEdit.phone,
+      additionalPhones: clientToEdit.additionalPhones,
       address: clientToEdit.address,
       alias: clientToEdit.alias,
       taxId: clientToEdit.taxId,
@@ -39,6 +40,7 @@ const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): Cre
   return {
     name: "",
     phone: "",
+    additionalPhones: "",
     address: "",
     alias: "",
     taxId: "",
@@ -126,6 +128,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
         const {
           name,
           phone,
+          additionalPhones,
           address,
           alias,
           taxId,
@@ -138,6 +141,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
         dataToSend = {
           name,
           phone,
+          additionalPhones,
           address,
           alias,
           taxId,
@@ -173,6 +177,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
         const {
           name,
           phone,
+          additionalPhones,
           address,
           alias,
           taxId,
@@ -185,6 +190,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
         dataToSend = {
           name,
           phone,
+          additionalPhones,
           address,
           alias,
           taxId,

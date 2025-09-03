@@ -87,6 +87,8 @@ export interface OrderItemInput {
 export interface CreateOrderFormDTO extends CreateOrderDTO {
   customer_address?: string;
   customer_id_display?: number;
+  phone?: string;
+  customer_name?: string;
   zone_name?: string;
   zone_id?: string;
   mobile?: string[]

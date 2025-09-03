@@ -71,6 +71,19 @@ export const useProducts = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, search, filters, sortBy, sortDirection]);
 
+  const fetchProductById = useCallback(async (id: number): Promise<Product | null> => {
+    try {
+      setIsLoading(true);
+      const product = await productService.getProductById(id);
+      return product;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener producto");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const createProduct = async (productData: CreateProductDTO | FormData, isFormData = false) => {
     try {
       setIsLoading(true);
@@ -141,6 +154,7 @@ export const useProducts = () => {
     setSelectedProduct,
     isLoading,
     error,
+    fetchProductById,
     deleteProduct,
     handleDeleteImage,
     updateProduct,

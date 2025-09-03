@@ -4,6 +4,7 @@ export interface Client {
   person_id: number;
   name: string;
   phone: string;
+  additionalPhones: string;
   address: string;
   alias: string;
   taxId: string;
@@ -15,13 +16,17 @@ export interface Client {
   registration_date: string;
   locality: Locality;
   zone: Zone;
-  loaned_products: LoanedProduct[];
+  loaned_products_detail: LoanedProduct[];
   payment_semaphore_status: PaymentSemaphoreStatus;
+  is_active: boolean;
+  owns_returnable_containers: boolean;
+  available_credits: []
 }
 
 export interface CreateClientDTO {
   name: string;
   phone: string;
+  additionalPhones?: string;
   address: string;
   alias?: string;
   taxId?: string;

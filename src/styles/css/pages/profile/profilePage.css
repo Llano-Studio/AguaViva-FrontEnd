@@ -1,6 +1,7 @@
 .profile-page {
   display: flex;
   flex-direction: column;
+  padding-top: 2rem;
 }
 
 .profile-page-content-container{

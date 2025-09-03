@@ -1,0 +1,19 @@
+.orders-form-container .orders{
+    background: var(--bg-color-3);
+    border-radius: 12px;
+    border: solid 1.5px var(--bg-color-2);
+    padding: 30px;
+    margin-bottom: 80px;
+    margin-right: 2rem;
+}
+
+.orders-form-container .orders .form{
+    border: none;
+    padding: 20px 0;
+}
+
+.orders legend {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color-3);
+}

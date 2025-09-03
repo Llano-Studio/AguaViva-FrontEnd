@@ -19,7 +19,8 @@ export function useDependentLocationFields(initialCountry = 0, initialProvince =
       setCountries(await locationService.getCountries());
       setProvinces(await locationService.getProvinces());
       setLocalities(await locationService.getLocalities());
-      setZones(await locationService.getZones());
+      const zonesResponse = await locationService.getZones();
+      setZones(zonesResponse.data);
     };
     fetchData();
   }, []);

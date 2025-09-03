@@ -11,22 +11,20 @@ export interface OneOffCustomer {
   type: string;
 }
 
-export interface OneOffProductPriceList {
-  price_list_id: number;
-  name: string;
-  unit_price: string;
-}
-
 export interface OneOffProduct {
   product_id: number;
   description: string;
   quantity: number;
-  price_list: OneOffProductPriceList;
+  unit_price: string;
+  subtotal: string;
+  price_list_id: number;
 }
 
 export interface OneOffPerson {
   person_id: number;
   name: string;
+  phone: string;
+  address: string;
 }
 
 export interface OneOffSaleChannel {
@@ -57,8 +55,10 @@ export interface OrderOneOff {
   total_amount: string;
   paid_amount: string;
   status: string;
+  traffic_light_status: string;       
   requires_delivery: boolean;
   notes?: string;
+  delivery_address: string;          
   products: OneOffProduct[];
   person: OneOffPerson;
   sale_channel: OneOffSaleChannel;

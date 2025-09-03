@@ -5,16 +5,6 @@ export interface Zone {
   locality: Locality;
 }
 
-export interface Locality {
-  locality_id: number;
-  code: string;
-  name: string;
-  province_id: number;
-  zone_id: number;
-  province?: any;
-  zone?: Zone;
-}
-
 export interface ZonesResponse {
   data: Zone[];
   meta: {
@@ -37,4 +27,32 @@ export interface Province {
   name: string;
   country_id: number;
   country?: Country;
+}
+
+export interface Locality {
+  locality_id: number;
+  code: string;
+  name: string;
+  province_id: number;
+  zone_id?: number;
+  province?: Province;
+  zone?: Zone;
+  zones?: Zone[]; // Para respuesta de create/update
+}
+
+export interface CreateLocalityDTO {
+  code: string;
+  name: string;
+  provinceId: number;
+  countryId?: number;
+}
+
+export interface UpdateLocalityDTO {
+  name?: string;
+  provinceId?: number;
+}
+
+export interface DeleteLocalityResponse {
+  message: string;
+  deleted: boolean;
 }

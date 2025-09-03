@@ -13,6 +13,9 @@ import "../../styles/css/pages/pages.css";
 import PaginationControls from "../../components/common/PaginationControls";
 import { orderModalConfig, orderProductsConfig } from "../../config/orders/orderModalConfig";
 import { Modal } from "../../components/common/Modal";
+import OrderForm from "../../components/orders/OrderForm";
+import OrderOneOffForm from "../../components/orders/OrderOneOffForm";
+import "../../styles/css/pages/orders/ordersPage.css";
 
 
 const OrdersPage: React.FC = () => {
@@ -35,6 +38,7 @@ const OrdersPage: React.FC = () => {
     fetchOrders: fetchRegularOrders,
     deleteOrder: deleteRegularOrder,
     productsOfOrder, // Función para obtener productos de una orden
+    updateOrder
   } = useOrders();
 
   const {
@@ -56,6 +60,7 @@ const OrdersPage: React.FC = () => {
     fetchOrders: fetchOneOffOrders,
     deleteOrder: deleteOneOffOrder,
     productsOfOrderOneOff: productsOfOrderOneOff,
+    updateOrder: updateOrderOneOff
   } = useOrdersOneOff();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -67,7 +72,9 @@ const OrdersPage: React.FC = () => {
   const { showSnackbar } = useSnackbar();
   const [showViewModal, setShowViewModal] = useState(false);
   const [orderToView, setOrderToView] = useState<any>(null);
-  const [orderProducts, setOrderProducts] = useState<any[]>([]); // Productos de la orden
+  const [orderProducts, setOrderProducts] = useState<any[]>([]);
+  const [editingOrder, setEditingOrder] = useState<any | null>(null);
+  const [showEditPanel, setShowEditPanel] = useState(false);
 
   // Agregar estado para el ordenamiento local cuando filterType es "ALL"
   const [localSortBy, setLocalSortBy] = useState<string[]>([]);
@@ -163,9 +170,25 @@ const OrdersPage: React.FC = () => {
   };
 
   const handleEditClick = (order: any) => {
-    // Aquí puedes abrir el modal de edición o navegar a la edición
-    // Por ejemplo:
-    // navigate(`/pedidos/editar/${order.order_id || order.purchase_id}`);
+    setEditingOrder(order);
+    console.log(order);
+    setShowEditPanel(true);
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditPanel(false);
+    setEditingOrder(null);
+  };
+
+  const handleOrderUpdated = async (msg?: string) => {
+    if (editingOrder?.order_type === "HYBRID") {
+      await fetchRegularOrders();
+    } else {
+      await fetchOneOffOrders();
+    }
+    if (msg) showSnackbar(msg, "success");
+    setShowEditPanel(false);
+    setEditingOrder(null);
   };
 
   const handleFilterChange = (name: string, value: any) => {
@@ -253,15 +276,25 @@ const OrdersPage: React.FC = () => {
 
   const titlePage = "orders";
 
+  const start = (page - 1) * (orders.length || 1) + (orders.length > 0 ? 1 : 0);
+  const end = (page - 1) * (orders.length || 1) + orders.length;
+
+  const isHybridEditing = editingOrder ? ("order_id" in editingOrder) : false;
+
+
   return (
-    <div className={`table-scroll page-container ${titlePage}-page-container`}>
+    <div className={`table-scroll page-container ${titlePage + "-page-container"}`}>
       {/* Panel de la tabla */}
-      <div className={`page-content ${titlePage}-page-content`}>
+      <div
+        className={`page-content ${titlePage + "-page-content"}
+          ${showEditPanel ? "-translate-x-full" : "translate-x-0"}
+        `}
+      >
         <div>
-          <h1 className={`page-title ${titlePage}-page-title`}>Pedidos</h1>
+          <h1 className={`page-title ${titlePage + "-page-title"}`}>Pedidos</h1>
         </div>
-        <div className={`page-header ${titlePage}-page-header`}>
-          <div className={`page-header-div-1 ${titlePage}-page-header-div-1`}>
+        <div className={`page-header ${titlePage + "-page-header"}`}>
+          <div className={`page-header-div-1 ${titlePage + "-page-header-div-1"}`}>
             <SearchBar
               ref={searchInputRef}
               value={filterType === "ORDER" ? searchRegular : filterType === "ONE_OFF" ? searchOneOff : ""}
@@ -270,39 +303,41 @@ const OrdersPage: React.FC = () => {
               class={titlePage}
             />
           </div>
-          <div className={`page-header-div-2 ${titlePage}-page-header-div-2`}>
+          <div className={`page-header-div-2 ${titlePage + "-page-header-div-2"}`}>
             <button
               onClick={() => setShowFilters(true)}
-              className={`page-filter-button ${titlePage}-page-filter-button`}
+              className={`page-filter-button ${titlePage + "-page-filter-button"}`}
             >
               <img
                 src="/assets/icons/filter-icon.svg"
                 alt="Filtros"
-                className={`page-filter-button-icon ${titlePage}-page-filter-button-icon`}
+                className={`page-filter-button-icon ${titlePage + "-page-filter-button-icon"}`}
                 style={{ display: "inline-block" }}
               />
               Filtros
             </button>
             <button
               onClick={() => navigate("/pedidos/nuevo-pedido")}
-              className={`page-new-button ${titlePage}-page-new-button`}
+              className={`page-new-button ${titlePage + "-page-new-button"}`}
             >
               <img
                 src="/assets/icons/huge-icon.svg"
                 alt="Nuevo pedido"
-                className={`page-new-button-icon ${titlePage}-page-new-button-icon`}
+                className={`page-new-button-icon ${titlePage + "-page-new-button-icon"}`}
                 style={{ display: "inline-block" }}
               />
               Nuevo Pedido
             </button>
             <select
               value={filterType}
-              onChange={e => setFilterType(e.target.value as any)}
+              onChange={(e) => setFilterType(e.target.value as any)}
               className={`page-type-filter ${titlePage}-page-type-filter`}
             >
               {(orderFiltersConfig[0]?.options ?? [])
-                .filter(opt => opt && (typeof opt.value === "string" || typeof opt.value === "number"))
-                .map(opt => (
+                .filter(
+                  (opt) => opt && (typeof opt.value === "string" || typeof opt.value === "number")
+                )
+                .map((opt) => (
                   <option key={String(opt.value)} value={String(opt.value)}>
                     {opt.label}
                   </option>
@@ -310,42 +345,120 @@ const OrdersPage: React.FC = () => {
             </select>
           </div>
         </div>
+
         <OrdersTable
           orders={orders}
-          onEdit={handleEditClick}
-          onDelete={order => handleDeleteClick(getOrderRowId(order))}
-          className={titlePage}
-          columns={orderTableColumns}
-          sortBy={filterType === "ALL" ? localSortBy : (filterType === "ORDER" ? sortByRegular : sortByOneOff)}
-          sortDirection={filterType === "ALL" ? localSortDirection : (filterType === "ORDER" ? sortDirectionRegular : sortDirectionOneOff)}
-          onSort={handleSort}
-          onView={handleViewClick}
+            onEdit={handleEditClick}
+            onDelete={(order) => handleDeleteClick(getOrderRowId(order))}
+            className={titlePage}
+            columns={orderTableColumns}
+            sortBy={
+              filterType === "ALL"
+                ? localSortBy
+                : filterType === "ORDER"
+                ? sortByRegular
+                : sortByOneOff
+            }
+            sortDirection={
+              filterType === "ALL"
+                ? localSortDirection
+                : filterType === "ORDER"
+                ? sortDirectionRegular
+                : sortDirectionOneOff
+            }
+            onSort={handleSort}
+            onView={handleViewClick}
         />
+
         <PaginationControls
           page={page}
           totalPages={totalPages}
           onPageChange={setPage}
-          start={(page - 1) * (orders.length || 1) + (orders.length > 0 ? 1 : 0)}
-          end={(page - 1) * (orders.length || 1) + orders.length}
+          start={start}
+          end={end}
           total={total}
           label="pedidos"
           className={titlePage + "-page-pagination"}
         />
       </div>
 
+      {/* Panel formulario edición */}
+      <div
+        className={`form-container ${titlePage + "-form-container"}
+          ${showEditPanel ? "translate-x-0" : "translate-x-full"}
+        `}
+      >
+        <div className={`form-wrapper ${titlePage + "-form-wrapper"}`}>
+          <div className={`form-header ${titlePage + "-form-header"}`}>
+            <button
+              onClick={handleCancelEdit}
+              className={`form-close-button ${titlePage + "-form-close-button"}`}
+            >
+              <img
+                src="/assets/icons/back.svg"
+                alt="Volver"
+                className={`form-icon-cancel ${titlePage + "-form-icon-cancel"}`}
+              />
+            </button>
+            <h2 className={`form-title ${titlePage + "-form-title"}`}>Editar Pedido</h2>
+          </div>
+
+          {editingOrder && isHybridEditing && (
+            <OrderForm
+              isEditing
+              orderToEdit={editingOrder}
+              onCancel={handleCancelEdit}
+              class={titlePage}
+              onSubmit={async (data: any) => {
+                try {
+                  if (!updateOrder) return false;
+                  await updateOrder(editingOrder.order_id, data);
+                  return true;
+                } catch {
+                  return false;
+                }
+              }}
+              refreshOrders={async () => { await fetchRegularOrders(); }}
+              onSuccess={(msg: string) => handleOrderUpdated(msg || "Pedido actualizado correctamente.")}
+            />
+          )}
+
+          {editingOrder && !isHybridEditing && (
+            <OrderOneOffForm
+              isEditing
+              orderToEdit={editingOrder}
+              onCancel={handleCancelEdit}
+              class={titlePage}
+              onSubmit={async (data: any) => {
+                try {
+                  if (!updateOrderOneOff) return false;
+                  await updateOrderOneOff(editingOrder.purchase_id, data);
+                  return true;
+                } catch {
+                  return false;
+                }
+              }}
+              refreshOrders={async () => { await fetchOneOffOrders(); }}
+              onSuccess={(msg: string) => handleOrderUpdated(msg || "Pedido actualizado correctamente.")}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Modal de Vista */}
       <Modal
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
           setOrderToView(null);
-          setOrderProducts([]); 
+          setOrderProducts([]);
         }}
         title="Detalles del Pedido"
         class={titlePage}
         config={orderModalConfig}
         data={orderToView}
-        itemsForList={orderProducts} 
-        itemsConfig={orderProductsConfig} 
+        itemsForList={orderProducts}
+        itemsConfig={orderProductsConfig}
         itemsTitle="Productos del Pedido"
       />
 
@@ -369,9 +482,10 @@ const OrdersPage: React.FC = () => {
         onClear={handleClearFilters}
       />
 
-      {/* Loading/Error */}
       {(isLoadingRegular || isLoadingOneOff) && <div className="p-4">Cargando...</div>}
-      {(errorRegular || errorOneOff) && <div className="text-red-500 p-4">{errorRegular || errorOneOff}</div>}
+      {(errorRegular || errorOneOff) && (
+        <div className="text-red-500 p-4">{errorRegular || errorOneOff}</div>
+      )}
     </div>
   );
 };

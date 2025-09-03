@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Country, Province, Locality, Zone } from "../interfaces/Locations";
+import { Country, Province, Locality, Zone, CreateLocalityDTO, UpdateLocalityDTO } from "../interfaces/Locations";
 import { LocationService } from "../services/LocationsService";
 
 export const useLocations = () => {
@@ -25,8 +25,8 @@ export const useLocations = () => {
       setIsLoading(true);
       setError(null);
       const data = await locationService.getZones();
-      setZones(data);
-      return data;
+      setZones(data.data); // Solo el array de zonas
+      return data.data;
     } catch (err: any) {
       setError(err.message || "Error al obtener zonas");
       throw err;
@@ -143,6 +143,56 @@ export const useLocations = () => {
     }
   }, []);
 
+  const createLocality = useCallback(async (data: CreateLocalityDTO) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const locality = await locationService.createLocality(data);
+      setLocalities((prev) => [...prev, locality]);
+      return locality;
+    } catch (err: any) {
+      setError(err.message || "Error al crear localidad");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Actualizar localidad
+  const updateLocality = useCallback(async (id: number, data: UpdateLocalityDTO) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const updated = await locationService.updateLocality(id, data);
+      if (!updated) return null; // No actualices el estado si es null
+      setLocalities((prev) =>
+        prev.map((loc) => (loc.locality_id === id ? updated : loc))
+      );
+      return updated;
+    } catch (err: any) {
+      setError(err.message || "Error al actualizar localidad");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Eliminar localidad
+  const deleteLocality = useCallback(async (id: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await locationService.deleteLocality(id);
+      setLocalities((prev) => prev.filter((loc) => loc.locality_id !== id));
+      return result;
+    } catch (err: any) {
+      setError(err.message || "Error al eliminar localidad");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const fetchLocalitiesByProvince = useCallback(async (provinceId: number) => {
     try {
       setIsLoading(true);
@@ -203,6 +253,9 @@ export const useLocations = () => {
     fetchLocalityById,
     fetchLocalitiesByProvince,
     fetchLocalitiesByZone,
+    createLocality,
+    updateLocality,
+    deleteLocality,
 
     // Setters
     setZones,
