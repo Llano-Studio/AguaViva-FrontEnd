@@ -31,5 +31,16 @@ export const clientFilters: FilterField[] = [
     order: 3,
     // Puedes agregar options dinámicamente si lo necesitas
   },
+  {
+    name: "is_active",
+    label: "Estado",
+    type: "checkbox" as const,
+    order: 4,
+    options: [
+      { label: "Activo", value: "true" },
+      { label: "Inactivo", value: "false" }
+    ],
+  },
+  
 
 ].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));

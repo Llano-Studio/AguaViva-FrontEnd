@@ -26,15 +26,9 @@ export const clientSubscriptionListColumns = sortByOrder([
     render: (item: any) => item.start_date,
   },
   {
-    header: "Fecha fin",
-    accessor: "end_date",
-    order: 4,
-    render: (item: any) => item.end_date,
-  },
-  {
     header: "Estado",
     accessor: "status",
-    order: 5,
+    order: 4,
     render: (item: any) => item.status,
   },
 ]);

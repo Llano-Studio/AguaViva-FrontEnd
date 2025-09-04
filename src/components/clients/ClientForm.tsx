@@ -34,7 +34,9 @@ const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): Cre
       localityId: clientToEdit.locality?.locality_id ?? 0,
       zoneId: clientToEdit.zone?.zone_id ?? 0,
       registrationDate: formatDateForInput(clientToEdit.registration_date),
-      type: clientToEdit.type
+      type: clientToEdit.type,
+      notes: clientToEdit.notes || "",
+      is_active: clientToEdit.is_active
     };
   }
   return {
@@ -49,7 +51,9 @@ const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): Cre
     localityId: 0,
     zoneId: 0,
     registrationDate: new Date().toISOString().split('T')[0],
-    type: ClientType.INDIVIDUAL
+    type: ClientType.INDIVIDUAL,
+    notes: "",
+    is_active: true
   };
 };
 
@@ -135,7 +139,9 @@ const ClientForm: React.FC<ClientFormProps> = ({
           localityId,
           zoneId,
           registrationDate,
-          type
+          type,
+          is_active,
+          notes
         } = values as CreateClientDTO;
 
         dataToSend = {
@@ -148,7 +154,9 @@ const ClientForm: React.FC<ClientFormProps> = ({
           localityId,
           zoneId,
           registrationDate,
-          type
+          type,
+          is_active,
+          notes
         };
       }
       const newClient = await createClient(dataToSend);
@@ -184,7 +192,9 @@ const ClientForm: React.FC<ClientFormProps> = ({
           localityId,
           zoneId,
           registrationDate,
-          type
+          type,
+          is_active,
+          notes
         } = pendingValues as CreateClientDTO;
 
         dataToSend = {
@@ -197,7 +207,9 @@ const ClientForm: React.FC<ClientFormProps> = ({
           localityId,
           zoneId,
           registrationDate,
-          type
+          type,
+          is_active,
+          notes
         };
       }
       const updatedClient = await updateClient(clientToEdit.person_id, dataToSend);

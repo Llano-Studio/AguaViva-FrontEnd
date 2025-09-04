@@ -141,7 +141,6 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
   function cleanSubscriptionPayload(data: any) {
   return {
     subscription_plan_id: data.subscription_plan_id,
-    end_date: data.end_date,
     status: data.status,
     notes: data.notes,
     delivery_preferences: data.delivery_preferences,

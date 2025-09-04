@@ -30,6 +30,9 @@ export const clientFields = (
       validation: { required: true },
       order: 11
     },
+    { name: "notes", label: "Notas", validation: { required: false }, type: "textarea", order: 12 },
+    { name: "is_active", label: "Activo", validation: { required: true }, type: "checkbox", order: 13 },
+
   ]);
 };
 

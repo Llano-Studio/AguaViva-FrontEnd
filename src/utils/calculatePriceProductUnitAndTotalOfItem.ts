@@ -8,6 +8,7 @@ export const calculatePriceUnitAndTotalOfItem = async (
   quantity: number
 ): Promise<{ price_unit: string; price_total_item: string }> => {
   // Obtener la lista de precios por ID
+  console.log("Calculating price for product_id:", product_id, "price_list_id:", price_list_id, "quantity:", quantity);
   const priceList = await priceListService.getPriceListById(price_list_id);
   if (!priceList || !Array.isArray(priceList.price_list_item)) {
     return { price_unit: "0", price_total_item: "0" };

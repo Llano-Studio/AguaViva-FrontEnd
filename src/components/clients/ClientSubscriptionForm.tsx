@@ -41,7 +41,6 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
     return {
       ...initialValues,
       start_date: startDate,
-      end_date: endDate,
     };
   };
 
