@@ -1,0 +1,27 @@
+import { Field } from "../../interfaces/Common";
+
+export const clientComodatoFields: Field<any>[] = [
+  { name: "product_id", label: "ID Producto", type: "number", validation: { required: true } },
+  { name: "article_description", label: "Descripción artículo", type: "text" },
+  { name: "quantity", label: "Cantidad", type: "number", validation: { required: true }, },
+  { name: "delivery_date", label: "Fecha entrega", type: "date", validation: { required: true } },
+  { name: "expected_return_date", label: "Fecha devolución esperada", type: "date" },
+  {
+    name: "status",
+    label: "Estado",
+    type: "select",
+    options: [
+      { label: "Activo", value: "ACTIVE" },
+      { label: "Devuelto", value: "RETURNED" },
+      { label: "Inactivo", value: "INACTIVE" },
+    ],
+    validation: { required: true },
+    defaultValue: "ACTIVE",
+  },
+  { name: "deposit_amount", label: "Depósito", type: "number" },
+  { name: "monthly_fee", label: "Cuota mensual", type: "number" },
+  { name: "brand", label: "Marca", type: "text" },
+  { name: "model", label: "Modelo", type: "text" },
+  { name: "contract_image_path", label: "Contrato (ruta)", type: "text" },
+  { name: "notes", label: "Notas", type: "textarea" },
+];

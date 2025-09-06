@@ -3,14 +3,15 @@ import { DataTable } from '../../components/common/DataTable';
 import { Modal } from '../../components/common/Modal';
 import { Client } from '../../interfaces/Client';
 import useClients from '../../hooks/useClients';
-import useZones from '../../hooks/useZones'; // Agregar este import
+import useZones from '../../hooks/useZones';
 import ClientForm from '../../components/clients/ClientForm';
 import { useNavigate } from "react-router-dom";
 import { clientColumns } from "../../config/clients/clientFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { clientFilters } from "../../config/clients/clientFiltersConfig";
-import { clientModalConfig ,loanedProductsConfig } from "../../config/clients/clientModalConfig";
+import { clientModalConfig } from "../../config/clients/clientModalConfig";
+import { clientComodatoListColumns } from "../../config/clients/clientComodatoListColumns";
 import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import Switch from "../../components/common/Switch";
 import { useSnackbar } from "../../context/SnackbarContext";
@@ -39,13 +40,12 @@ const ClientsPage: React.FC = () => {
     setSortDirection,
     fetchClients,
     deleteClient,
-    fetchLoanedProducts,
-    loanedProducts, // Productos en comodato enriquecidos
+    // Reemplazamos productos prestados por comodatos
+    fetchPersonComodatos,
+    comodatos,
   } = useClients();
 
-  // Hook para obtener zonas
   const { zones, fetchZones } = useZones();
-  
   const [showViewModal, setShowViewModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -64,7 +64,6 @@ const ClientsPage: React.FC = () => {
     }
   }, [clients]);
 
-  // Cargar zonas al montar el componente
   useEffect(() => {
     fetchZones();
   }, []);
@@ -77,7 +76,6 @@ const ClientsPage: React.FC = () => {
     fetchZones(); 
   }, []);
 
-  // Crear filtros dinámicos con las opciones de zona
   const dynamicClientFilters = clientFilters.map((filter) => {
     if (filter.name === "zoneIds") {
       return {
@@ -134,16 +132,14 @@ const ClientsPage: React.FC = () => {
     setFilters((prev: any) => ({ ...prev, [name]: value }));
   };
 
-
   const handleApplyFilters = () => {
     const transformedFilters = { ...filters };
-    // Transformar el filtro de localidades en una cadena separada por comas
     if (filters.locality && Array.isArray(filters.locality)) {
       transformedFilters.localityIds = filters.locality.join(",");
-      delete transformedFilters.locality; // Eliminar el campo original
+      delete transformedFilters.locality;
     }
 
-    setFilters(transformedFilters); // Guardar los filtros transformados
+    setFilters(transformedFilters);
     setShowFilters(false);
     setPage(1);
   };
@@ -170,7 +166,6 @@ const ClientsPage: React.FC = () => {
     setPage(1);
   };
 
-  // Maneja el éxito en crear/editar cliente
   const handleFormSuccess = (msg: string) => {
     showSnackbar(msg, "success");
     setShowForm(false);
@@ -181,11 +176,10 @@ const ClientsPage: React.FC = () => {
   const handleViewClient = async (client: Client) => {
     setSelectedClient(client);
     setShowViewModal(true);
-
     try {
-      await fetchLoanedProducts(client.person_id); // Obtiene los productos en comodato enriquecidos
-    } catch (error) {
-      console.error("Error al obtener productos en comodato:", error);
+      await fetchPersonComodatos(client.person_id);
+    } catch (e) {
+      console.error("Error al obtener comodatos:", e);
     }
   };
 
@@ -204,7 +198,6 @@ const ClientsPage: React.FC = () => {
 
   return (
     <div className={`table-scroll page-container ${titlePage+"-page-container"}`}>
-      {/* Panel de la tabla */}
       <div
         className={`page-content ${titlePage+"-page-content"}
           ${showForm ? "-translate-x-full" : "translate-x-0"}
@@ -291,7 +284,6 @@ const ClientsPage: React.FC = () => {
         />
       </div>
 
-      {/* Panel del formulario */}
       <div
         className={`form-container ${titlePage+"-form-container"}
           ${showForm ? "translate-x-0" : "translate-x-full"}
@@ -318,7 +310,6 @@ const ClientsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal de Vista */}
       <Modal
         isOpen={showViewModal}
         onClose={() => {
@@ -329,12 +320,11 @@ const ClientsPage: React.FC = () => {
         class={titlePage}
         config={clientModalConfig}
         data={selectedClient}
-        itemsForList={loanedProducts} // Productos en comodato
-        itemsConfig={loanedProductsConfig} // Configuración de los productos
-        itemsTitle="Productos en Comodato" // Título para los productos
+        itemsForList={comodatos}
+        itemsConfig={clientComodatoListColumns}
+        itemsTitle="Productos en Comodato"
       />
 
-      {/* Modal de Eliminar */}
       <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -343,11 +333,10 @@ const ClientsPage: React.FC = () => {
         genere="M"
       />
 
-      {/* Drawer de filtros */}
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        fields={dynamicClientFilters} // Usar filtros dinámicos
+        fields={dynamicClientFilters}
         values={filters}
         onChange={handleFilterChange}
         onApply={handleApplyFilters}

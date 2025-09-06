@@ -8,6 +8,7 @@ import { SubscriptionPlanService } from "../../services/SubscriptionPlanService"
 import useClientSubscriptions from "../../hooks/useClientSubscriptions";
 import ModalDeleteConfirm from "../common/ModalDeleteConfirm";
 import { parseTimeRangeFields } from "../../utils/parseTimeRangeFields";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/components/clients/subscriptionClient.css";
 
 interface SubscriptionClientProps {
@@ -25,7 +26,9 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<any>(null);
-  
+
+  const { showSnackbar } = useSnackbar();
+
   const {
     subscriptions,
     createSubscription,
@@ -39,10 +42,12 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
       const service = new SubscriptionPlanService();
       const res = await service.getSubscriptionPlans();
       if (res && res.data) {
-        setPlansOptions(res.data.map((plan: any) => ({
-          label: plan.name,
-          value: plan.subscription_plan_id
-        })));
+        setPlansOptions(
+          res.data.map((plan: any) => ({
+            label: plan.name,
+            value: plan.subscription_plan_id,
+          }))
+        );
       }
     };
     fetchPlans();
@@ -58,10 +63,8 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
     setLoading(true);
     setSubscriptionError(null);
     try {
-      // Clonar valores para no mutar el original
       const dataToSend = { ...values };
 
-      // Limpiar preferred_days si está vacío o no existe
       if (
         !dataToSend.delivery_preferences?.preferred_days ||
         dataToSend.delivery_preferences.preferred_days.length === 0
@@ -74,8 +77,11 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
       await createSubscription({ ...dataToSend, customer_id: clientId });
       setShowModal(false);
       await fetchSubscriptionsByCustomer(clientId);
+      showSnackbar("Suscripción creada correctamente.", "success");
     } catch (err: any) {
-      setSubscriptionError(err.message || "Error al agregar abono");
+      const msg = err?.message || "Error al agregar abono";
+      setSubscriptionError(msg);
+      showSnackbar(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -87,9 +93,14 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
   };
 
   const handleConfirmDelete = async () => {
-    if (subscriptionToDelete) {
+    if (!subscriptionToDelete) return;
+    try {
       await deleteSubscription(subscriptionToDelete.subscription_id);
       await fetchSubscriptionsByCustomer(clientId);
+      showSnackbar("Suscripción eliminada correctamente.", "success");
+    } catch (err: any) {
+      showSnackbar(err?.message || "Error al eliminar la suscripción", "error");
+    } finally {
       setShowDeleteModal(false);
       setSubscriptionToDelete(null);
     }
@@ -105,10 +116,8 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
     setShowModal(true);
     setSubscriptionError(null);
     try {
-      // Clonar valores para no mutar el original
       const dataToSend = { ...values };
 
-      // Limpiar preferred_days si está vacío o no existe
       if (
         !dataToSend.delivery_preferences?.preferred_days ||
         dataToSend.delivery_preferences.preferred_days.length === 0
@@ -118,14 +127,16 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
         }
       }
 
-      // Limpiar el payload para enviar solo los campos que la API espera
       const cleaned = cleanSubscriptionPayload(dataToSend);
       await updateSubscription(subscriptionToEdit.subscription_id, cleaned);
       setShowModal(false);
       setSubscriptionToEdit(null);
       await fetchSubscriptionsByCustomer(clientId);
+      showSnackbar("Suscripción actualizada correctamente.", "success");
     } catch (err: any) {
-      setSubscriptionError(err.message || "Error al editar abono");
+      const msg = err?.message || "Error al editar abono";
+      setSubscriptionError(msg);
+      showSnackbar(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -139,35 +150,33 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
   if (!isEditing) return null;
 
   function cleanSubscriptionPayload(data: any) {
-  return {
-    subscription_plan_id: data.subscription_plan_id,
-    status: data.status,
-    notes: data.notes,
-    delivery_preferences: data.delivery_preferences,
-  };
-}
+    return {
+      subscription_plan_id: data.subscription_plan_id,
+      status: data.status,
+      notes: data.notes,
+      delivery_preferences: data.delivery_preferences,
+    };
+  }
 
-  const initialValues = subscriptionToEdit
-  ? {
-      ...subscriptionToEdit,
-      delivery_preferences: parseTimeRangeFields(
-        subscriptionToEdit.delivery_preferences,
-        [
-          {
-            source: "preferred_time_range",
-            start: "preferred_time_range_start",
-            end: "preferred_time_range_end",
-          },
-          {
-            source: "avoid_times",
-            start: "avoid_times_start",
-            end: "avoid_times_end",
-            isArray: true,
-          },
-        ]
-      ),
-    }
-  : undefined;
+  const initialValues =
+    subscriptionToEdit
+      ? {
+          ...subscriptionToEdit,
+          delivery_preferences: parseTimeRangeFields(subscriptionToEdit.delivery_preferences, [
+            {
+              source: "preferred_time_range",
+              start: "preferred_time_range_start",
+              end: "preferred_time_range_end",
+            },
+            {
+              source: "avoid_times",
+              start: "avoid_times_start",
+              end: "avoid_times_end",
+              isArray: true,
+            },
+          ]),
+        }
+      : undefined;
 
   return (
     <div className="subscriptionClient-actions-container">
@@ -186,6 +195,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
           Agregar Abono
         </button>
       </div>
+
       <ModalSubscriptionClient
         isOpen={showModal}
         onClose={() => {
@@ -202,7 +212,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
       <ListItem
         items={subscriptions}
         columns={clientSubscriptionListColumns}
-        getKey={item => item.subscription_id}
+        getKey={(item) => item.subscription_id}
         content="abono"
         genere="M"
         onRemove={handleRemoveSubscription}

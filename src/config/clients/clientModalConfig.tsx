@@ -1,5 +1,7 @@
 import { formatDateForView } from "../../utils/formateDateForView";
 import { renderPaymentSemaphoreLabel } from "../../utils/paymentSemaphoreLabels";
+import { sortByOrder } from "../../utils/sortByOrder";
+import { formatDate as formatDateLong } from "../../utils/formatDate";
 
 export const clientModalConfig = [
   { label: "ID cliente", accessor: "person_id", className: "modal-item-1", order: 0 },
@@ -32,20 +34,43 @@ export const clientModalConfig = [
   },
 ].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-export const loanedProductsConfig = [
-  { 
-    header: "Imagen", 
-    accessor: "image", 
-    render: (item: any) => (
-      <img 
-        src={item.image} 
-        alt="Producto" 
-        style={{ width: 50, height: 50, objectFit: "cover", borderRadius: "4px" }} 
-      />
-    )
+
+export const loanedProductsConfig = sortByOrder([
+  {
+    header: "Producto",
+    accessor: "article_description",
+    order: 0,
+    render: (item: any) => item.article_description || item.product?.name || item.product_id,
   },
-  { header: "Descripción", accessor: "description" },
-  { header: "Cantidad", accessor: "loaned_quantity" },
-  { header: "Fecha de Adquisición", accessor: "acquisition_date" },
-  { header: "Estado del Pedido", accessor: "order_status" },
-];
+  {
+    header: "Cantidad",
+    accessor: "quantity",
+    order: 1,
+    render: (item: any) => item.quantity,
+  },
+  {
+    header: "Estado",
+    accessor: "status",
+    order: 2,
+    render: (item: any) => item.status,
+  },
+  {
+    header: "Entrega",
+    accessor: "delivery_date",
+    order: 3,
+    render: (item: any) => renderDate(item.delivery_date),
+  },
+  {
+    header: "Dev. esperada",
+    accessor: "expected_return_date",
+    order: 4,
+    render: (item: any) => renderDate(item.expected_return_date),
+  },
+]);
+
+function renderDate(v?: string) {
+  if (!v) return "";
+  const ymd = String(v).slice(0, 10); // "YYYY-MM-DD"
+  const _prettyLong = formatDateLong(ymd);
+  return formatDateForView(ymd);
+}

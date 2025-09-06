@@ -1,21 +1,21 @@
-.modalSubscriptionClient-title{
+.modalClientComodato-title{
     font-size: 15px;
     font-weight: 600;
     color: var(--text-color-3);
     margin-bottom: 13px;
 }
 
-.client-comodato-form{
+.client-subscription-form{
     padding: 0;
     border: none;
     row-gap: 10px;
 }
 
-.modalSubscriptionClient-wrapper{
+.modalClientComodato-wrapper{
     width: 75%;
 }
 
-.modalSubscriptionClient-button-close{
+.modalClientComodato-button-close{
     padding: 0;
 }
 

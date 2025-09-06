@@ -1,4 +1,5 @@
 import { sortByOrder } from "../../utils/sortByOrder";
+import { formatDateForView } from "../../utils/formateDateForView";
 
 export const clientSubscriptionListColumns = sortByOrder([
   {
@@ -7,13 +8,13 @@ export const clientSubscriptionListColumns = sortByOrder([
     order: 0,
     render: (item: any) => item.subscription_plan?.name,
   },
-    {
+  {
     header: "Descripción",
     accessor: "subscription_plan_description",
     order: 1,
     render: (item: any) => item.subscription_plan?.description,
   },
-    {
+  {
     header: "Precio",
     accessor: "subscription_plan_price",
     order: 2,
@@ -23,7 +24,7 @@ export const clientSubscriptionListColumns = sortByOrder([
     header: "Fecha inicio",
     accessor: "start_date",
     order: 3,
-    render: (item: any) => item.start_date,
+    render: (item: any) => formatDateForView(item.start_date),
   },
   {
     header: "Estado",

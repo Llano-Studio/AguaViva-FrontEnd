@@ -10,6 +10,7 @@ import SubscriptionClient from "./SubscriptionClient";
 import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { formatDateForInput } from "../../utils/formatDateForInput";
+import ClientComodato from "./ClientComodato";
 
 interface ClientFormProps {
   onCancel: () => void;
@@ -246,7 +247,10 @@ const ClientForm: React.FC<ClientFormProps> = ({
       {error && <div className="error-message">{error}</div>}
 
       {isEditing && clientToEdit && (
-        <SubscriptionClient clientId={clientToEdit.person_id} isEditing={isEditing} />
+        <>
+          <SubscriptionClient clientId={clientToEdit.person_id} isEditing={isEditing} />
+          <ClientComodato clientId={clientToEdit.person_id} isEditing={isEditing} />
+        </>
       )}
 
       <ModalUpdateConfirm

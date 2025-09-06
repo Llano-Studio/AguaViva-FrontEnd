@@ -1,10 +1,11 @@
 import { sortByOrder } from "../../utils/sortByOrder";
+import { formatDateForView } from "../../utils/formateDateForView";
 
 export const clientSubscriptionModalConfig = sortByOrder([
   { label: "Abono", accessor: "subscription_plan.name", order: 0 },
   { label: "Precio", accessor: "subscription_plan.price", order: 1 },
   { label: "Descripción", accessor: "subscription_plan.description", order: 2 },
-  { label: "Fecha inicio", accessor: "start_date", order: 3 },
+  { label: "Fecha inicio", accessor: "start_date", order: 3, render: (v: string) => formatDateForView(v) },
   { label: "Estado", accessor: "status", order: 4 },
   { label: "Horario preferido", accessor: "delivery_preferences.preferred_time_range", order: 5 },
   {
@@ -21,7 +22,6 @@ export const clientSubscriptionModalConfig = sortByOrder([
   { label: "Instrucciones especiales", accessor: "delivery_preferences.special_instructions", order: 8 },
   { label: "Notas", accessor: "notes", order: 9 },
 ]);
-
 
 const daysMap: Record<string, string> = {
   MONDAY: "Lunes",

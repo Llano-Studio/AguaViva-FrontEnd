@@ -94,3 +94,9 @@ export enum PaymentSemaphoreStatus {
   YELLOW = "YELLOW",
   RED = "RED"
 }
+
+export interface ChangeSubscriptionPlanDTO {
+  current_subscription_id: number;
+  new_plan_id: number;
+  effective_date: string;         // YYYY-MM-DD
+}

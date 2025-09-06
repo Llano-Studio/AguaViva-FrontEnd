@@ -62,7 +62,7 @@
   font-size: 11px;
   font-weight: 600;
   color: var(--text-color-2);
-  width: 115px;
+  min-width: 115px;
   height: 28px;
   padding: 0px;
   background: var(--acent-color-2);
