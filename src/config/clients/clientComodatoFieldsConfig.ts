@@ -1,9 +1,8 @@
 import { Field } from "../../interfaces/Common";
 
 export const clientComodatoFields: Field<any>[] = [
-  { name: "product_id", label: "ID Producto", type: "number", validation: { required: true } },
-  { name: "article_description", label: "Descripción artículo", type: "text" },
-  { name: "quantity", label: "Cantidad", type: "number", validation: { required: true }, },
+  { name: "article_description", label: "Producto", type: "search", validation: { required: true } },
+  { name: "quantity", label: "Cantidad", type: "number", validation: { required: true } },
   { name: "delivery_date", label: "Fecha entrega", type: "date", validation: { required: true } },
   { name: "expected_return_date", label: "Fecha devolución esperada", type: "date" },
   {
@@ -22,6 +21,6 @@ export const clientComodatoFields: Field<any>[] = [
   { name: "monthly_fee", label: "Cuota mensual", type: "number" },
   { name: "brand", label: "Marca", type: "text" },
   { name: "model", label: "Modelo", type: "text" },
-  { name: "contract_image_path", label: "Contrato (ruta)", type: "text" },
   { name: "notes", label: "Notas", type: "textarea" },
+  { name: "contract_image_path", label: "Contrato comodato", type: "file"},
 ];

@@ -18,6 +18,7 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
 import useLocations from "../../hooks/useLocations";
+import useClientSubscriptions from "../../hooks/useClientSubscriptions";
 
 const ClientsPage: React.FC = () => {
   const { 
@@ -58,6 +59,10 @@ const ClientsPage: React.FC = () => {
   const { showSnackbar } = useSnackbar();
   const { localities, fetchLocalities } = useLocations();
 
+  // Subscripciones por cliente: mostrar botón Pagar solo si existe
+  const { fetchSubscriptionsByCustomer } = useClientSubscriptions();
+  const [hasSubscription, setHasSubscription] = useState<Record<number, boolean>>({});
+
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
@@ -75,6 +80,32 @@ const ClientsPage: React.FC = () => {
   useEffect(() => {
     fetchZones(); 
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadSubs = async () => {
+      try {
+        const results = await Promise.all(
+          clients.map(async (c) => {
+            const res: any = await fetchSubscriptionsByCustomer(c.person_id);
+            const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+            const has = Array.isArray(list) && list.length > 0;
+            return [c.person_id, has] as const;
+          })
+        );
+        if (!cancelled) {
+          const map: Record<number, boolean> = {};
+          results.forEach(([id, has]) => (map[id] = has));
+          setHasSubscription(map);
+        }
+      } catch {
+        if (!cancelled) setHasSubscription({});
+      }
+    };
+    if (clients.length) loadSubs();
+    else setHasSubscription({});
+    return () => { cancelled = true; };
+  }, [clients, fetchSubscriptionsByCustomer]);
 
   const dynamicClientFilters = clientFilters.map((filter) => {
     if (filter.name === "zoneIds") {
@@ -183,6 +214,12 @@ const ClientsPage: React.FC = () => {
     }
   };
 
+  // Prearmado para implementar registro de pago
+  const handlePayment = (item: Client & { id: number }) => {
+    showSnackbar("Registrar pago: por implementar", "info");
+    console.log("onPayment -> item:", item);
+  };
+
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
   }
@@ -258,6 +295,8 @@ const ClientsPage: React.FC = () => {
           onView={handleViewClient}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
+          onPayment={handlePayment}
+          paymentVisible={(item) => !!hasSubscription[item.id]}
           class={titlePage}
           sortBy={sortBy}
           sortDirection={sortDirection}

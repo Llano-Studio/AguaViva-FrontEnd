@@ -19,3 +19,11 @@ export const ViewButton = ({ onClick }: { onClick: () => void }) => (
 export const DownloadButton = ({ onClick }: { onClick: () => void }) => (
   <IconButton onClick={onClick} icon="/assets/icons/download.svg" alt="Descargar PDF" />
 );
+
+export const CancelButton = ({ onClick }: { onClick: () => void }) => (
+  <IconButton onClick={onClick} icon="/assets/icons/cancel.svg" alt="Descargar PDF" />
+);
+
+export const PaymentButton = ({ onClick }: { onClick: () => void }) => (
+  <IconButton onClick={onClick} icon="/assets/icons/payment.svg" alt="Realizar Pago" />
+);

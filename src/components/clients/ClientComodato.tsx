@@ -33,9 +33,17 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
   const [toDelete, setToDelete] = useState<any>(null);
 
   useEffect(() => {
-    if (isEditing && clientId) {
-      fetchPersonComodatos(clientId);
-    }
+    if (!isEditing || !clientId) return;
+    (async () => {
+      try {
+        setLoading(true);
+        await fetchPersonComodatos(clientId);
+      } catch (e: any) {
+        setErr(e?.message || "Error al cargar comodatos");
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [isEditing, clientId, fetchPersonComodatos]);
 
   const handleOpenNew = () => {
@@ -92,21 +100,14 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
       <div className="clientComodato-actions-title">
         <h2 className="clientComodato-title">Comodatos del cliente</h2>
         <button onClick={handleOpenNew} className="page-new-button clientComodato-new-button">
-          <img
-            src="/assets/icons/huge-icon.svg"
-            alt="Agregar comodato"
-            className="page-new-button-icon"
-          />
+          <img src="/assets/icons/huge-icon.svg" alt="Agregar comodato" className="page-new-button-icon" />
           Agregar Comodato
         </button>
       </div>
 
       <ModalClientComodato
         isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditingItem(null);
-        }}
+        onClose={() => { setShowModal(false); setEditingItem(null); }}
         onSubmit={handleSubmit}
         initialValues={editingItem || undefined}
         loading={loading}
@@ -121,10 +122,7 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
         content="comodato"
         genere="M"
         onRemove={handleRemove}
-        onEdit={(i) => {
-          setEditingItem(i);
-          setShowModal(true);
-        }}
+        onEdit={(i) => { setEditingItem(i); setShowModal(true); }}
         onView={(i) => setViewItem(i)}
       />
 
@@ -138,10 +136,7 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
 
       <ModalDeleteConfirm
         isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setToDelete(null);
-        }}
+        onClose={() => { setShowDeleteModal(false); setToDelete(null); }}
         onDelete={handleConfirmDelete}
         content="comodato"
         genere="M"
