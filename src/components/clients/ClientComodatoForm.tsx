@@ -35,7 +35,7 @@ const getInitialValues = (isEditing?: boolean, item?: any): FormValues => {
       notes: item.notes ?? "",
       deposit_amount: item.deposit_amount ?? 0,
       monthly_fee: item.monthly_fee ?? 0,
-      article_description: item.article_description ?? "",
+      article_description: item.product.description ?? "",
       brand: item.brand ?? "",
       model: item.model ?? "",
       contract_image_path: "",
@@ -135,6 +135,7 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
           page: 1,
           limit: 10,
           search: q,
+          isReturnable: true,
         });
         const list = Array.isArray(res?.data) ? res.data : [];
         cacheRef.current.set(q, list);

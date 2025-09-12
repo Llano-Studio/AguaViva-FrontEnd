@@ -101,7 +101,7 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
       setAbonoSubscriptionId(null);
       if (!selectedClient?.person_id) return;
       try {
-        const subs = await fetchSubscriptionsByCustomer(selectedClient.person_id, "");
+        const subs = await fetchSubscriptionsByCustomer(selectedClient.person_id, "", { status: "ACTIVE" });
         const first = subs?.[0];
         if (first) {
           articleForm.setValue("abono", first.subscription_plan?.subscription_plan_id);
@@ -302,7 +302,8 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
                   return [{ isNone: true, subscription_plan: { name: "-" } }];
                 const subs = await fetchSubscriptionsByCustomer(
                   selectedClient.person_id,
-                  query
+                  query,
+                  { status: "ACTIVE" }
                 );
                 return [{ isNone: true, subscription_plan: { name: "-" } }, ...subs];
               },

@@ -1,13 +1,64 @@
 @import "tailwindcss";
 
-.icon-button{
-    @apply hover:opacity-80 transition-opacity;
-    padding: 0px;
-    margin-right: 5px;
+.icon-button-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 5px;
 }
 
-.icon-button-img{
-    height: 19px;
-    width: 22px;
-    border-radius: 2px;
+.icon-button {
+  @apply hover:opacity-80 transition-opacity;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon-button-img {
+  height: 19px;
+  width: 22px;
+  border-radius: 2px;
+  display: block;
+}
+
+/* Tooltip */
+.icon-button-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -6px);
+  background: #1f2937;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease, transform .15s ease;
+  z-index: 20;
+  box-shadow: 0 4px 10px rgba(0,0,0,.25);
+}
+
+.icon-button-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1f2937;
+}
+
+.icon-button-wrapper:hover .icon-button-tooltip,
+.icon-button-wrapper:focus-within .icon-button-tooltip {
+  opacity: 1;
+  transform: translate(-50%, -10px);
 }

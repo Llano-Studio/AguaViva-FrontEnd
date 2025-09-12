@@ -70,9 +70,17 @@ export function useFormOrder() {
     return mobiles;
   };
 
-  const fetchSubscriptionsByCustomer = async (customerId: number, query?: string) => {
+  const fetchSubscriptionsByCustomer = async (
+    customerId: number,
+    query?: string,
+    filters?: { status?: string; [key: string]: any }
+  ) => {
     if (!customerId) return [];
-    const response = await subscriptionService.getSubscriptionsByCustomer(customerId, {});
+    const params = {
+      ...(query ? { search: query } : {}),
+      ...(filters ?? {}),
+    };
+    const response = await subscriptionService.getSubscriptionsByCustomer(customerId, params);
     return response?.data || [];
   };
 

@@ -23,7 +23,10 @@ export class ClientSubscriptionService {
     return await httpAdapter.delete(`${this.baseUrl}/${id}`);
   }
 
-  async getSubscriptionsByCustomer(customerId: number, params?: { page?: number; limit?: number }) {
+  async getSubscriptionsByCustomer(
+    customerId: number,
+    params?: { page?: number; limit?: number; search?: string; status?: string; [key: string]: any }
+  ) {
     return await httpAdapter.get<any>(`${this.baseUrl}/customer/${customerId}`, { params });
   }
 }

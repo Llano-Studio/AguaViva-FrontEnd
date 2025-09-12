@@ -80,3 +80,13 @@
   overflow-y: auto;
   padding-right: 20px;
 }
+
+.dashboard-container .table-container{
+    padding-right: 5px;
+}
+
+.dashboard-container .table-scroll,
+.dashboard-container .table-container,
+.dashboard-container .table{
+    overflow: visible;
+}
