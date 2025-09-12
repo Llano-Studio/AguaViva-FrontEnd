@@ -17,6 +17,7 @@ const NewUserPage = React.lazy(() => import("../pages/users/NewUserPage"));
 const LoginPage = React.lazy(() => import("../pages/login/LoginPage"));
 const PasswordRecovery = React.lazy(() => import("../pages/passwordRecovery/PasswordRecoveryPage"));
 const ResetPasswordPage = React.lazy(() => import("../pages/resetPassword/ResetPasswordPage"));
+const EmailConfirmationPage = React.lazy(() => import("../pages/emailConfirmation/EmailConfirmationPage"));
 const ZonesPage = React.lazy(() => import("../pages/zones/ZonesPage"));
 const NewZonePage = React.lazy(() => import("../pages/zones/NewZonePage"));
 const OrdersPage = React.lazy(() => import("../pages/orders/OrdersPage"));
@@ -39,6 +40,7 @@ const AppRouter: React.FC = () => {
           <Route path="/recuperar-clave" element={<PasswordRecovery />} />
           <Route path="/password-recovery" element={<PasswordRecovery />} />
           <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/confirmar-email" element={<EmailConfirmationPage />} />
 
           {/* Rutas privadas con layout */}
           <Route

@@ -88,7 +88,7 @@ const ResetPasswordPage: React.FC = () => {
     try {
       const response = await authService.resetPassword(token, password);
       if (response.success) {
-        setMessage("Contraseña actualizada correctamente");
+        setMessage("Contraseña restablecida correctamente.");
         setIsSuccess(true);
         setPassword("");
         setConfirmPassword("");
@@ -220,4 +220,4 @@ const ResetPasswordPage: React.FC = () => {
   );
 };
 
-export default ResetPasswordPage; 
+export default ResetPasswordPage;
