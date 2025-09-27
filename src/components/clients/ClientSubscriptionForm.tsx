@@ -5,10 +5,12 @@ import { ItemForm } from "../common/ItemForm";
 import { Field } from "../../interfaces/Common";
 import { formatTimeRangeFields } from "../../utils/formatTimeRangeFields";
 import { useSnackbar } from "../../context/SnackbarContext";
+import { CreateClientSubscriptionDTO } from "../../interfaces/ClientSubscription";
+import { getDefaultCollectionDay } from "../../utils/getDefaultCollectionDay";
 
 interface ClientSubscriptionFormProps {
-  initialValues?: any;
-  onSubmit: (values: any) => Promise<any> | any;
+  initialValues?: Partial<CreateClientSubscriptionDTO> & any;
+  onSubmit: (values: CreateClientSubscriptionDTO | any) => Promise<any> | any;
   onCancel: () => void;
   plansOptions: { label: string; value: number }[];
   loading?: boolean;
@@ -39,10 +41,13 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
       return initialValues;
     }
     const today = new Date();
-    const startDate = today.toISOString().split("T")[0]; // YYYY-MM-DD
+    const startDate = today.toISOString().split("T")[0];
     return {
       ...initialValues,
       start_date: startDate,
+      collection_day: getDefaultCollectionDay(), // default según hoy (si >28 => 1)
+      payment_mode: "ADVANCE",
+      status: "ACTIVE",
     };
   };
 
@@ -52,27 +57,19 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
   );
 
   // useForm y paso a ItemForm
-  const form = useForm({
-    defaultValues: getDefaultDates(),
+  const form = useForm<CreateClientSubscriptionDTO>({
+    defaultValues: getDefaultDates() as any,
   });
 
   // Armar payload antes de enviar
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: CreateClientSubscriptionDTO | any) => {
     const dataToSend = { ...values };
+    if (!dataToSend.payment_mode) dataToSend.payment_mode = "ADVANCE";
+    if (!dataToSend.status) dataToSend.status = "ACTIVE"; // fuerza ACTIVE si no viene
     if (dataToSend.delivery_preferences) {
       dataToSend.delivery_preferences = formatTimeRangeFields(dataToSend.delivery_preferences, [
-        {
-          start: "preferred_time_range_start",
-          end: "preferred_time_range_end",
-          target: "preferred_time_range",
-          asArray: false,
-        },
-        {
-          start: "avoid_times_start",
-          end: "avoid_times_end",
-          target: "avoid_times",
-          asArray: true,
-        },
+        { start: "preferred_time_range_start", end: "preferred_time_range_end", target: "preferred_time_range", asArray: false },
+        { start: "avoid_times_start", end: "avoid_times_end", target: "avoid_times", asArray: true },
       ]);
     }
     try {

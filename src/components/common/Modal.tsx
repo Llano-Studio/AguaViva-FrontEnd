@@ -58,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
           </button>
         </div>
         {config && data ? (
-          <div className={`modal-content ${classModal ? classModal+"-modal-content" : ""}`}>
+          <div className={`modal-view-content ${classModal ? classModal+"-modal-view-content" : ""}`}>
             {config.map((item) => (
               <div key={item.accessor} className={item.className ? `${classModal ? classModal+"-" : ""}${item.className}` : ""}>
                 {item.label && (
@@ -87,11 +87,13 @@ export const Modal: React.FC<ModalProps> = ({
         {itemsForList && itemsForList.length > 0 && itemsConfig && (
           <div className="modal-items-list-container">
             {itemsTitle && <h3>{itemsTitle}</h3>}
-            <ListItem
-              items={itemsForList}
-              columns={itemsConfig}
-              getKey={(item) => item.product_id}
-            />
+            <div className={`table-scroll`}>
+              <ListItem
+                items={itemsForList}
+                columns={itemsConfig}
+                getKey={(item) => item.product_id}
+              />
+            </div>
           </div>
         )}
       </div>

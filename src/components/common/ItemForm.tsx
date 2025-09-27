@@ -63,6 +63,21 @@ export function ItemForm<T extends FieldValues>({
         message: `Mínimo ${field.validation.minLength} caracteres`
       };
     }
+    // NUEVO: reglas min/max para RHF en numéricos
+    if (field.type === 'number') {
+      if (field.validation?.min !== undefined) {
+        validationRules.min = {
+          value: field.validation.min,
+          message: `Mínimo ${field.validation.min}`,
+        };
+      }
+      if (field.validation?.max !== undefined) {
+        validationRules.max = {
+          value: field.validation.max,
+          message: `Máximo ${field.validation.max}`,
+        };
+      }
+    }
 
     switch (field.type) {
       case 'select': {
@@ -129,11 +144,52 @@ export function ItemForm<T extends FieldValues>({
             />
           );
         }
+
+        // NUEVO: límites y clamping
+        const minVal = field.validation?.min as number | undefined;
+        const maxVal = field.validation?.max as number | undefined;
+        const stepVal = (field.validation as any)?.step ?? 1;
+
+        const clampNumber = (raw: string) => {
+          if (raw === "") return raw;
+          let n = Number(raw);
+          if (Number.isNaN(n)) return "";
+          if (minVal !== undefined && n < minVal) n = minVal;
+          if (maxVal !== undefined && n > maxVal) n = maxVal;
+          return String(n);
+        };
+
         return (
           <input
             type="number"
-            {...register(field.name as any, validationRules)}
+            inputMode="numeric"
+            min={minVal !== undefined ? minVal : undefined}
+            max={maxVal !== undefined ? maxVal : undefined}
+            step={stepVal}
+            {...register(field.name as any, { ...validationRules, valueAsNumber: true })}
             className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+            onInput={(e) => {
+              const input = e.currentTarget;
+              const clamped = clampNumber(input.value);
+              if (clamped !== input.value) {
+                input.value = clamped;
+              }
+            }}
+            onBlur={(e) => {
+              const input = e.currentTarget;
+              const clamped = clampNumber(input.value);
+              if (clamped !== input.value) {
+                input.value = clamped;
+              }
+            }}
+            onKeyDown={(e) => {
+              const disallowed = ['e', 'E', '+'];
+              const allowMinus = minVal === undefined || minVal < 0;
+              if (disallowed.includes(e.key)) e.preventDefault();
+              if (!allowMinus && e.key === '-') e.preventDefault();
+              // si step es entero, bloqueamos decimales
+              if (Number(stepVal) === 1 && e.key === '.') e.preventDefault();
+            }}
           />
         );
       case 'date':

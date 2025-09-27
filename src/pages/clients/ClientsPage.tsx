@@ -15,10 +15,11 @@ import { clientComodatoListColumns } from "../../config/clients/clientComodatoLi
 import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import Switch from "../../components/common/Switch";
 import { useSnackbar } from "../../context/SnackbarContext";
-import '../../styles/css/pages/pages.css';
+import ClientPayment from "../../components/clients/ClientPayment";
 import PaginationControls from "../../components/common/PaginationControls";
 import useLocations from "../../hooks/useLocations";
 import useClientSubscriptions from "../../hooks/useClientSubscriptions";
+import '../../styles/css/pages/pages.css';
 
 const ClientsPage: React.FC = () => {
   const { 
@@ -55,9 +56,10 @@ const ClientsPage: React.FC = () => {
   const [semaphoreOn, setSemaphoreOn] = useState(false);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
-
   const { showSnackbar } = useSnackbar();
   const { localities, fetchLocalities } = useLocations();
+  const [showPaymentPanel, setShowPaymentPanel] = useState(false);
+  const [clientForPayment, setClientForPayment] = useState<Client | null>(null);
 
   // Subscripciones por cliente: mostrar botón Pagar solo si existe
   const { fetchSubscriptionsByCustomer } = useClientSubscriptions();
@@ -151,6 +153,7 @@ const ClientsPage: React.FC = () => {
 
   const handleEditClick = (client: Client) => {
     setSelectedClient(client);
+    setShowPaymentPanel(false); // cerrar pagos si estaba abierto
     setShowForm(true);
   };
 
@@ -216,8 +219,10 @@ const ClientsPage: React.FC = () => {
 
   // Prearmado para implementar registro de pago
   const handlePayment = (item: Client & { id: number }) => {
-    showSnackbar("Registrar pago: por implementar", "info");
-    console.log("onPayment -> item:", item);
+    setShowForm(false); // cerrar edición si estaba abierta
+    const c = clients.find(c => c.person_id === item.id);
+    if (c) setClientForPayment(c);
+    setShowPaymentPanel(true);
   };
 
   if (error) {
@@ -237,7 +242,7 @@ const ClientsPage: React.FC = () => {
     <div className={`table-scroll page-container ${titlePage+"-page-container"}`}>
       <div
         className={`page-content ${titlePage+"-page-content"}
-          ${showForm ? "-translate-x-full" : "translate-x-0"}
+          ${(showForm || showPaymentPanel) ? "-translate-x-full" : "translate-x-0"}
         `}
       >
         <div>
@@ -344,6 +349,32 @@ const ClientsPage: React.FC = () => {
               refreshClients={async () => { await fetchClients(); }}
               class={titlePage}
               onSuccess={handleFormSuccess}
+            />
+          )}
+        </div>
+      </div>
+
+      <div
+        className={`form-container ${titlePage+"-form-container"}
+          ${showPaymentPanel ? "translate-x-0" : "translate-x-full"}
+        `}
+      >
+        <div className={`form-wrapper ${titlePage+"-form-wrapper"}`}>
+          <div className={`form-header ${titlePage+"-form-header"}`}>
+            <button
+              onClick={() => { setShowPaymentPanel(false); setClientForPayment(null); }}
+              className={`form-close-button ${titlePage+"-form-close-button"}`}
+            >
+              <img src="/assets/icons/back.svg" alt="Volver" className={`form-icon-cancel ${titlePage+"-form-icon-cancel"}`} />
+            </button>
+            <h2 className={`form-title ${titlePage+"-form-title"}`}>Pagos de Abonos</h2>
+          </div>
+
+          {clientForPayment && (
+            <ClientPayment
+              clientId={clientForPayment.person_id}
+              onClose={() => { setShowPaymentPanel(false); setClientForPayment(null); }}
+              className={titlePage}
             />
           )}
         </div>

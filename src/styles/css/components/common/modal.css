@@ -32,7 +32,7 @@
     padding: 0;
 }
 
-.modal-content{
+.modal-view-content{
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -40,7 +40,7 @@
     justify-content: start;
 }
 
-.modal-content div {
+.modal-view-content div {
     width: 25%;
     padding-right: 3%;
     margin-bottom: 30px;
@@ -58,4 +58,10 @@
 
 .modal-items-list-container{
     margin-top: 20px;
+}
+
+.modal-container .table-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
 }

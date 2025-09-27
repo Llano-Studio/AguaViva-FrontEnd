@@ -14,6 +14,8 @@ import ModalCancelledSubscription from "./ModalCancelledSubscription";
 import ModalCancelledConfirm from "../common/ModalCancelledConfirm";
 import useClients from "../../hooks/useClients";
 import useCancellationOrders from "../../hooks/useCancellationOrders";
+import { ClientSubscription, CreateClientSubscriptionDTO, UpdateClientSubscriptionDTO } from "../../interfaces/ClientSubscription";
+import { getDefaultCollectionDay } from "../../utils/getDefaultCollectionDay";
 import "../../styles/css/components/clients/subscriptionClient.css";
 
 interface SubscriptionClientProps {
@@ -94,22 +96,23 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
     }
   };
 
-  const handleAddSubscription = async (values: any) => {
+  const handleAddSubscription = async (values: CreateClientSubscriptionDTO) => {
     setLoading(true);
     setSubscriptionError(null);
     try {
-      const dataToSend = { ...values };
+      const dataToSend: CreateClientSubscriptionDTO = {
+        ...values,
+        customer_id: clientId,
+        collection_day: values.collection_day ?? getDefaultCollectionDay(),
+        payment_mode: values.payment_mode || "ADVANCE",
+        status: "ACTIVE",
+      };
 
-      if (
-        !dataToSend.delivery_preferences?.preferred_days ||
-        dataToSend.delivery_preferences.preferred_days.length === 0
-      ) {
-        if (dataToSend.delivery_preferences) {
-          delete dataToSend.delivery_preferences.preferred_days;
-        }
+      if (!dataToSend.delivery_preferences?.preferred_days || dataToSend.delivery_preferences.preferred_days.length === 0) {
+        if (dataToSend.delivery_preferences) delete dataToSend.delivery_preferences.preferred_days;
       }
 
-      await createSubscription({ ...dataToSend, customer_id: clientId });
+      await createSubscription(dataToSend);
       setShowModal(false);
       await refreshLists();
       showSnackbar("Suscripción creada correctamente.", "success");
@@ -146,20 +149,15 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
     setShowModal(true);
   };
 
-  const handleEditSubscription = async (values: any) => {
+  const handleEditSubscription = async (values: UpdateClientSubscriptionDTO) => {
     setLoading(true);
     setShowModal(true);
     setSubscriptionError(null);
     try {
-      const dataToSend = { ...values };
+      const dataToSend: UpdateClientSubscriptionDTO = { ...values };
 
-      if (
-        !dataToSend.delivery_preferences?.preferred_days ||
-        dataToSend.delivery_preferences.preferred_days.length === 0
-      ) {
-        if (dataToSend.delivery_preferences) {
-          delete dataToSend.delivery_preferences.preferred_days;
-        }
+      if (!dataToSend.delivery_preferences?.preferred_days || dataToSend.delivery_preferences.preferred_days.length === 0) {
+        if (dataToSend.delivery_preferences) delete dataToSend.delivery_preferences.preferred_days;
       }
 
       const cleaned = cleanSubscriptionPayload(dataToSend);
@@ -231,9 +229,13 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
     }
   };
 
-  function cleanSubscriptionPayload(data: any) {
+  function cleanSubscriptionPayload(data: any): UpdateClientSubscriptionDTO {
     return {
       subscription_plan_id: data.subscription_plan_id,
+      start_date: data.start_date,
+      collection_day: data.collection_day,
+      payment_mode: data.payment_mode,
+      payment_due_day: data.payment_due_day,
       status: data.status,
       notes: data.notes,
       delivery_preferences: data.delivery_preferences,
@@ -304,15 +306,19 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
         onCancel={handleCancelledSubscriptions}
       />
 
-      <h3 className="subscriptionClient-title">Cancelados</h3>
-      <ListItem
-        items={cancelledSubscriptions}
-        columns={clientSubscriptionListColumns}
-        getKey={(item) => item.subscription_id}
-        content="abonos-cancelled"
-        genere="M"
-        onView={handleViewSubscription}
-      />
+      {cancelledSubscriptions.length > 0 && (
+        <>
+          <h3 className="subscriptionClient-title">Cancelados</h3>
+          <ListItem
+            items={cancelledSubscriptions}
+            columns={clientSubscriptionListColumns}
+            getKey={(item) => item.subscription_id}
+            content="abonos-cancelled"
+            genere="M"
+            onView={handleViewSubscription}
+          />
+        </>
+      )}
 
       <Modal
         isOpen={showViewSubscriptionModal}

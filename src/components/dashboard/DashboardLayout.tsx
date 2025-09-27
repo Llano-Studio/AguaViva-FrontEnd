@@ -90,7 +90,6 @@ const DashboardLayout: React.FC = () => {
               <NavbarProfile/>
         </div>        
       
-
         <main className="table-scroll content">
           <Outlet /> {/* Esto renderiza las rutas hijas */}
         </main>
