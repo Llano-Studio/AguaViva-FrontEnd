@@ -316,7 +316,6 @@ export const OrderArticlesSection: React.FC<OrderArticlesSectionProps> = ({
                   setSelectedAbonoName("-");
                   setAbonoSelected(null);
                   setAbonoSubscriptionId(null);
-                  form.setValue("subscription_id", undefined);
                   setAvailableCredits([]);
                 } else {
                   articleForm.setValue(

@@ -16,7 +16,7 @@ export const clientFields = (
     { name: "additionalPhones", label: "Teléfonos adicionales", validation: { required: false }, order: 2 },
     { name: "address", label: "Dirección", validation: { required: true }, order: 3 },
     { name: "alias", label: "Empresa", validation: { required: false }, order: 4 },
-    { name: "taxId", label: "CUIT/CUIL", validation: { required: false }, order: 5 },
+    { name: "taxId", label: "CUIT/CUIL", type: "taxId", placeholder: "XX-XXXXXXXX-X", validation: { required: false }, order: 5 },
     ...dependentLocationFields<CreateClientDTO>(countries, provinces, localities, zones).map(f => ({ ...f, order: f.order! + 5 })),
     { name: "registrationDate", label: "Fecha de alta", type: "date", validation: { required: true }, order: 10 },
     { 

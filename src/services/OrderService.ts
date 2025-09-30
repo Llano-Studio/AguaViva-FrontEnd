@@ -1,5 +1,5 @@
 import { httpAdapter } from "./httpAdapter";
-import { Order, OrdersResponse, CreateOrderDTO, AvailableCredit } from "../interfaces/Order";
+import { Order, OrdersResponse, CreateOrderDTO, AvailableCredit, CreateOrderPaymentDTO, OrderPaymentResponse } from "../interfaces/Order";
 
 export class OrderService {
   private ordersUrl = "/orders";
@@ -54,4 +54,13 @@ export class OrderService {
       throw new Error(error?.message || error?.response?.data?.message || "Error al obtener créditos disponibles");
     }
   }
+
+  async processOrderPayment(orderId: number, payload: CreateOrderPaymentDTO): Promise<OrderPaymentResponse> {
+    try {
+      const url = `${this.ordersUrl}/${orderId}/payments`;
+      return await httpAdapter.post<OrderPaymentResponse>(payload, url);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al procesar pago de la orden");
+    }
+  }  
 }

@@ -15,6 +15,7 @@ import { orderModalConfig, orderProductsConfig } from "../../config/orders/order
 import { Modal } from "../../components/common/Modal";
 import OrderForm from "../../components/orders/OrderForm";
 import OrderOneOffForm from "../../components/orders/OrderOneOffForm";
+import ModalOrderPayment from "../../components/orders/ModalOrderPayment"; 
 import "../../styles/css/pages/orders/ordersPage.css";
 
 
@@ -75,6 +76,10 @@ const OrdersPage: React.FC = () => {
   const [orderProducts, setOrderProducts] = useState<any[]>([]);
   const [editingOrder, setEditingOrder] = useState<any | null>(null);
   const [showEditPanel, setShowEditPanel] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [orderToPay, setOrderToPay] = useState<any | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<{ label: string; value: number }[]>([]);
+
 
   // Agregar estado para el ordenamiento local cuando filterType es "ALL"
   const [localSortBy, setLocalSortBy] = useState<string[]>([]);
@@ -124,6 +129,15 @@ const OrdersPage: React.FC = () => {
       searchInputRef.current.focus();
     }
   }, [regularOrders, oneOffOrders]);
+
+  useEffect(() => {
+    // TODO: Reemplazar con servicio PaymentMethodsService si está disponible.
+    setPaymentMethods([
+      { label: "Efectivo", value: 1 },
+      { label: "Transferencia", value: 2 },
+      { label: "Mercado Pago", value: 3 },
+    ]);
+  }, []);
 
   const handleDeleteClick = (id: number) => {
     const order = orders.find((o: any) => o.order_id === id || o.purchase_id === id);
@@ -348,26 +362,35 @@ const OrdersPage: React.FC = () => {
 
         <OrdersTable
           orders={orders}
-            onEdit={handleEditClick}
-            onDelete={(order) => handleDeleteClick(getOrderRowId(order))}
-            className={titlePage}
-            columns={orderTableColumns}
-            sortBy={
-              filterType === "ALL"
-                ? localSortBy
-                : filterType === "ORDER"
-                ? sortByRegular
-                : sortByOneOff
-            }
-            sortDirection={
-              filterType === "ALL"
-                ? localSortDirection
-                : filterType === "ORDER"
-                ? sortDirectionRegular
-                : sortDirectionOneOff
-            }
-            onSort={handleSort}
-            onView={handleViewClick}
+          onEdit={handleEditClick}
+          onDelete={(order) => handleDeleteClick(getOrderRowId(order))}
+          className={titlePage}
+          columns={orderTableColumns}
+          sortBy={
+            filterType === "ALL"
+              ? localSortBy
+              : filterType === "ORDER"
+              ? sortByRegular
+              : sortByOneOff
+          }
+          sortDirection={
+            filterType === "ALL"
+              ? localSortDirection
+              : filterType === "ORDER"
+              ? sortDirectionRegular
+              : sortDirectionOneOff
+          }
+          onSort={handleSort}
+          onView={handleViewClick}
+          onPayment={(order) => {
+            // Abrir modal de pago para esta orden
+            setOrderToPay(order);
+            setShowPaymentModal(true);
+          }}
+          paymentVisible={(row) => {
+            const total = parseFloat(String((row as any).total_amount ?? "0"));
+            return !isNaN(total) && total !== 0;
+          }}
         />
 
         <PaginationControls
@@ -469,6 +492,16 @@ const OrdersPage: React.FC = () => {
         onDelete={handleConfirmDelete}
         content="pedido"
         genere="M"
+      />
+
+      <ModalOrderPayment
+        isOpen={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setOrderToPay(null);
+        }}
+        order={orderToPay}
+        paymentMethods={paymentMethods}
       />
 
       {/* Drawer de filtros */}

@@ -1,4 +1,4 @@
-import {OrderType, OrderStatus} from "./Order";
+import { OrderType, OrderStatus, TrafficLightStatus, OrderPaymentStatus, OrderPayment } from "./Order";
 
 export interface OneOffCustomer {
   name: string;
@@ -54,16 +54,23 @@ export interface OrderOneOff {
   delivery_time: string;
   total_amount: string;
   paid_amount: string;
-  status: string;
-  traffic_light_status: string;       
+  status: OrderStatus | string;
+  order_type: OrderType; // nuevo en GET
+  traffic_light_status: TrafficLightStatus;
   requires_delivery: boolean;
   notes?: string;
-  delivery_address: string;          
+  delivery_address: string;
+
   products: OneOffProduct[];
   person: OneOffPerson;
   sale_channel: OneOffSaleChannel;
   locality: OneOffLocality;
   zone: OneOffZone;
+
+  // nuevos en GET
+  payment_status?: OrderPaymentStatus;
+  remaining_amount?: string;
+  payments?: OrderPayment[];
 }
 
 export interface OrdersOneOffResponse {
@@ -112,7 +119,7 @@ export interface OrderOneOffItemInputForm extends OrderOneOffItemInput {
 export interface CreateOrderOneOffFormDTO extends CreateOrderOneOffDTO {
   customer_id_display?: number;
   zone_name?: string;
-  mobile?: string[]
+  mobile?: string[];
   delivery_time_start?: string;
   delivery_time_end?: string;
   order_type: OrderType;

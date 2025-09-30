@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { OrderOneOff, CreateOrderOneOffDTO } from "../interfaces/OrderOneOff";
 import { OrderOneOffService } from "../services/OrderOneOffService";
 import { ProductService } from "../services/ProductService";
+import { CreateOrderPaymentDTO, OrderPaymentResponse } from "../interfaces/Order";
 
 
 export const useOrdersOneOff = () => {
   const orderService = new OrderOneOffService();
-  const productService = new ProductService(); 
+  const productService = new ProductService();
   const [orders, setOrders] = useState<OrderOneOff[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<OrderOneOff | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -150,6 +151,23 @@ export const useOrdersOneOff = () => {
     }
   };
 
+  const processOneOffOrderPayment = async (
+    orderId: number,
+    payment: CreateOrderPaymentDTO
+  ): Promise<OrderPaymentResponse> => {
+    try {
+      setIsLoading(true);
+      const res = await orderService.processOneOffOrderPayment(orderId, payment);
+      await fetchOrders(page, limit, search, filters, getSortParams());
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al procesar pago de la orden One-Off");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     orders,
     selectedOrder,
@@ -175,7 +193,9 @@ export const useOrdersOneOff = () => {
     setSortBy,
     sortDirection,
     setSortDirection,
-    productsOfOrderOneOff
+    productsOfOrderOneOff,
+    processOneOffOrderPayment,
+    fetchOrderById
   };
 };
 

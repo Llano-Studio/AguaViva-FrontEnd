@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { formatDateTimeForView } from "../../utils/formatDateTimeForView";
-import "../../styles/css/components/common/modalUpdateConfirm.css";
+import "../../styles/css/components/common/modalPaymentConfirm.css";
 
 interface ModalPaymentConfirmProps {
   isOpen: boolean;

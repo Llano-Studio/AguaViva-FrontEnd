@@ -4,6 +4,7 @@ import Select from "react-select";
 import { Field } from '../../interfaces/Common';
 import '../../styles/css/components/common/itemForm.css';
 import SearchBarWithDropdown from './SearchBarWithDropdown';
+import { formatCUIT } from "../../utils/formatCUIT";
 
 // Props del componente
 interface ItemFormProps<T extends FieldValues> extends UseFormReturn<T> {
@@ -292,6 +293,67 @@ export function ItemForm<T extends FieldValues>({
           />
         );
       }
+
+      case 'taxId': {
+        const reg = register(field.name as any, {
+          ...validationRules,
+          pattern: {
+            value: /^\d{2}-\d{8}-\d{1}$/,
+            message: "Formato inválido. Use XX-XXXXXXXX-X",
+          },
+        });
+
+        if (field.disabled) {
+          return (
+            <input
+              type="text"
+              value={watch(field.name as any) ?? ""}
+              className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+              disabled
+              readOnly
+              tabIndex={-1}
+              placeholder={(field as any).placeholder || "XX-XXXXXXXX-X"}
+            />
+          );
+        }
+
+        return (
+          <input
+            type="text"
+            {...reg}
+            className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+            placeholder={(field as any).placeholder || "XX-XXXXXXXX-X"}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={13} // 11 dígitos + 2 guiones
+            onKeyDown={(e) => {
+              const ctrl = e.ctrlKey || e.metaKey;
+              const allowedCtrl = ['a','c','v','x'];
+              const navigation = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+              if (ctrl && allowedCtrl.includes(e.key.toLowerCase())) return;
+              if (navigation.includes(e.key)) return;
+              // Solo dígitos (los guiones los agrega el formateador)
+              if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+            }}
+            onPaste={(e) => {
+              e.preventDefault();
+              const text = (e.clipboardData || (window as any).clipboardData).getData('text');
+              const formatted = formatCUIT(text);
+              (e.currentTarget as HTMLInputElement).value = formatted;
+              reg.onChange({ target: { name: field.name, value: formatted } });
+              if (onFieldChange) onFieldChange(field.name as string, formatted);
+            }}
+            onChange={(e) => {
+              const formatted = formatCUIT(e.target.value);
+              e.target.value = formatted;
+              reg.onChange(e);
+              if (onFieldChange) onFieldChange(field.name as string, formatted);
+            }}
+          />
+        );
+      }
+
+
       default:
         if (field.disabled) {
           return (

@@ -6,6 +6,7 @@ import { formatDateForView } from "../../utils/formateDateForView"; // <-- Agreg
 import { renderStatusOrderLabel } from "../../utils/statusOrderLabels";
 import { renderTypeOrderLabel } from "../../utils/typeOrderLabels";
 import '../../styles/css/components/common/statusBadge.css';
+import { renderStatusPaymentOrderLabel } from "../../utils/statusPaymentOrderLabels";
 
 
 // Campos para formulario de artículos de la orden
@@ -25,15 +26,15 @@ export const orderOneOffArticleFields: Field<any>[] = [
 
 export const orderClientFields: Field<CreateOrderFormDTO>[] = [
   {
-    name: "customer_id",
-    label: "ID Cliente",
+    name: "customer_name",
+    label: "Nombre y apellido",
     type: "search",
     validation: { required: false },
     order: 0,
-  },
+  },  
   {
-    name: "customer_name",
-    label: "Nombre y apellido",
+    name: "customer_id",
+    label: "ID Cliente",
     type: "search",
     validation: { required: false },
     order: 1,
@@ -132,6 +133,12 @@ export const orderTableColumns: Column<{ [key: string]: any }>[] = sortByOrder([
     render: (value: string) => {
       const className = `status-badge status-badge--${value.toLowerCase().replace('_', '-')}`;
       return <span className={className}>{renderStatusOrderLabel(value)}</span>;
+    }
+  },
+  { header: "Pago", accessor: "payment_status", order: 10,
+    render: (value: string) => {
+      const className = `status-payment-badge status-payment-badge--${value.toLowerCase().replace('_', '-')}`;
+      return <span className={className}>{renderStatusPaymentOrderLabel(value)}</span>;
     }
   },
  

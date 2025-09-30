@@ -11,6 +11,8 @@ interface Props {
   sortDirection?: ("asc" | "desc")[];
   onSort?: (column: string) => void;
   onView?: (order: OrderTableRow) => void;
+  onPayment?: (order: OrderTableRow) => void;
+  paymentVisible?: (order: OrderTableRow) => boolean; 
 }
 
 // Mapea las filas para agregar la propiedad 'id' y normalizar los campos requeridos por DataTable
@@ -24,7 +26,6 @@ const mapRowsWithId = (rows: OrderTableRow[]) =>
     scheduled_delivery_date: (row as any).scheduled_delivery_date ?? "",
     status: (row as any).status ?? (row as any).delivery_status,
     total_amount: (row as any).total_amount ?? "",
-    // Puedes agregar más campos si quieres mostrar price_list_id o notes en la tabla
   }));
 
 const OrdersTable: React.FC<Props> = ({
@@ -37,6 +38,8 @@ const OrdersTable: React.FC<Props> = ({
   sortDirection,
   onSort,
   onView,
+  onPayment,         
+  paymentVisible,    
 }) => {
   const mappedOrders = mapRowsWithId(orders);
 
@@ -55,8 +58,14 @@ const OrdersTable: React.FC<Props> = ({
       class={className}
       sortBy={sortBy}
       sortDirection={sortDirection}
-      onSort={onSort}
+      onSort={onSort as any}
       onView={onView}
+      onPayment={onPayment as any} // propaga el handler
+      paymentVisible={
+        paymentVisible
+          ? ((item) => paymentVisible(item as unknown as OrderTableRow))
+          : undefined
+      }
     />
   );
 };

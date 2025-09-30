@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Order, CreateOrderDTO, AvailableCredit } from "../interfaces/Order";
+import { Order, CreateOrderDTO, AvailableCredit, CreateOrderPaymentDTO, OrderPaymentResponse  } from "../interfaces/Order";
 import { OrderService } from "../services/OrderService";
 import { ClientSubscriptionService } from "../services/ClientSubscriptionService";
 import { ProductService } from "../services/ProductService";
@@ -174,6 +174,21 @@ export const useOrders = () => {
     }
   };
 
+  const processOrderPayment = async (orderId: number, payment: CreateOrderPaymentDTO): Promise<OrderPaymentResponse> => {
+    try {
+      setIsLoading(true);
+      const res = await orderService.processOrderPayment(orderId, payment);
+      // refrescar listado manteniendo paginación/filtros actuales
+      await fetchOrders(page, limit, search, filters, getSortParams());
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al procesar pago de la orden");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     orders,
     selectedOrder,
@@ -188,6 +203,7 @@ export const useOrders = () => {
     refreshOrders: () => fetchOrders(page, limit, search, filters, getSortParams()),
     fetchDeliveryPreferences,
     getAvailableCreditsBySubscription,
+    processOrderPayment, 
     page,
     setPage,
     limit,

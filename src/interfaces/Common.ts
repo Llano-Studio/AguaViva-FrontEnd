@@ -37,7 +37,8 @@ export type FieldType =
   | "multiselect"
   | "time"
   | "search"
-  | "datetime-local";
+  | "datetime-local"
+  | "taxId";
 
 export interface Column<T> {
   header: string;

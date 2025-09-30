@@ -11,6 +11,7 @@ import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { formatDateForInput } from "../../utils/formatDateForInput";
 import ClientComodato from "./ClientComodato";
+import { formatCUIT } from "../../utils/formatCUIT";
 
 interface ClientFormProps {
   onCancel: () => void;
@@ -118,6 +119,17 @@ const ClientForm: React.FC<ClientFormProps> = ({
 
   // Handler reutilizable
   const handleFieldChange = handleDependentLocationChange<CreateClientDTO>(setValue);
+
+
+  const handleClientFieldChange = (fieldName: keyof CreateClientDTO, value: any) => {
+    if (fieldName === "taxId") {
+      const formatted = formatCUIT(String(value ?? ""));
+      setValue("taxId", formatted, { shouldValidate: true, shouldDirty: true });
+      return;
+    }
+    // delega al handler existente (selects dependientes)
+    handleFieldChange(fieldName, value);
+  };
 
   // Submit handler
   const handleSubmit = async (values: CreateClientDTO | FormData) => {
@@ -242,7 +254,9 @@ const ClientForm: React.FC<ClientFormProps> = ({
         onCancel={onCancel}
         fields={clientFields(countryOptions, provinceOptions, localityOptions, zoneOptions)}
         class={classForm}
-        onFieldChange={handleFieldChange as (fieldName: string, value: any) => void}
+        onFieldChange={(fieldName, value) =>
+          handleClientFieldChange(fieldName as keyof CreateClientDTO, value)
+        }
       />
       {error && <div className="error-message">{error}</div>}
 
