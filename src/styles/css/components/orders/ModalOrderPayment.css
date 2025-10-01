@@ -27,3 +27,13 @@
   align-content: center;
 
 }
+
+.orderPayment-summary-data {
+  display: flex;
+  gap: 20px;
+  color: var(--text-color-3);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  margin-top: 12px;
+}

@@ -11,6 +11,7 @@ import { formatDateTimeLocal } from "../../utils/formatDateTimeLocal";
 import { CreateOrderPaymentDTO } from "../../interfaces/Order";
 import ModalPaymentConfirm from "../common/ModalPaymentConfirm";
 import "../../styles/css/components/orders/ModalOrderPayment.css";
+import { renderStatusPaymentOrderLabel } from "../../utils/statusPaymentOrderLabels";
 
 type PaymentOption = { label: string; value: number };
 
@@ -204,21 +205,19 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
                 />
               )}
 
-              {summary && (
-                <div className="cycle-summary" style={{ marginTop: payments.length > 0 ? 12 : 0 }}>
-                  <div>Total: ${summary?.total_amount ?? order?.total_amount ?? "-"}</div>
-                  <div>Pagado: ${summary?.paid_amount ?? order?.paid_amount ?? 0}</div>
-                  <div>Pendiente: ${summary?.remaining_amount ?? 0}</div>
-                  <div>Estado: {summary?.payment_status ?? "-"}</div>
-                </div>
-              )}
+
 
               {canRegisterPayment && (
                 <div className="orderPayment-summary">
-                  <h3 className="modal-subtitle">Registrar pago</h3>
-                  <p className="modal-subtitle">
-                    Saldo pendiente: {summary?.remaining_amount ?? 0}
-                  </p>
+                  <h3 className="orderPayment-modal-subtitle">Registrar pago</h3>
+                  {summary && (
+                  <div className="orderPayment-summary-data" style={{ marginTop: payments.length > 0 ? 12 : 0 }}>
+                    <div>Saldo Pendiente: ${summary?.remaining_amount ?? 0}</div>
+                    <div>Total: ${summary?.total_amount ?? order?.total_amount ?? "-"}</div>
+                    <div>Pagado: ${summary?.paid_amount ?? order?.paid_amount ?? 0}</div>
+                    <div>Estado: {renderStatusPaymentOrderLabel(String(summary?.payment_status ?? "NONE"))}</div>
+                  </div>
+                  )}
                   <ItemForm<OrderPaymentFormValues>
                     {...form}
                     onSubmit={handlePreSubmitPayment}

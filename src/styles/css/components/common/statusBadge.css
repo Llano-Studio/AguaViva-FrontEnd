@@ -57,6 +57,10 @@
   background-color: #93FFD1;
 }
 
+.status-payment-badge--partial {
+  background-color: #93e6ff;
+}
+
 .status-payment-badge--none {
   background-color: transparent;
 }
