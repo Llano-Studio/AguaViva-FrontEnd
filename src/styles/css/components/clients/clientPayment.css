@@ -1,3 +1,7 @@
 .clients-payment-block {
   margin-top: 25px;
 }
+
+.new-collectionOrder-button {
+  justify-self: end;
+}

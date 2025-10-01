@@ -1,4 +1,4 @@
-import { Client, CreateClientDTO, ClientsResponse, LoanedProduct, ChangeSubscriptionPlanDTO } from "../interfaces/Client";
+import { Client, CreateClientDTO, ClientsResponse, LoanedProduct, ChangeSubscriptionPlanDTO, CancelSubscriptionDTO } from "../interfaces/Client";
 import { httpAdapter } from "./httpAdapter";
 import { Comodato, CreateComodatoDTO, UpdateComodatoDTO, } from "../interfaces/Comodato";
 
@@ -58,10 +58,10 @@ export class ClientService {
   }
 
   // Cancelar suscripción de un cliente
-  async cancelSubscription(personId: number, subscriptionId: number): Promise<Client> {
+  async cancelSubscription(personId: number, subscriptionId: number, payload: CancelSubscriptionDTO): Promise<Client> {
     try {
       const url = `${this.clientsUrl}/${personId}/subscriptions/${subscriptionId}/cancel`;
-      return await httpAdapter.patch<Client>({}, url);
+      return await httpAdapter.patch<Client>(payload, url);
     } catch (error: any) {
       throw new Error(error?.message || error?.response?.data?.message || "Error al cancelar la suscripción");
     }

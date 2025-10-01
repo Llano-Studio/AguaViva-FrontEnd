@@ -100,3 +100,8 @@ export interface ChangeSubscriptionPlanDTO {
   new_plan_id: number;
   effective_date: string;         // YYYY-MM-DD
 }
+
+export interface CancelSubscriptionDTO {
+  cancellation_date: string; // "YYYY-MM-DD"
+  notes?: string;
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Client, CreateClientDTO, LoanedProduct, ChangeSubscriptionPlanDTO } from "../interfaces/Client";
+import { Client, CreateClientDTO, LoanedProduct, ChangeSubscriptionPlanDTO, CancelSubscriptionDTO } from "../interfaces/Client";
 import { ClientService } from "../services/ClientService";
 import { ProductService } from "../services/ProductService";
 import { cleanFilters } from "../utils/filterUtils";
@@ -147,10 +147,10 @@ export const useClients = () => {
   }, []);
 
   // Cancelar suscripción
-  const cancelSubscription = useCallback(async (personId: number, subscriptionId: number) => {
+  const cancelSubscription = useCallback(async (personId: number, subscriptionId: number, payload: CancelSubscriptionDTO) => {
     try {
       setIsLoading(true);
-      const updatedClient = await clientServiceRef.current.cancelSubscription(personId, subscriptionId);
+      const updatedClient = await clientServiceRef.current.cancelSubscription(personId, subscriptionId, payload);
       await fetchClients(page, limit, search, filters, getSortParams());
       return updatedClient;
     } catch (err: any) {
@@ -160,6 +160,7 @@ export const useClients = () => {
       setIsLoading(false);
     }
   }, [fetchClients, page, limit, search, filters]);
+
 
   // Cambiar plan de suscripción
   const changeSubscriptionPlan = useCallback(async (personId: number, payload: ChangeSubscriptionPlanDTO) => {

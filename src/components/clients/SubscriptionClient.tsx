@@ -34,7 +34,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<any>(null);
   const { cancelSubscription } = useClients();
-  const { createOrder } = useCancellationOrders();
+ 
 
   // Listas separadas
   const [activeSubscriptions, setActiveSubscriptions] = useState<any[]>([]);
@@ -204,18 +204,20 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
     setCancelLoading(true);
     setCancelError(null);
     try {
-      // 1. Cancelar suscripción
+      // Solo cancelar suscripción (enviar payload nuevo)
       await cancelSubscription(
         subscriptionToCancel.customer_id || clientId,
-        subscriptionToCancel.subscription_id
+        subscriptionToCancel.subscription_id,
+        {
+          cancellation_date:
+            cancelFormValues?.cancellation_date ||
+            cancelFormValues?.scheduled_collection_date ||
+            new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+          notes: cancelFormValues?.notes || undefined,
+        }
       );
-      // 2. Crear orden de cancelación
-      await createOrder({
-        subscription_id: subscriptionToCancel.subscription_id,
-        scheduled_collection_date: cancelFormValues.scheduled_collection_date,
-        notes: cancelFormValues.notes,
-      });
-      showSnackbar("Suscripción cancelada y orden creada.", "success");
+
+      showSnackbar("Suscripción cancelada correctamente.", "success");
       setShowCancelConfirmModal(false);
       setSubscriptionToCancel(null);
       setCancelFormValues(null);

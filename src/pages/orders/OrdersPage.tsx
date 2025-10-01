@@ -185,7 +185,6 @@ const OrdersPage: React.FC = () => {
 
   const handleEditClick = (order: any) => {
     setEditingOrder(order);
-    console.log(order);
     setShowEditPanel(true);
   };
 

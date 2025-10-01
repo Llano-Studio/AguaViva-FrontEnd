@@ -64,8 +64,6 @@ useEffect(() => {
         const localityId = zone.locality.locality_id;
         form.setValue("customer.localityId", localityId);
         form.setValue("locality_id", localityId);
-        console.log(form.getValues("customer.localityId"), "customer.localityId");
-        console.log(form.getValues("locality_id"), "locality_id");
       }
     });
   }
