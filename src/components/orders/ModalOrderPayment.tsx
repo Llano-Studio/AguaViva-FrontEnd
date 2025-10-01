@@ -10,6 +10,7 @@ import useOrdersOneOff from "../../hooks/useOrdersOneOff";
 import { formatDateTimeLocal } from "../../utils/formatDateTimeLocal";
 import { CreateOrderPaymentDTO } from "../../interfaces/Order";
 import ModalPaymentConfirm from "../common/ModalPaymentConfirm";
+import Snackbar from "../common/Snackbar";
 import "../../styles/css/components/orders/ModalOrderPayment.css";
 import { renderStatusPaymentOrderLabel } from "../../utils/statusPaymentOrderLabels";
 
@@ -66,6 +67,10 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
   // Confirmación
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingDTO, setPendingDTO] = useState<CreateOrderPaymentDTO | null>(null);
+
+  // Snackbar
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [snackMsg, setSnackMsg] = useState("");
 
   // Valores iniciales de resumen
   const initialSummary = useMemo(() => {
@@ -143,6 +148,14 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
             remaining_amount: refreshed.remaining_amount,
             payment_status: refreshed.payment_status,
           });
+          // Reset con el nuevo saldo pendiente
+          form.reset({
+            amount: getNumeric(refreshed.remaining_amount, 0) as any,
+            payment_method_id: pendingDTO.payment_method_id,
+            payment_date: formatDateTimeLocal(new Date()),
+            transaction_reference: "",
+            notes: "",
+          });
         }
       } else if (isOneOff) {
         await processOneOffOrderPayment(order.purchase_id, pendingDTO);
@@ -155,19 +168,24 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
             remaining_amount: refreshed.remaining_amount,
             payment_status: refreshed.payment_status,
           });
+          form.reset({
+            amount: getNumeric(refreshed.remaining_amount, 0) as any,
+            payment_method_id: pendingDTO.payment_method_id,
+            payment_date: formatDateTimeLocal(new Date()),
+            transaction_reference: "",
+            notes: "",
+          });
         }
       }
 
-      // reset del formulario con amount = nuevo remaining_amount
-      form.reset({
-        amount: getNumeric(summary?.remaining_amount, 0) as any,
-        payment_method_id: pendingDTO.payment_method_id,
-        payment_date: formatDateTimeLocal(new Date()),
-        transaction_reference: "",
-        notes: "",
-      });
+      // Snackbar de éxito
+      setSnackMsg("Pago registrado correctamente");
+      setSnackOpen(true);
     } catch (e) {
       console.error("Error al registrar pago:", e);
+      // Snackbar de error
+      setSnackMsg("Error al registrar pago");
+      setSnackOpen(true);
     } finally {
       setShowConfirm(false);
       setPendingDTO(null);
@@ -205,18 +223,16 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
                 />
               )}
 
-
-
               {canRegisterPayment && (
                 <div className="orderPayment-summary">
                   <h3 className="orderPayment-modal-subtitle">Registrar pago</h3>
                   {summary && (
-                  <div className="orderPayment-summary-data" style={{ marginTop: payments.length > 0 ? 12 : 0 }}>
-                    <div>Saldo Pendiente: ${summary?.remaining_amount ?? 0}</div>
-                    <div>Total: ${summary?.total_amount ?? order?.total_amount ?? "-"}</div>
-                    <div>Pagado: ${summary?.paid_amount ?? order?.paid_amount ?? 0}</div>
-                    <div>Estado: {renderStatusPaymentOrderLabel(String(summary?.payment_status ?? "NONE"))}</div>
-                  </div>
+                    <div className="orderPayment-summary-data" style={{ marginTop: payments.length > 0 ? 12 : 0 }}>
+                      <div>Saldo Pendiente: ${summary?.remaining_amount ?? 0}</div>
+                      <div>Total: ${summary?.total_amount ?? order?.total_amount ?? "-"}</div>
+                      <div>Pagado: ${summary?.paid_amount ?? order?.paid_amount ?? 0}</div>
+                      <div>Estado: {renderStatusPaymentOrderLabel(String(summary?.payment_status ?? "NONE"))}</div>
+                    </div>
                   )}
                   <ItemForm<OrderPaymentFormValues>
                     {...form}
@@ -257,6 +273,12 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
         payment_date={pendingDTO?.payment_date || new Date().toISOString()}
         reference={pendingDTO?.transaction_reference}
         loading={isLoading}
+      />
+
+      <Snackbar
+        open={snackOpen}
+        message={snackMsg}
+        onClose={() => setSnackOpen(false)}
       />
     </div>,
     document.body
