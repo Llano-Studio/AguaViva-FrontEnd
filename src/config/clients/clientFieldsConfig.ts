@@ -45,7 +45,9 @@ export const clientColumns: Column<Client>[] = sortByOrder([
   { header: 'Empresa', accessor: 'alias', order: 4,
     render: (value: string) => value ? value : '-' 
   },
-  { header: 'CUIT/CUIL', accessor: 'taxId', order: 5, require: false },
+  { header: 'CUIT/CUIL', accessor: 'taxId', order: 5, require: false,
+    render: (value: string) => value ? value : '-' 
+   },
   { header: 'Localidad', accessor: 'locality.name', order: 6 },
   { header: 'Zona', accessor: 'zone.name', order: 7 },
   { 

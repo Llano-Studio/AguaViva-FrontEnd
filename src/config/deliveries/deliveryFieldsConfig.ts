@@ -1,10 +1,12 @@
 import { Column } from "../../interfaces/Common";
 import { Delivery } from "../../interfaces/Deliveries";
 import { sortByOrder } from "../../utils/sortByOrder";
+import { renderTypeOrderLabel } from "../../utils/typeOrderLabels";
 import { formatDateForView } from "../../utils/formateDateForView";
+import { renderStatusOrderLabel } from "../../utils/statusOrderLabels";
 
 export const deliveryColumns: Column<Delivery>[] = sortByOrder([
-  { header: "ID", accessor: "order_id", order: 1 },
+  { header: "ID", accessor: "id", order: 1 },
   { header: "Cliente", accessor: "customer.name", order: 2 },
   { 
     header: "Fecha Pedido", 
@@ -18,6 +20,11 @@ export const deliveryColumns: Column<Delivery>[] = sortByOrder([
     order: 4,
     render: (value: string) => formatDateForView(value)
   },
-  { header: "Estado", accessor: "status", order: 5 },
-  { header: "Total", accessor: "total_amount", order: 6 },
+  { header: "Tipo", accessor: "order_type", order: 5,
+    render: (value: string) => renderTypeOrderLabel(value)
+  },
+  { header: "Estado", accessor: "status", order: 6, 
+    render: (value: string) => renderStatusOrderLabel(value)
+  },
+  { header: "Total", accessor: "total_amount", order: 7 },
 ]);

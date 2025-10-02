@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useFormRouteSheet } from "../../hooks/useFormRouteSheet";
 import { DataTable } from "../common/DataTable";
@@ -10,10 +10,11 @@ import { RouteSheet, CreateRouteSheetDTO } from "../../interfaces/RouteSheet";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../../utils/formatDate";
 import { DatePickerWithLabel } from "../common/DatePickerWithLabel";
-
+import { mapOrdersForTable } from "../../utils/mapOrdersForTable";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 interface RouteSheetFormProps {
-  onSubmit: (values: any) => void;
+  onSubmit: (values: any) => Promise<void> | void;
   onCancel: () => void;
   loading?: boolean;
   error?: string | null;
@@ -29,8 +30,11 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   loading,
   error,
   className,
+  onSuccess,
 }) => {
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
+
   const {
     vehicles,
     drivers,
@@ -62,7 +66,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
 
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     const today = new Date();
-    return today.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+    return today.toISOString().split("T")[0];
   });
 
   const [formattedDate, setFormattedDate] = useState<string>("");
@@ -73,6 +77,8 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
 
   const firstLoad = useRef(true);
 
+  // Normaliza las órdenes (regulares + one-off) para mostrarlas en la tabla
+  const mappedOrders = useMemo(() => mapOrdersForTable(orders as any), [orders]);
 
   useEffect(() => {
     fetchVehicles();
@@ -80,14 +86,17 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
       deliveryDateFrom: selectedDate,
       deliveryDateTo: selectedDate,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Cuando cambian las órdenes, seleccionarlas por defecto
   useEffect(() => {
     if (orders.length > 0) {
-      setSelectedOrders(orders.map((order) => order.id)); // Seleccionar todos los IDs de las órdenes
+      setSelectedOrders(orders.map((order) => (order as any).id));
+    } else {
+      setSelectedOrders([]);
     }
-  }, [orders]);
+  }, [orders, setSelectedOrders]);
 
   useEffect(() => {
     if (!firstLoad.current) {
@@ -96,6 +105,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
         deliveryDateTo: selectedDate,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVehicleId, selectedDate]);
 
   useEffect(() => {
@@ -107,6 +117,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
       deliveryDateFrom: selectedDate,
       deliveryDateTo: selectedDate,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderSearch, selectedDate]);
 
   useEffect(() => {
@@ -114,58 +125,86 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
       deliveryDateFrom: selectedDate,
       deliveryDateTo: selectedDate,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   useEffect(() => {
     if (selectedVehicleId) {
-      // Obtener los choferes del móvil seleccionado
       fetchDrivers(selectedVehicleId).then(() => {
-        // Solo establecer automáticamente el primer chofer si está activada la selección automática
         if (isDriverAutoSelected && drivers.length > 0) {
-      
-            setSelectedDriverId(drivers[0].value);
-          
+          setSelectedDriverId(drivers[0].value);
         } else if (drivers.length === 0) {
-          setSelectedDriverId(""); // Si no hay choferes, limpiar el estado
+          setSelectedDriverId("");
         }
       });
     } else {
-      setSelectedDriverId(""); // Si no hay móvil seleccionado, limpiar el estado
+      setSelectedDriverId("");
     }
-    // Eliminar drivers de las dependencias para evitar bucles
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVehicleId, isDriverAutoSelected]);
 
   const handleDriverChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newDriverId = Number(e.target.value);
-    setSelectedDriverId(newDriverId); // Actualizar el estado del chofer seleccionado
-    setIsDriverAutoSelected(false); // Cambiar a selección manual
+    setSelectedDriverId(newDriverId);
+    setIsDriverAutoSelected(false);
   };
 
   useEffect(() => {
     setFormattedDate(formatDate(selectedDate));
   }, [selectedDate]);
 
-  const handleSubmit = (data: any) => {
-    const details = selectedOrders.map((orderId) => {
-      const order = orders.find((o) => o.id === orderId);
-      return {
-        order_id: order?.id || 0,
-        delivery_status: "PENDING",
-        delivery_time: order?.delivery_time || "", // Usar el rango tal como viene
-        comments: "",
+  const handleSubmit = async (data: any) => {
+    try {
+      const details = selectedOrders.map((orderId) => {
+        const order = (orders as any[]).find((o) => (o as any).id === orderId) as any;
+
+        const isOneOff =
+          String(order?.order_type ?? (order?.purchase_id ? "ONE_OFF" : "HYBRID")) === "ONE_OFF";
+        const resolvedOrderType = (order?.order_type ?? (isOneOff ? "ONE_OFF" : "HYBRID")) as any;
+
+        const detail: any = {
+          order_type: resolvedOrderType,
+          delivery_status: "PENDING",
+          delivery_time: String(order?.delivery_time || ""),
+          comments: "",
+        };
+
+        if (isOneOff) {
+          // ONE_OFF: solo one_off_purchase_id (+ header si aplica)
+          const purchaseId = order?.purchase_id ?? order?.one_off_purchase_id;
+          if (purchaseId) detail.one_off_purchase_id = Number(purchaseId);
+          if (order?.one_off_purchase_header_id)
+            detail.one_off_purchase_header_id = Number(order.one_off_purchase_header_id);
+        } else {
+          // HYBRID: solo order_id (+ cycle_payment_id si aplica)
+          detail.order_id = Number(order?.order_id ?? 0);
+          if (order?.cycle_payment_id) detail.cycle_payment_id = Number(order.cycle_payment_id);
+        }
+
+        return detail;
+        });
+
+      const routeSheetData: CreateRouteSheetDTO = {
+        driver_id: (selectedDriverId as number) || 0,
+        vehicle_id: (selectedVehicleId as number) || 0,
+        delivery_date: selectedDate,
+        route_notes: routeNotes || "",
+        details,
       };
-    });
 
-    const routeSheetData: CreateRouteSheetDTO = {
-      driver_id: selectedDriverId || 0,
-      vehicle_id: selectedVehicleId || 0,
-      delivery_date: selectedDate,
-      route_notes: routeNotes || "",
-      details,
-    };
+      await onSubmit(routeSheetData);
 
-    onSubmit(routeSheetData);
-    navigate("/entregas");
+      if (onSuccess) {
+        onSuccess("Hoja de ruta creada correctamente.");
+      } else {
+        showSnackbar("Hoja de ruta creada correctamente.", "success");
+      }
+
+      navigate("/entregas");
+    } catch (err: any) {
+      showSnackbar(err?.message || "Error al crear la hoja de ruta", "error");
+      // no navegamos en error
+    }
   };
 
   className = "routeSheet";
@@ -192,7 +231,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
             value={selectedVehicleId}
             onChange={(e) => {
               setSelectedVehicleId(Number(e.target.value));
-              setIsDriverAutoSelected(true); // Volver a selección automática al cambiar el móvil
+              setIsDriverAutoSelected(true);
             }}
             required
           >
@@ -220,8 +259,8 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
       </div>
 
       <div style={{ margin: "24px 0" }}>
-        <DataTable
-          data={orders}
+        <DataTable<any>
+          data={mappedOrders}
           columns={[
             {
               header: "",
@@ -235,7 +274,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
                 />
               ),
             },
-            ...deliveryColumns,
+            ...(deliveryColumns as any),
           ]}
         />
       </div>
@@ -255,7 +294,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
           type="submit"
           disabled={loading}
           className={`${className}-form-button-submit form-submit`}
-        >a
+        >
           Generar hoja de ruta
         </button>
       </div>

@@ -1,10 +1,5 @@
 import { httpAdapter } from "./httpAdapter";
-import {
-  RouteSheet,
-  CreateRouteSheetDTO,
-  UpdateRouteSheetDTO,
-  RouteSheetsResponse
-} from "../interfaces/RouteSheet";
+import { RouteSheet, CreateRouteSheetDTO, UpdateRouteSheetDTO, RouteSheetsResponse } from "../interfaces/RouteSheet";
 
 export class RouteSheetService {
   private baseUrl = "/route-sheets";

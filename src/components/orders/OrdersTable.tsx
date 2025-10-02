@@ -1,73 +1,92 @@
+import { useMemo } from "react";
 import { OrderTableRow, orderTableColumns } from "../../config/orders/orderFieldsConfig";
 import { DataTable } from "../common/DataTable";
+import { Column } from "../../interfaces/Common";
+import { mapOrdersForTable } from "../../utils/mapOrdersForTable";
 
 interface Props {
   orders: OrderTableRow[];
-  onEdit: (order: OrderTableRow) => void;
-  onDelete: (order: OrderTableRow) => void;
+  onEdit?: (order: OrderTableRow) => void;
+  onDelete?: (order: OrderTableRow) => void;
   className?: string;
-  columns?: typeof orderTableColumns;
+  columns?: Column<any>[];
   sortBy?: string[];
   sortDirection?: ("asc" | "desc")[];
   onSort?: (column: string) => void;
   onView?: (order: OrderTableRow) => void;
   onPayment?: (order: OrderTableRow) => void;
-  paymentVisible?: (order: OrderTableRow) => boolean; 
+  paymentVisible?: (order: OrderTableRow) => boolean;
 }
 
-// Mapea las filas para agregar la propiedad 'id' y normalizar los campos requeridos por DataTable
-const mapRowsWithId = (rows: OrderTableRow[]) =>
-  rows.map(row => ({
-    ...row,
-    id: (row as any).order_id ?? (row as any).purchase_id,
-    customer: (row as any).customer ?? { name: (row as any).person?.name ?? "" },
-    order_type: (row as any).order_type ?? "ONE_OFF",
-    order_date: (row as any).order_date ?? (row as any).purchase_date,
-    scheduled_delivery_date: (row as any).scheduled_delivery_date ?? "",
-    status: (row as any).status ?? (row as any).delivery_status,
-    total_amount: (row as any).total_amount ?? "",
-  }));
+// Obtiene un id consistente para ambos tipos de orden
+const getRowId = (row: any) => row?.order_id ?? row?.purchase_id ?? row?.id;
 
 const OrdersTable: React.FC<Props> = ({
   orders,
   onEdit,
   onDelete,
   className,
-  columns = orderTableColumns,
+  columns = orderTableColumns as unknown as Column<any>[],
   sortBy,
   sortDirection,
   onSort,
   onView,
-  onPayment,         
-  paymentVisible,    
+  onPayment,
+  paymentVisible,
 }) => {
-  const mappedOrders = mapRowsWithId(orders);
+  const mappedOrders = mapOrdersForTable(orders as any);
 
-  // Adaptador para DataTable: recibe id y busca el pedido original
-  const handleDelete = (id: number) => {
-    const order = mappedOrders.find(o => o.id === id);
-    if (order) onDelete(order);
+  // Mapa id -> orden original para no romper los tipos al devolver en callbacks
+  const idToOriginal = useMemo(() => {
+    const map = new Map<any, OrderTableRow>();
+    (orders as any[]).forEach((o) => map.set(getRowId(o), o));
+    return map;
+  }, [orders]);
+
+  // Adaptadores seguros
+  const adaptDelete = (id: number) => {
+    const original = idToOriginal.get(id);
+    if (original && onDelete) onDelete(original);
   };
 
-  return (
-    <DataTable
-      data={mappedOrders}
-      columns={columns}
-      onEdit={onEdit}
-      onDelete={handleDelete}
-      class={className}
-      sortBy={sortBy}
-      sortDirection={sortDirection}
-      onSort={onSort as any}
-      onView={onView}
-      onPayment={onPayment as any} // propaga el handler
-      paymentVisible={
-        paymentVisible
-          ? ((item) => paymentVisible(item as unknown as OrderTableRow))
-          : undefined
-      }
-    />
-  );
+  const adaptView = (arg: any) => {
+    if (!onView) return;
+    const id = typeof arg === "number" ? arg : getRowId(arg);
+    const original = idToOriginal.get(id);
+    onView(original ?? arg);
+  };
+
+  const adaptEdit = (arg: any) => {
+    if (!onEdit) return;
+    const id = typeof arg === "number" ? arg : getRowId(arg);
+    const original = idToOriginal.get(id);
+    if (original) onEdit(original);
+  };
+
+  // Pasar solo props opcionales si existen
+  const dataTableProps: any = {
+    data: mappedOrders,
+    columns: columns as Column<any>[],
+    class: className,
+    sortBy,
+    sortDirection,
+    onSort: onSort as any,
+  };
+
+  if (onEdit) dataTableProps.onEdit = adaptEdit;
+  if (onDelete) dataTableProps.onDelete = adaptDelete;
+  if (onView) dataTableProps.onView = adaptView;
+  if (onPayment) dataTableProps.onPayment = ((arg: any) => {
+    const id = typeof arg === "number" ? arg : getRowId(arg);
+    const original = idToOriginal.get(id);
+    if (original) (onPayment as any)(original);
+  }) as any;
+  if (paymentVisible) {
+    dataTableProps.paymentVisible = (item: any) =>
+      paymentVisible(item as unknown as OrderTableRow);
+  }
+
+  return <DataTable<any> {...dataTableProps} />;
 };
 
 export default OrdersTable;

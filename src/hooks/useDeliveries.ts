@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { Delivery, CreateDeliveryDTO } from "../interfaces/Deliveries";
 import { OrderService } from "../services/OrderService";
+import { OrderOneOffService } from "../services/OrderOneOffService";
 
 export const useDeliveries = () => {
   const orderService = new OrderService();
+  const oneOffService = new OrderOneOffService();
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +26,7 @@ export const useDeliveries = () => {
       .join(",");
   };
 
+  // Traer REGULARES + ONE_OFF(requires_delivery=true) y combinarlos
   const fetchDeliveries = useCallback(
     async (
       pageParam = page,
@@ -34,22 +37,50 @@ export const useDeliveries = () => {
     ) => {
       try {
         setIsLoading(true);
-        const response = await orderService.getOrders({
-          page: pageParam,
-          limit: limitParam,
-          search: searchParam,
-          sortBy: sortByParam,
-          ...filtersParam,
-        });
-        if (response?.data) {
-          setDeliveries(response.data);
-          setTotal(response.meta.total);
-          setTotalPages(response.meta.totalPages || 1);
-          setPage(response.meta.page || 1);
-          setLimit(response.meta.limit || 10);
-          return true;
-        }
-        return false;
+
+        // Pedimos ambas listas en paralelo
+        const [regularRes, oneOffRes] = await Promise.all([
+          orderService.getOrders({
+            page: 1, // pedimos desde el inicio para luego combinar y paginar localmente
+            limit: limitParam, // podés aumentar si querés más margen antes de cortar
+            search: searchParam,
+            sortBy: sortByParam,
+            ...filtersParam,
+            order_type: "HYBRID",
+          }),
+          oneOffService.getOrdersOneOff({
+            page: 1,
+            limit: limitParam,
+            search: searchParam,
+            sortBy: sortByParam,
+            ...filtersParam,
+            order_type: "ONE_OFF",
+            requires_delivery: true, // solo ONE_OFF con envío
+          }),
+        ]);
+
+        const regularData = regularRes?.data ?? [];
+        const oneOffData = oneOffRes?.data ?? [];
+
+        const combined = [...regularData, ...oneOffData];
+
+        // Paginación local sobre la combinación
+        const totalCombined =
+          (regularRes?.meta?.total ?? regularData.length) +
+          (oneOffRes?.meta?.total ?? oneOffData.length);
+
+        const totalPagesCombined = Math.max(1, Math.ceil(totalCombined / limitParam));
+        const startIdx = (pageParam - 1) * limitParam;
+        const endIdx = startIdx + limitParam;
+        const paginated = combined.slice(startIdx, endIdx);
+
+        setDeliveries(paginated as any);
+        setTotal(totalCombined);
+        setTotalPages(totalPagesCombined);
+        setPage(pageParam);
+        setLimit(limitParam);
+
+        return true;
       } catch (err: any) {
         setError(err.message || "Error al obtener entregas");
         return false;
@@ -68,7 +99,7 @@ export const useDeliveries = () => {
     try {
       setIsLoading(true);
       // Puedes adaptar esto según tu backend, aquí se usa createOrder
-      const newDelivery = await orderService.createOrder(deliveryData as any);
+      await orderService.createOrder(deliveryData as any);
       await fetchDeliveries(page, limit, search, filters, getSortParams());
       return true;
     } catch (err: any) {
