@@ -7,6 +7,7 @@ import {
   EmailConfirmationResponse,
 } from "../interfaces/IAuthService";
 import { httpAdapter } from "./httpAdapter";
+import type { User } from "../interfaces/User";
 
 export type {
   PasswordRecoveryResponse,
@@ -34,6 +35,17 @@ export class AuthService implements IAuthService {
       return null;
     } catch (error) {
       console.error("Error al intentar iniciar sesión:", error);
+      return null;
+    }
+  }
+
+  async getProfile(): Promise<User | null> {
+    try {
+      // GET /api/auth/profile (la base '/api' la maneja httpAdapter/baseURL)
+      const response = await httpAdapter.get<User>("/auth/profile");
+      return response ?? null;
+    } catch (error) {
+      console.error("Error al obtener el perfil:", error);
       return null;
     }
   }

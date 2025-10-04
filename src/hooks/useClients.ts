@@ -127,7 +127,7 @@ export const useClients = () => {
     try {
       setIsLoading(true);
       const products = await clientServiceRef.current.getLoanedProducts(clientId);
-      const enrichedProducts = await Promise.all(
+    const enrichedProducts = await Promise.all(
         products.map(async (product) => {
           const productDetails = await productServiceRef.current.getProductById(product.product_id);
           return {
@@ -161,7 +161,6 @@ export const useClients = () => {
     }
   }, [fetchClients, page, limit, search, filters]);
 
-
   // Cambiar plan de suscripción
   const changeSubscriptionPlan = useCallback(async (personId: number, payload: ChangeSubscriptionPlanDTO) => {
     try {
@@ -177,11 +176,35 @@ export const useClients = () => {
     }
   }, [fetchClients, page, limit, search, filters]);
 
-  // Comodatos: crear
-  const createComodato = useCallback(async (personId: number, payload: CreateComodatoDTO) => {
+  // Comodatos: crear (acepta FormData para soportar imágenes)
+  const createComodato = useCallback(async (personId: number, payload: FormData | CreateComodatoDTO) => {
     try {
       setIsLoading(true);
-      const created = await clientServiceRef.current.createComodato(personId, payload);
+
+      let body: FormData;
+      if (payload instanceof FormData) {
+        body = payload;
+      } else {
+        body = new FormData();
+        Object.entries(payload || {}).forEach(([key, value]) => {
+          if (value === undefined || value === null) return;
+          if (value instanceof Blob) {
+            body.set(key, value);
+          } else if (Array.isArray(value)) {
+            value.forEach((item, idx) => {
+              if (item instanceof Blob) body.append(`${key}[${idx}]`, item);
+              else body.append(`${key}[${idx}]`, String(item));
+            });
+          } else {
+            body.set(key, String(value));
+          }
+        });
+      }
+
+      // algunos backends piden person_id también en el body
+      body.set("person_id", String(personId));
+
+      const created = await clientServiceRef.current.createComodato(personId, body);
       return created;
     } catch (err: any) {
       setError(err?.message || "Error al crear comodato");

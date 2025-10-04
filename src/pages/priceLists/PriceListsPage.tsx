@@ -11,9 +11,12 @@ import FilterDrawer from "../../components/common/FilterDrawer";
 import { priceListFilters } from "../../config/priceLists/priceListFiltersConfig";
 import { priceListModalConfig } from "../../config/priceLists/priceListModalConfig";
 import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
-import "../../styles/css/pages/pages.css";
 import { useSnackbar } from "../../context/SnackbarContext";
 import PaginationControls from "../../components/common/PaginationControls";
+import { buildIsRole } from "../../utils/buildIsRole";
+import { useAuth } from "../../hooks/useAuth";
+import type { UserRole } from "../../interfaces/User";
+import "../../styles/css/pages/pages.css";
 
 const PriceListsPage: React.FC = () => {
   const {
@@ -46,6 +49,11 @@ const PriceListsPage: React.FC = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { showSnackbar } = useSnackbar();
+  const { currentUser } = useAuth();
+  const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
+  const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+  const canEdit = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -190,8 +198,8 @@ const PriceListsPage: React.FC = () => {
             setSelectedPriceList(priceList);
             setShowViewModal(true);
           }}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
+          onEdit={canEdit ? handleEditClick : undefined}
+          onDelete={canDelete ? handleDeleteClick : undefined}
           class={titlePage}
           sortBy={sortBy}
           sortDirection={sortDirection}

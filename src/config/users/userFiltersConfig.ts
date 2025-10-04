@@ -1,4 +1,5 @@
 import { sortByOrder } from "../../utils/sortByOrder";
+import { ROLE_OPTIONS } from "../../utils/roleLabels";
 
 export const userFilters = sortByOrder([
   {
@@ -6,11 +7,7 @@ export const userFilters = sortByOrder([
     label: "Rol",
     type: "checkbox" as const,
     order: 1,
-    options: [
-      { label: "Administrativo", value: "ADMINISTRATIVE" },
-      { label: "Superadministrador", value: "SUPERADMIN" },
-      { label: "Chofer", value: "DRIVERS" }
-    ],
+    options: ROLE_OPTIONS,
   },
   {
     name: "isActive",

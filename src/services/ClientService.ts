@@ -48,7 +48,6 @@ export class ClientService {
     }
   }
 
-  // Obtener productos en comodato para un cliente
   async getLoanedProducts(clientId: number): Promise<LoanedProduct[]> {
     try {
       return await httpAdapter.get<LoanedProduct[]>(`${this.clientsUrl}/${clientId}/loaned-products-detail`);
@@ -57,7 +56,6 @@ export class ClientService {
     }
   }
 
-  // Cancelar suscripción de un cliente
   async cancelSubscription(personId: number, subscriptionId: number, payload: CancelSubscriptionDTO): Promise<Client> {
     try {
       const url = `${this.clientsUrl}/${personId}/subscriptions/${subscriptionId}/cancel`;
@@ -67,7 +65,6 @@ export class ClientService {
     }
   }
 
-  // Cambiar plan de suscripción
   async changeSubscriptionPlan(personId: number, dto: ChangeSubscriptionPlanDTO): Promise<Client> {
     try {
       const url = `${this.clientsUrl}/${personId}/subscriptions/change-plan`;
@@ -77,17 +74,17 @@ export class ClientService {
     }
   }
 
-  // Crear comodato
-  async createComodato(personId: number, dto: CreateComodatoDTO): Promise<Comodato> {
+  // Crear comodato – pasar isFormData si dto es FormData
+  async createComodato(personId: number, dto: FormData | CreateComodatoDTO): Promise<Comodato> {
     try {
       const url = `${this.clientsUrl}/${personId}/comodatos`;
-      return await httpAdapter.post<Comodato>(dto, url);
+      const isFormData = typeof FormData !== "undefined" && dto instanceof FormData;
+      return await httpAdapter.post<Comodato>(dto, url, isFormData ? { isFormData: true } : undefined);
     } catch (error: any) {
       throw new Error(error?.message || error?.response?.data?.message || "Error al crear comodato");
     }
   }
 
-  // Obtener comodatos de una persona
   async getPersonComodatos(personId: number): Promise<Comodato[]> {
     try {
       const url = `${this.clientsUrl}/${personId}/comodatos`;
@@ -97,7 +94,6 @@ export class ClientService {
     }
   }
 
-  // Obtener todos los comodatos
   async getAllComodatos(): Promise<Comodato[]> {
     try {
       const url = `${this.clientsUrl}/comodatos`;
@@ -107,7 +103,6 @@ export class ClientService {
     }
   }
 
-  // Obtener un comodato específico
   async getComodatoById(personId: number, comodatoId: number): Promise<Comodato> {
     try {
       const url = `${this.clientsUrl}/${personId}/comodatos/${comodatoId}`;
@@ -117,7 +112,6 @@ export class ClientService {
     }
   }
 
-  // Actualizar comodato
   async updateComodato(personId: number, comodatoId: number, dto: UpdateComodatoDTO): Promise<Comodato> {
     try {
       const url = `${this.clientsUrl}/${personId}/comodatos/${comodatoId}`;
@@ -127,7 +121,6 @@ export class ClientService {
     }
   }
 
-  // Eliminar comodato
   async deleteComodato(personId: number, comodatoId: number): Promise<{ deleted: boolean; message?: string }> {
     try {
       const url = `${this.clientsUrl}/${personId}/comodatos/${comodatoId}`;

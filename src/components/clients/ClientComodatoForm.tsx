@@ -1,22 +1,30 @@
 import React, { useEffect, useMemo, useCallback, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { clientComodatoFields } from "../../config/clients/clientComodatoFieldsConfig";
 import { ItemForm } from "../common/ItemForm";
 import { Field } from "../../interfaces/Common";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { CreateComodatoDTO } from "../../interfaces/Comodato";
 import { ProductService } from "../../services/ProductService";
+import { clientComodatoFields } from "../../config/clients/clientComodatoFieldsConfig";
 
 interface ClientComodatoFormProps {
   initialValues?: any;
-  onSubmit: (values: any) => Promise<any> | any;
+  onSubmit: (values: FormData | Record<string, any>) => Promise<any> | any;
   onCancel: () => void;
   loading?: boolean;
   error?: string | null;
   isEditing?: boolean;
 }
 
-type FormValues = Omit<CreateComodatoDTO, "person_id">;
+type FormValues = Omit<CreateComodatoDTO, "person_id"> & {
+  article_description?: string;
+  brand?: string;
+  model?: string;
+  // si tu campo de archivo llega como File
+  contract_image?: File | null;
+  // si llega como string path
+  contract_image_path?: string;
+};
 
 const getInitialValues = (isEditing?: boolean, item?: any): FormValues => {
   const today = new Date();
@@ -35,9 +43,10 @@ const getInitialValues = (isEditing?: boolean, item?: any): FormValues => {
       notes: item.notes ?? "",
       deposit_amount: item.deposit_amount ?? 0,
       monthly_fee: item.monthly_fee ?? 0,
-      article_description: item.product.description ?? "",
+      article_description: item.product?.description ?? "",
       brand: item.brand ?? "",
       model: item.model ?? "",
+      contract_image: null,
       contract_image_path: "",
     };
   }
@@ -45,7 +54,7 @@ const getInitialValues = (isEditing?: boolean, item?: any): FormValues => {
     product_id: 0,
     quantity: 1,
     delivery_date: todayStr,
-    expected_return_date: nextYearStr, // +1 año desde hoy
+    expected_return_date: nextYearStr,
     status: "ACTIVE",
     notes: "",
     deposit_amount: 0,
@@ -53,34 +62,10 @@ const getInitialValues = (isEditing?: boolean, item?: any): FormValues => {
     article_description: "",
     brand: "",
     model: "",
+    contract_image: null,
     contract_image_path: "",
   };
 };
-
-// Normaliza cuando ItemForm entrega FormData
-function normalizeValues(values: FormValues | FormData): FormValues {
-  if (values instanceof FormData) {
-    const obj: Record<string, any> = {};
-    values.forEach((val, key) => {
-      obj[key] = val;
-    });
-    return {
-      product_id: Number(obj.product_id ?? 0),
-      quantity: Number(obj.quantity ?? 1),
-      delivery_date: obj.delivery_date ? String(obj.delivery_date).slice(0, 10) : new Date().toISOString().slice(0, 10),
-      expected_return_date: obj.expected_return_date ? String(obj.expected_return_date).slice(0, 10) : "",
-      status: (obj.status as FormValues["status"]) ?? "ACTIVE",
-      notes: obj.notes ? String(obj.notes) : "",
-      deposit_amount: obj.deposit_amount != null && obj.deposit_amount !== "" ? Number(obj.deposit_amount) : 0,
-      monthly_fee: obj.monthly_fee != null && obj.monthly_fee !== "" ? Number(obj.monthly_fee) : 0,
-      article_description: obj.article_description ? String(obj.article_description) : "",
-      brand: obj.brand ? String(obj.brand) : "",
-      model: obj.model ? String(obj.model) : "",
-      contract_image_path: obj.contract_image_path ? String(obj.contract_image_path) : "",
-    };
-  }
-  return values;
-}
 
 const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
   initialValues,
@@ -100,33 +85,28 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
 
   const form = useForm<FormValues>({ defaultValues: computedInitials });
 
-  // Registramos product_id para poder leerlo del estado de RHF aunque el ItemForm no tenga un input visible
+  // Registramos product_id para poder leerlo del estado aunque ItemForm no tenga input visible
   useEffect(() => {
     form.register("product_id", { valueAsNumber: true });
     form.setValue("product_id", computedInitials.product_id, { shouldDirty: false });
   }, [form, computedInitials.product_id]);
 
-  // Estado local del buscador para evitar loops con el form
+  // Estado local del buscador
   const [searchText, setSearchText] = useState<string>(computedInitials.article_description || "");
   useEffect(() => {
     setSearchText(computedInitials.article_description || "");
     form.reset(computedInitials);
   }, [computedInitials, form]);
 
-  // Cache y control de llamadas en vuelo para evitar loops
+  // Cache de búsquedas
   const cacheRef = useRef<Map<string, any[]>>(new Map());
   const inFlightRef = useRef<string | null>(null);
 
-  // Llamada directa al servicio. Solo la usa el SearchBar (abrir/tipear).
   const fetchProductOptions = useCallback(
     async (query: string) => {
       const q = (query || "").trim();
-
-      // cache
       const cached = cacheRef.current.get(q);
       if (cached) return cached;
-
-      // evitar duplicadas por misma query
       if (inFlightRef.current === q) return cached || [];
 
       inFlightRef.current = q;
@@ -160,7 +140,6 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
       optionValueKey: "product_id",
       renderOption: (p: any) => <span>{p.description}</span>,
       onOptionSelect: (p: any) => {
-        // Setear en RHF para que podamos tomarlo en el submit aunque no exista input visible
         form.setValue("product_id", Number(p.product_id), { shouldDirty: true, shouldValidate: true });
         form.setValue("article_description", p.description || "", { shouldDirty: true });
         setSearchText(p.description || "");
@@ -173,24 +152,49 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
     },
   } as const;
 
-  const handleSubmit: (values: FormValues | FormData) => void = (values) => {
-    // Normalizar
-    const payload = normalizeValues(values);
-    // Forzar product_id desde el estado de RHF por si el FormData no lo incluye
-    const selectedId = form.getValues("product_id");
-    if (selectedId != null) {
-      payload.product_id = Number(selectedId);
+  // Construcción de FormData igual que en ProductForm
+  const handleSubmit = async (values: FormValues | FormData) => {
+    try {
+      const v = form.getValues(); // valores completos del formulario
+
+      const fd = new FormData();
+      fd.set("product_id", String(v.product_id ?? 0));
+      fd.set("quantity", String(v.quantity ?? 1));
+      fd.set("delivery_date", v.delivery_date ? String(v.delivery_date).slice(0, 10) : "");
+      fd.set("expected_return_date", v.expected_return_date ? String(v.expected_return_date).slice(0, 10) : "");
+      fd.set("status", v.status ?? "ACTIVE");
+      fd.set("notes", v.notes ? String(v.notes) : "");
+      fd.set("deposit_amount", String(v.deposit_amount ?? 0));
+      fd.set("monthly_fee", String(v.monthly_fee ?? 0));
+      fd.set("article_description", v.article_description ? String(v.article_description) : "");
+      fd.set("brand", v.brand ? String(v.brand) : "");
+      fd.set("model", v.model ? String(v.model) : "");
+      // Si usás path además de archivo
+      if (v.contract_image_path) fd.set("contract_image_path", String(v.contract_image_path));
+
+      // Fusionar archivos provenientes del ItemForm (si envió FormData)
+      if (values instanceof FormData) {
+        values.forEach((val, key) => {
+          if (val instanceof Blob) {
+            fd.set(key, val); // priorizar archivos reales
+          } else if (!fd.has(key)) {
+            fd.set(key, String(val));
+          }
+        });
+      }
+
+      const ok = await onSubmit(fd);
+
+      if (ok !== false) {
+        showSnackbar(isEditing ? "Comodato actualizado correctamente." : "Comodato creado correctamente.", "success");
+        onCancel();
+      } else {
+        showSnackbar("Error al guardar el comodato", "error");
+      }
+    } catch (e: any) {
+      showSnackbar(e?.message || "Error al guardar el comodato", "error");
+      console.error(e);
     }
-    void Promise.resolve(onSubmit(payload))
-      .then(() => {
-        showSnackbar(
-          isEditing ? "Comodato actualizado correctamente." : "Comodato creado correctamente.",
-          "success"
-        );
-      })
-      .catch((e: any) => {
-        showSnackbar(e?.message || "Error al guardar el comodato", "error");
-      });
   };
 
   useEffect(() => {
@@ -199,7 +203,7 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
 
   return (
     <>
-      <ItemForm
+      <ItemForm<FormValues>
         {...form}
         fields={fields}
         searchFieldProps={searchFieldProps}

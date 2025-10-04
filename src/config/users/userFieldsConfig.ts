@@ -1,10 +1,8 @@
 import { Field, Column } from "../../interfaces/Common";
 import { User } from "../../interfaces/User";
 import { sortByOrder } from "../../utils/sortByOrder";
-import { renderRoleLabel } from "../../utils/roleLabels";
+import { renderRoleLabel, ROLE_OPTIONS } from "../../utils/roleLabels";
 
-
-// Campos del formulario de usuario (ya ordenados por order)
 export const userFields = sortByOrder([
   { name: "name", label: "Nombre", validation: { required: true }, order: 1 },
   {
@@ -14,54 +12,44 @@ export const userFields = sortByOrder([
     validation: { required: true, isEmail: true },
     order: 2,
   },
-  { 
+  {
     name: "role",
-    label: "Rol", 
+    label: "Rol",
     type: "select",
-    options: [
-      { label: "Administrativo", value: "ADMINISTRATIVE" },
-      { label: "Superadministrador", value: "SUPERADMIN" },
-      { label: "Chofer", value: "DRIVERS" }
-    ],
+    options: ROLE_OPTIONS,
     validation: { required: true },
     order: 3,
   },
-  { name: "isActive", 
-    label: "Activo", 
-    type: "checkbox", 
-    order: 4 
-  },
+  { name: "isActive", label: "Activo", type: "checkbox", order: 4 },
   {
     name: "profileImage",
     label: "Imagen de perfil",
     type: "file",
-    order: 4,
+    order: 5,
   },
 ] as Field<User & { password?: string }>[]);
 
-// Campo extra para creación
 export const passwordField: Field<User & { password?: string }> = {
   name: "password",
   label: "Contraseña",
   type: "password",
   validation: { required: true, minLength: 6 },
-  order: 5,
+  order: 6,
 };
 
-// Columnas de la tabla de usuarios (agregando order)
 export const userColumns: Column<User>[] = sortByOrder([
-  { header: 'Nombre', accessor: 'name', order: 1 },
-  { header: 'Email', accessor: 'email', order: 2 },
-  { 
-    header: 'Rol', 
-    accessor: 'role',
+  { header: "Nombre", accessor: "name", order: 1 },
+  { header: "Email", accessor: "email", order: 2 },
+  {
+    header: "Rol",
+    accessor: "role",
     order: 3,
-    render: (value: string) => renderRoleLabel(value)
+    render: (value: string) => renderRoleLabel(value),
   },
-  { 
-    header: 'Activo', 
-    accessor: 'isActive',
+  {
+    header: "Activo",
+    accessor: "isActive",
     order: 4,
-    render: (value: boolean) => value ? 'Sí' : 'No'
-  }
+    render: (value: boolean) => (value ? "Sí" : "No"),
+  },
 ]);
