@@ -17,3 +17,7 @@
     font-weight: 500;
     color: var(--text-color-3);
 }
+
+.orders-modal-view-content div:last-child {
+    width: 100%;
+}

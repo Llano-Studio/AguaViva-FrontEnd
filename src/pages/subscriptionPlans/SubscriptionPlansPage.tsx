@@ -16,6 +16,10 @@ import SubscriptionPlanUpdatePrice from "../../components/subscriptionPlans/Subs
 import "../../styles/css/pages/subscriptionPlans/subscriptionPlansPage.css";
 import { useSnackbar } from "../../context/SnackbarContext";
 import PaginationControls from "../../components/common/PaginationControls";
+import SpinnerLoading from '../../components/common/SpinnerLoading';
+import { buildIsRole } from '../../utils/buildIsRole';
+import { UserRole } from '../../interfaces/User';
+import { useAuth } from '../../hooks/useAuth';
 
 const SubscriptionPlansPage: React.FC = () => {
   const {
@@ -49,7 +53,10 @@ const SubscriptionPlansPage: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [showUpdatePriceModal, setShowUpdatePriceModal] = useState(false);
   const { showSnackbar } = useSnackbar();
-  
+  const { currentUser } = useAuth();
+  const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
+  const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+  const canEdit = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;  
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -126,7 +133,7 @@ const SubscriptionPlansPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading /></div>;
   }
 
   const start = (page - 1) * (plans.length || 1) + (plans.length > 0 ? 1 : 0);
@@ -202,8 +209,8 @@ const SubscriptionPlansPage: React.FC = () => {
             setSelectedPlan(plan);
             setShowViewModal(true);
           }}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
+          onEdit={canEdit ? handleEditClick : undefined}
+          onDelete={canDelete ? handleDeleteClick : undefined}
           class={titlePage}
           sortBy={sortBy}
           sortDirection={sortDirection}

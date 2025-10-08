@@ -2,6 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { ItemForm } from "../common/ItemForm";
 import { Field } from "../../interfaces/Common";
+import SpinnerLoading from "../common/SpinnerLoading";
 
 interface VehicleUsersFormProps {
   userOptions: { label: string; value: number }[];
@@ -71,7 +72,7 @@ const VehicleUsersForm: React.FC<VehicleUsersFormProps> = ({
         class="vehicle-users"
       />
       {error && <div className="error-message">{error}</div>}
-      {loading && <div className="loading-message">Cargando...</div>}
+      {loading && <div className="p-4 container-loading"><SpinnerLoading /></div>}
     </>
   );
 };

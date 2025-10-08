@@ -13,7 +13,10 @@ export type AuthApi = {
   confirmEmail: (token: string) => ReturnType<AuthService["confirmEmail"]>;
 };
 
-export type UseAuthReturn = AuthContextType & {
+// Tipado laxo para permitir desestructurar `login` desde el contexto sin cambiar el sistema
+type WithLogin<T> = T & { login?: any };
+
+export type UseAuthReturn = WithLogin<AuthContextType> & {
   authApi: AuthApi;
   currentUser: AuthUser | null; // alias para compatibilidad
 };

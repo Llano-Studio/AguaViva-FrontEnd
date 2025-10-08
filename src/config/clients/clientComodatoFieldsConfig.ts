@@ -22,5 +22,5 @@ export const clientComodatoFields: Field<any>[] = [
   { name: "brand", label: "Marca", type: "text" },
   { name: "model", label: "Modelo", type: "text" },
   { name: "notes", label: "Notas", type: "textarea" },
-  { name: "contract_image_path", label: "Contrato comodato", type: "file"},
+  { name: "contract_image", label: "Contrato comodato", type: "file"},
 ];

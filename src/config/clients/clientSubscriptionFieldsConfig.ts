@@ -18,7 +18,7 @@ export const clientSubscriptionFields: Field<any>[] = [
   },
   {
     name: "collection_day",
-    label: "Día de recolección",
+    label: "Día de pago",
     type: "number",
     validation: { required: true, min: 1, max: 28 },
     order: 2,

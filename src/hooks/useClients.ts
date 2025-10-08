@@ -259,10 +259,10 @@ export const useClients = () => {
   }, []);
 
   // Comodatos: actualizar
-  const updateComodato = useCallback(async (personId: number, comodatoId: number, payload: UpdateComodatoDTO) => {
+  const updateComodato = useCallback(async (personId: number, comodatoId: number, payload: FormData | UpdateComodatoDTO) => {
     try {
       setIsLoading(true);
-      const updated = await clientServiceRef.current.updateComodato(personId, comodatoId, payload);
+      const updated = await clientServiceRef.current.updateComodato(personId, comodatoId, payload as any);
       return updated;
     } catch (err: any) {
       setError(err?.message || "Error al actualizar el comodato");

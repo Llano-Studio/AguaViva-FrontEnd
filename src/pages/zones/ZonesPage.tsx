@@ -16,6 +16,7 @@ import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
 import useLocations from "../../hooks/useLocations"; // Importar el hook de ubicaciones
 import ModalLocalities from "../../components/zones/ModalLocalities";
+import SpinnerLoading from '../../components/common/SpinnerLoading';
 
 
 const ZonesPage: React.FC = () => {
@@ -161,7 +162,7 @@ const ZonesPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading/></div>;
   }
 
   const start = (page - 1) * (zones.length || 1) + (zones.length > 0 ? 1 : 0);

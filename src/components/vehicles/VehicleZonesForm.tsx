@@ -5,6 +5,7 @@ import { Field } from "../../interfaces/Common";
 import { ItemForm } from "../common/ItemForm"
 import { getDependentLocationOptions, handleDependentLocationChange } from "../../config/common/dependentLocationLogic";
 import { useDependentLocationFields } from "../../hooks/useDependentLocationFields";
+import SpinnerLoading from "../common/SpinnerLoading";
 
 interface VehicleZonesFormProps {
   initialValues?: Partial<VehicleZoneFormData>;
@@ -110,7 +111,7 @@ const VehicleZonesForm: React.FC<VehicleZonesFormProps> = ({
         onFieldChange={handleFieldChangeWrapper} // <-- usa el wrapper aquí
       />
       {error && <div className="error-message">{error}</div>}
-      {loading && <div className="loading-message">Cargando...</div>}
+      {loading && <div className="p-4 container-loading"><SpinnerLoading /></div>}
     </>
   );
 };

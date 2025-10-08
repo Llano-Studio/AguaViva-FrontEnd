@@ -15,6 +15,7 @@ import useVehicleAssignments from "../../hooks/useVehicleAssignments";
 import { useSnackbar } from "../../context/SnackbarContext";
 import "../../styles/css/pages/pages.css";
 import PaginationControls from "../../components/common/PaginationControls";
+import SpinnerLoading from "../../components/common/SpinnerLoading";
 
 const VehiclesPage: React.FC = () => {
   const {
@@ -150,7 +151,7 @@ const VehiclesPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading /></div>;
   }
 
   const start = (page - 1) * (vehicles.length || 1) + (vehicles.length > 0 ? 1 : 0);

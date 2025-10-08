@@ -7,6 +7,7 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import { Modal } from "../common/Modal";
 import { localityColumns } from "../../config/zones/localityFieldsConfig";
 import "../../styles/css/components/zones/modalLocalities.css";
+import SpinnerLoading from "../common/SpinnerLoading";
 
 interface ModalLocalitiesProps {
   isOpen: boolean;
@@ -91,7 +92,7 @@ const ModalLocalities: React.FC<ModalLocalitiesProps> = ({ isOpen, onClose }) =>
           genere="F"
         />
         {error && <div className="error-message">{error}</div>}
-        {isLoading && <div>Cargando...</div>}
+        {isLoading && <div className="p-4 container-loading"><SpinnerLoading /></div>}
       </div>
     </Modal>
   );

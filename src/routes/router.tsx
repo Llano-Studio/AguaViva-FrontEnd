@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import PrivateRoute from "./PrivateRoute";
+import SpinnerLoading from "../components/common/SpinnerLoading"; // <-- agregar
+
 
 // Lazy loaded pages
 const DashboardPage = React.lazy(() => import("../pages/dashboard/DashboardPage"));
@@ -33,7 +35,13 @@ const NewRouteSheet = React.lazy(() => import("../pages/routeSheets/NewRouteShee
 const AppRouter: React.FC = () => {
   return (
     <Router>
-      <React.Suspense fallback={<div>Cargando...</div>}>
+      <React.Suspense 
+        fallback={
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", gap: 10 }}>
+            <SpinnerLoading size={60} />
+          </div>
+        }
+      >
         <Routes>
           {/* Rutas públicas */}
           <Route path="/login" element={<LoginPage />} />

@@ -113,3 +113,11 @@ select:focus-visible {
 .input:-internal-autofill-selected{
   color: red;
 }
+
+.container-loading{
+  display: flex;
+  align-items: center;
+  justify-Content: center;
+  height: 100%;
+  width: 100%;
+}

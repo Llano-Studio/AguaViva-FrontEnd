@@ -85,19 +85,21 @@
 }
 
 .filter-select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background-color: white;
-  font-size: 14px;
-  color: #374151;
-  outline: none;
-  transition: border-color 0.2s ease-in-out;
+    margin-top: 10px;
+    width: 100%;
+    padding: 5px 2px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: white;
+    font-size: 13px;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.2s ease-in-out;
+    color: var(--text-color-1);
 }
 
 .filter-select:focus {
-  border-color: #3b82f6;
+  border-color: var(--acent-color-1);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 

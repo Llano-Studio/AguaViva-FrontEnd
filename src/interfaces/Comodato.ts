@@ -49,7 +49,8 @@ export interface CreateComodatoDTO {
   article_description?: string;
   brand?: string;
   model?: string;
-  contract_image_path?: string;
+  contract_image?: string;
+  contract_image_path?:string
 }
 
 export type UpdateComodatoDTO = Partial<Omit<CreateComodatoDTO, "person_id">> & {

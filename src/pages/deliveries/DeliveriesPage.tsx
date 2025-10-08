@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { downloadPDF } from "../../utils/downloadPDF";
 import { BASE_URL } from "../../config";
 import OrdersTable from "../../components/orders/OrdersTable";
+import SpinnerLoading from '../../components/common/SpinnerLoading';
 
 const DeliveriesPage: React.FC = () => {
   const {
@@ -212,7 +213,7 @@ const DeliveriesPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading /></div>;
   }
 
   const start = total > 0 ? (page - 1) * limit + 1 : 0;

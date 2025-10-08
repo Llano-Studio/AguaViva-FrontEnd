@@ -7,6 +7,7 @@ import { formatTimeRangeFields } from "../../utils/formatTimeRangeFields";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { CreateClientSubscriptionDTO } from "../../interfaces/ClientSubscription";
 import { getDefaultCollectionDay } from "../../utils/getDefaultCollectionDay";
+import SpinnerLoading from "../common/SpinnerLoading";
 
 interface ClientSubscriptionFormProps {
   initialValues?: Partial<CreateClientSubscriptionDTO> & any;
@@ -98,7 +99,7 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
         class="client-subscription"
       />
       {error && <div className="error-message">{error}</div>}
-      {loading && <div className="loading-message">Cargando...</div>}
+      {loading && <div className="p-4 container-loading"><SpinnerLoading/></div>}
     </>
   );
 };

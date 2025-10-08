@@ -20,6 +20,7 @@ import PaginationControls from "../../components/common/PaginationControls";
 import useLocations from "../../hooks/useLocations";
 import useClientSubscriptions from "../../hooks/useClientSubscriptions";
 import '../../styles/css/pages/pages.css';
+import SpinnerLoading from '../../components/common/SpinnerLoading';
 
 const ClientsPage: React.FC = () => {
   const { 
@@ -230,7 +231,7 @@ const ClientsPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading /></div>;
   }
 
   const start = (page - 1) * (clients.length || 1) + (clients.length > 0 ? 1 : 0);

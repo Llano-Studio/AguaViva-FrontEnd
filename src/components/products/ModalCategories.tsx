@@ -7,6 +7,7 @@ import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { Modal } from "../common/Modal";
 import "../../styles/css/components/products/modalCategories.css";
+import SpinnerLoading from "../common/SpinnerLoading";
 
 interface ModalCategoriesProps {
   isOpen: boolean;
@@ -85,7 +86,7 @@ const ModalCategories: React.FC<ModalCategoriesProps> = ({ isOpen, onClose }) =>
           genere="F"
         />
         {error && <div className="error-message">{error}</div>}
-        {isLoading && <div>Cargando...</div>}
+        {isLoading && <div className="p-4 container-loading"><SpinnerLoading /></div>}
       </div>
     </Modal>
   );

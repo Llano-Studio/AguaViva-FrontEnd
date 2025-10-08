@@ -4,6 +4,7 @@ import { clientCancelledSubscriptionFields } from "../../config/clients/clientCa
 import { ItemForm } from "../common/ItemForm";
 import { Field } from "../../interfaces/Common";
 import { useSnackbar } from "../../context/SnackbarContext";
+import SpinnerLoading from "../common/SpinnerLoading";
 
 interface ClientCancelledSubscriptionFormProps {
   initialValues?: any;
@@ -57,7 +58,7 @@ const ClientCancelledSubscriptionForm: React.FC<ClientCancelledSubscriptionFormP
         class="client-cancelled-subscription"
       />
       {error && <div className="error-message">{error}</div>}
-      {loading && <div className="loading-message">Cargando...</div>}
+      {loading && <div className="p-4 container-loading"><SpinnerLoading/></div>}
     </>
   );
 };

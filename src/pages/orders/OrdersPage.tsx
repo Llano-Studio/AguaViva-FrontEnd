@@ -17,6 +17,10 @@ import OrderForm from "../../components/orders/OrderForm";
 import OrderOneOffForm from "../../components/orders/OrderOneOffForm";
 import ModalOrderPayment from "../../components/orders/ModalOrderPayment"; 
 import "../../styles/css/pages/orders/ordersPage.css";
+import SpinnerLoading from "../../components/common/SpinnerLoading";
+import { useAuth } from "../../hooks/useAuth";
+import { UserRole } from "../../interfaces/User";
+import { buildIsRole } from "../../utils/buildIsRole";
 
 
 const OrdersPage: React.FC = () => {
@@ -79,11 +83,11 @@ const OrdersPage: React.FC = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [orderToPay, setOrderToPay] = useState<any | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<{ label: string; value: number }[]>([]);
-
-
-  // Agregar estado para el ordenamiento local cuando filterType es "ALL"
   const [localSortBy, setLocalSortBy] = useState<string[]>([]);
   const [localSortDirection, setLocalSortDirection] = useState<("asc" | "desc")[]>([]);
+  const { currentUser } = useAuth();
+  const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
+  const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;  
 
   const sortOrdersLocally = (orders: any[], sortBy: string[], sortDirection: ("asc" | "desc")[]) => {
     if (sortBy.length === 0) return orders;
@@ -362,7 +366,7 @@ const OrdersPage: React.FC = () => {
         <OrdersTable
           orders={orders}
           onEdit={handleEditClick}
-          onDelete={(order) => handleDeleteClick(getOrderRowId(order))}
+          onDelete={canDelete ? (order) => handleDeleteClick(getOrderRowId(order)) : undefined}
           className={titlePage}
           columns={orderTableColumns}
           sortBy={
@@ -514,7 +518,7 @@ const OrdersPage: React.FC = () => {
         onClear={handleClearFilters}
       />
 
-      {(isLoadingRegular || isLoadingOneOff) && <div className="p-4">Cargando...</div>}
+      {(isLoadingRegular || isLoadingOneOff) && <div className="p-4 container-loading"><SpinnerLoading /></div>}
       {(errorRegular || errorOneOff) && (
         <div className="text-red-500 p-4">{errorRegular || errorOneOff}</div>
       )}

@@ -3,30 +3,21 @@ import { useForm } from "react-hook-form";
 import { ItemForm } from "../common/ItemForm";
 import { Field } from "../../interfaces/Common";
 import { useSnackbar } from "../../context/SnackbarContext";
-import { CreateComodatoDTO } from "../../interfaces/Comodato";
 import { ProductService } from "../../services/ProductService";
 import { clientComodatoFields } from "../../config/clients/clientComodatoFieldsConfig";
+import SpinnerLoading from "../common/SpinnerLoading";
 
 interface ClientComodatoFormProps {
   initialValues?: any;
-  onSubmit: (values: FormData | Record<string, any>) => Promise<any> | any;
+  onSubmit: (fd: FormData) => Promise<any> | any; // siempre FormData
   onCancel: () => void;
   loading?: boolean;
   error?: string | null;
   isEditing?: boolean;
+  personId?: number; // lo agrega el contenedor al FormData (no desde acá)
 }
 
-type FormValues = Omit<CreateComodatoDTO, "person_id"> & {
-  article_description?: string;
-  brand?: string;
-  model?: string;
-  // si tu campo de archivo llega como File
-  contract_image?: File | null;
-  // si llega como string path
-  contract_image_path?: string;
-};
-
-const getInitialValues = (isEditing?: boolean, item?: any): FormValues => {
+const getInitialValues = (isEditing?: boolean, item?: any): any => {
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
   const nextYear = new Date(today);
@@ -47,7 +38,6 @@ const getInitialValues = (isEditing?: boolean, item?: any): FormValues => {
       brand: item.brand ?? "",
       model: item.model ?? "",
       contract_image: null,
-      contract_image_path: "",
     };
   }
   return {
@@ -63,7 +53,6 @@ const getInitialValues = (isEditing?: boolean, item?: any): FormValues => {
     brand: "",
     model: "",
     contract_image: null,
-    contract_image_path: "",
   };
 };
 
@@ -83,9 +72,10 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
     [isEditing, initialValues]
   );
 
-  const form = useForm<FormValues>({ defaultValues: computedInitials });
+  // Usamos RHF; ItemForm construirá el FormData
+  const form = useForm<any>({ defaultValues: computedInitials });
 
-  // Registramos product_id para poder leerlo del estado aunque ItemForm no tenga input visible
+  // product_id (por SearchBar)
   useEffect(() => {
     form.register("product_id", { valueAsNumber: true });
     form.setValue("product_id", computedInitials.product_id, { shouldDirty: false });
@@ -152,49 +142,46 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
     },
   } as const;
 
-  // Construcción de FormData igual que en ProductForm
-  const handleSubmit = async (values: FormValues | FormData) => {
-    try {
-      const v = form.getValues(); // valores completos del formulario
+  // Completar el FormData de ItemForm con product_id y contract_image si faltan
+  const handleSubmit = (values: any) => {
+    const fd = values instanceof FormData ? values : new FormData();
+    fd.delete("contract_image_path");
 
-      const fd = new FormData();
-      fd.set("product_id", String(v.product_id ?? 0));
-      fd.set("quantity", String(v.quantity ?? 1));
-      fd.set("delivery_date", v.delivery_date ? String(v.delivery_date).slice(0, 10) : "");
-      fd.set("expected_return_date", v.expected_return_date ? String(v.expected_return_date).slice(0, 10) : "");
-      fd.set("status", v.status ?? "ACTIVE");
-      fd.set("notes", v.notes ? String(v.notes) : "");
-      fd.set("deposit_amount", String(v.deposit_amount ?? 0));
-      fd.set("monthly_fee", String(v.monthly_fee ?? 0));
-      fd.set("article_description", v.article_description ? String(v.article_description) : "");
-      fd.set("brand", v.brand ? String(v.brand) : "");
-      fd.set("model", v.model ? String(v.model) : "");
-      // Si usás path además de archivo
-      if (v.contract_image_path) fd.set("contract_image_path", String(v.contract_image_path));
+    const v = form.getValues();
+    const normDate = (d: any) => (d ? String(d).slice(0, 10) : "");
 
-      // Fusionar archivos provenientes del ItemForm (si envió FormData)
-      if (values instanceof FormData) {
-        values.forEach((val, key) => {
-          if (val instanceof Blob) {
-            fd.set(key, val); // priorizar archivos reales
-          } else if (!fd.has(key)) {
-            fd.set(key, String(val));
-          }
-        });
-      }
-
-      const ok = await onSubmit(fd);
-
-      if (ok !== false) {
-        showSnackbar(isEditing ? "Comodato actualizado correctamente." : "Comodato creado correctamente.", "success");
-        onCancel();
-      } else {
-        showSnackbar("Error al guardar el comodato", "error");
-      }
-    } catch (e: any) {
-      showSnackbar(e?.message || "Error al guardar el comodato", "error");
-      console.error(e);
+    // Asegurar product_id
+    const pidFromFD = fd.get("product_id");
+    const pid = pidFromFD ?? v.product_id;
+    if (pid != null && String(pid).trim() !== "") {
+      fd.set("product_id", String(pid));
     }
+
+    // Rellenar campos obligatorios si faltan en el FD (por seguridad)
+    if (!fd.has("quantity") && v.quantity != null) fd.set("quantity", String(v.quantity));
+    if (!fd.has("delivery_date")) fd.set("delivery_date", normDate(v.delivery_date));
+    if (!fd.has("expected_return_date")) fd.set("expected_return_date", normDate(v.expected_return_date));
+    if (!fd.has("status") && v.status != null) fd.set("status", String(v.status));
+
+    // Opcionales si faltan
+    if (!fd.has("notes") && v.notes != null) fd.set("notes", String(v.notes));
+    if (!fd.has("deposit_amount") && v.deposit_amount != null) fd.set("deposit_amount", String(v.deposit_amount));
+    if (!fd.has("monthly_fee") && v.monthly_fee != null) fd.set("monthly_fee", String(v.monthly_fee));
+    if (!fd.has("article_description") && v.article_description != null)
+      fd.set("article_description", String(v.article_description));
+    if (!fd.has("brand") && v.brand != null) fd.set("brand", String(v.brand));
+    if (!fd.has("model") && v.model != null) fd.set("model", String(v.model));
+
+    // Asegurar contract_image si el usuario seleccionó archivo o string
+    if (!fd.has("contract_image") && v.contract_image) {
+      if (v.contract_image instanceof Blob) {
+        fd.set("contract_image", v.contract_image);
+      } else if (typeof v.contract_image === "string" && v.contract_image.trim() !== "") {
+        fd.set("contract_image", v.contract_image.trim());
+      }
+    }
+
+    return onSubmit(fd);
   };
 
   useEffect(() => {
@@ -203,7 +190,7 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
 
   return (
     <>
-      <ItemForm<FormValues>
+      <ItemForm<any>
         {...form}
         fields={fields}
         searchFieldProps={searchFieldProps}
@@ -212,7 +199,7 @@ const ClientComodatoForm: React.FC<ClientComodatoFormProps> = ({
         class="client-comodato"
       />
       {error && <div className="error-message">{error}</div>}
-      {loading && <div className="loading-message">Cargando...</div>}
+      {loading && <div className="p-4 container-loading"><SpinnerLoading/></div>}
     </>
   );
 };

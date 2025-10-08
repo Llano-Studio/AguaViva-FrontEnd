@@ -112,10 +112,11 @@ export class ClientService {
     }
   }
 
-  async updateComodato(personId: number, comodatoId: number, dto: UpdateComodatoDTO): Promise<Comodato> {
+  async updateComodato(personId: number, comodatoId: number, dto: FormData | UpdateComodatoDTO): Promise<Comodato> {
     try {
       const url = `${this.clientsUrl}/${personId}/comodatos/${comodatoId}`;
-      return await httpAdapter.patch<Comodato>(dto, url);
+      const isFormData = typeof FormData !== "undefined" && dto instanceof FormData;
+      return await httpAdapter.patch<Comodato>(dto, url, isFormData ? { isFormData: true } : undefined);
     } catch (error: any) {
       throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar el comodato");
     }

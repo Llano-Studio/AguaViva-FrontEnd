@@ -51,15 +51,71 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
     setShowModal(true);
   };
 
+  const toYMD = (v: any) => (v ? String(v).slice(0, 10) : "");
+  const toNum = (v: any) => (v === undefined || v === null || String(v).trim() === "" ? undefined : Number(v));
+  const getFD = (fd: FormData, k: string) => {
+    const v = fd.get(k);
+    return v == null ? undefined : String(v);
+  };
+  const stripUndefined = (obj: Record<string, any>) => {
+    const o: Record<string, any> = {};
+    Object.keys(obj).forEach((k) => {
+      const v = (obj as any)[k];
+      if (v !== undefined) o[k] = v;
+    });
+    return o;
+  };
+
   const handleSubmit = async (values: any) => {
     setLoading(true);
     setErr(null);
     try {
       if (editingItem) {
-        await updateComodato(clientId, editingItem.comodato_id, values);
+        // Editar: siempre enviar FormData (con o sin imagen)
+        let fd: FormData;
+        if (values instanceof FormData) {
+          fd = values;
+        } else {
+          fd = new FormData();
+          Object.entries(values || {}).forEach(([k, v]) => {
+            if (v === undefined || v === null) return;
+            if (v instanceof Blob) fd.set(k, v);
+            else fd.set(k, String(v));
+          });
+        }
+
+        // Limpieza y mínimos
+        fd.delete("contract_image_path");
+        const ymd = (d: any) => (d ? String(d).slice(0, 10) : "");
+        const get = (k: string) => {
+          const v = fd.get(k);
+          return v == null ? "" : String(v);
+        };
+        if (!fd.has("product_id")) fd.set("product_id", get("product_id"));
+        if (!fd.has("quantity")) fd.set("quantity", get("quantity"));
+        if (!fd.has("delivery_date")) fd.set("delivery_date", ymd(get("delivery_date")));
+        if (!fd.has("expected_return_date")) fd.set("expected_return_date", ymd(get("expected_return_date")));
+        if (!fd.has("status")) fd.set("status", get("status"));
+
+        await updateComodato(clientId, editingItem.comodato_id, fd as any);
         showSnackbar("Comodato actualizado correctamente.", "success");
       } else {
-        await createComodato(clientId, { ...values, person_id: clientId });
+        // Crear: siempre FormData
+        let payload: FormData;
+        if (values instanceof FormData) {
+          payload = values;
+        } else {
+          payload = new FormData();
+          Object.entries(values || {}).forEach(([k, v]) => {
+            if (v === undefined || v === null) return;
+            if (v instanceof Blob) payload.set(k, v);
+            else payload.set(k, String(v));
+          });
+        }
+        payload.set("person_id", String(clientId));
+        payload.delete("contract_image_path");
+
+        await createComodato(clientId, payload);
         showSnackbar("Comodato creado correctamente.", "success");
       }
       setShowModal(false);
@@ -73,7 +129,7 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
       setLoading(false);
     }
   };
-
+  
   const handleRemove = (item: any) => {
     setToDelete(item);
     setShowDeleteModal(true);
