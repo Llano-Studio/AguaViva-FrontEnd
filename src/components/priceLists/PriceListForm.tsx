@@ -15,6 +15,7 @@ import { PriceListItemUpdatePrice } from "./PriceListItemUpdatePrice";
 import ModalUpdateConfirm from "../common/ModalUpdateConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { formatDateForInput } from "../../utils/formatDateForInput";
+import ModalActionConfirm from "../common/ModalActionConfirm";
 
 interface PriceListFormProps {
   onCancel: () => void;
@@ -60,6 +61,8 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
     updatePriceList,
     selectedPriceListItems,
     fetchPriceListById,
+    fetchPriceListItemHistory,
+    undoPriceUpdate, 
   } = usePriceLists();
 
   const { showSnackbar } = useSnackbar();
@@ -71,6 +74,9 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
   const [pendingValues, setPendingValues] = useState<CreatePriceListDTO | null>(null);
+  const [showUndoConfirm, setShowUndoConfirm] = useState(false); // NUEVO
+  const [itemToUndo, setItemToUndo] = useState<any | null>(null);
+
 
   const initialValues = useMemo(
     () => getInitialValues(isEditing, priceListToEdit),
@@ -125,6 +131,60 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
   const handleEditProduct = (item: any) => {
     setItemToEdit(item);
     setShowEditItemModal(true);
+  };
+
+  const handleUndoItem = (item: any) => {
+    setItemToUndo(item);
+    setShowUndoConfirm(true);
+  };
+
+  // Confirma y ejecuta el deshacer
+  const handleConfirmUndoItem = async () => {
+    try {
+      const item = itemToUndo;
+      if (!item?.price_list_item_id) {
+        showSnackbar("Ítem inválido para deshacer.", "error");
+        return;
+      }
+
+      const res = await fetchPriceListItemHistory(item.price_list_item_id, { page: 1, limit: 1 });
+      const history = res?.data || [];
+
+      if (!history.length) {
+        showSnackbar("No hay cambios para deshacer en este ítem.", "info");
+        return;
+      }
+
+      let latest = history[0];
+      if (history.length > 1) {
+        latest = [...history].sort((a: any, b: any) =>
+          new Date(b.change_date).getTime() - new Date(a.change_date).getTime()
+        )[0] || history[0];
+      }
+
+      const createdBy =
+        (typeof window !== "undefined" && (localStorage.getItem("userEmail") || localStorage.getItem("email"))) ||
+        "admin@aguaviva.com";
+
+      const undoRes = await undoPriceUpdate({
+        history_ids: [latest.history_id],
+        reason: "Deshacer último cambio de precio del ítem",
+        created_by: createdBy,
+      });
+
+      if (undoRes) {
+        showSnackbar(undoRes.message || "Actualización deshecha correctamente.", "success");
+        if (priceListToEdit?.price_list_id) {
+          await fetchPriceListById(priceListToEdit.price_list_id);
+        }
+      }
+    } catch (err: any) {
+      showSnackbar(err?.message || "Error al deshacer el cambio de precio", "error");
+      console.error(err);
+    } finally {
+      setShowUndoConfirm(false);
+      setItemToUndo(null);
+    }
   };
 
   // Submit handler
@@ -254,21 +314,32 @@ const PriceListForm: React.FC<PriceListFormProps> = ({
             columns={priceListItemListColumns}
             getKey={item => item.price_list_item_id}
             onRemove={handleRemoveProduct}
-            onEdit={handleEditProduct} // Pasar la función de edición
+            onEdit={handleEditProduct}
+            onUndoAction={handleUndoItem} 
             content="Producto"
             genere="M"
           />
         </div>
+
       )}
       <PriceListItemUpdatePrice
         isOpen={showEditItemModal}
         onClose={() => setShowEditItemModal(false)}
-        item={itemToEdit} // Asegúrate de que itemToEdit no sea null
+        item={itemToEdit}
         classForm={classForm}
         onUpdated={async () => {
           await fetchPriceListById(priceListToEdit?.price_list_id || 0);
           showSnackbar("Precio del ítem actualizado correctamente.", "success");
         }}
+      />
+      <ModalActionConfirm
+        isOpen={showUndoConfirm}
+        onClose={() => {
+          setShowUndoConfirm(false);
+          setItemToUndo(null);
+        }}
+        onConfirm={handleConfirmUndoItem}
+        content="deshacer el precio actual"
       />
       <ModalUpdateConfirm
         isOpen={showUpdateConfirm}

@@ -27,3 +27,9 @@ export const CancelButton = ({ onClick }: { onClick: () => void }) => (
 export const PaymentButton = ({ onClick }: { onClick: () => void }) => (
   <IconButton onClick={onClick} icon="/assets/icons/payment.svg" alt="Pagos" tooltip="Pagos" />
 );
+
+export const UndoActionButton = ({ onClick }: { onClick: () => void }) => (
+  <IconButton onClick={onClick} icon="/assets/icons/backActions.svg" alt="Deshacer" tooltip="Deshacer" />
+);
+
+

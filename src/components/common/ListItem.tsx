@@ -1,5 +1,5 @@
 import React from "react";
-import { ViewButton, EditButton, DeleteButton, CancelButton } from "./ActionButtons";
+import { ViewButton, EditButton, DeleteButton, CancelButton, UndoActionButton } from "./ActionButtons";
 import "../../styles/css/components/common/listItem.css";
 
 interface ListColumn<T> {
@@ -17,6 +17,7 @@ interface ListItemProps<T> {
   onEdit?: (item: T) => void;
   onView?: (item: T) => void;
   onCancel?: (item: T) => void;
+  onUndoAction?: (item: T) => void; // NUEVO
   content?: string;
   genere?: "M" | "F";
 }
@@ -29,21 +30,28 @@ export function ListItem<T>({
   onEdit,
   onView,
   onCancel,
+  onUndoAction, // NUEVO
   content
 }: ListItemProps<T>) {
   if (!items.length) return <div className="listItem-empty">No hay elementos para mostrar.</div>;
 
   const handleDeleteClick = (item: T) => onRemove?.(item);
   const handleCancelClick = (item: T) => onCancel?.(item);
+  const handleUndoActionClick = (item: T) => onUndoAction?.(item); // NUEVO
 
-  const showActions = !!(onView || onEdit || onRemove || onCancel);
+  const showActions = !!(onView || onEdit || onRemove || onCancel || onUndoAction);
 
   // Plantilla de columnas consistente para header y rows
-  // 1ra columna más ancha (200px) como en tu CSS; resto min 100px
   const cols: string[] = columns.map((_, idx) =>
     idx === 0 ? "minmax(200px, 2fr)" : "minmax(100px, 1fr)"
   );
-  if (showActions) cols.push("120px"); // ancho fijo de acciones
+
+  if (showActions) {
+    const actionsCount = [onView, onEdit, onCancel, onUndoAction, onRemove].filter(Boolean).length;
+    const actionsWidth = Math.max(120, actionsCount * 40); // 40px aprox por botón
+    cols.push(`${actionsWidth}px`);
+  }
+
   const gridTemplate = cols.join(" ");
 
   return (
@@ -84,6 +92,7 @@ export function ListItem<T>({
                 {onView && <ViewButton onClick={() => onView(item)} />}
                 {onEdit && <EditButton onClick={() => onEdit(item)} />}
                 {onCancel && <CancelButton onClick={() => handleCancelClick(item)} />}
+                {onUndoAction && <UndoActionButton onClick={() => handleUndoActionClick(item)} />}{/* NUEVO */}
                 {onRemove && <DeleteButton onClick={() => handleDeleteClick(item)} />}
               </td>
             )}
