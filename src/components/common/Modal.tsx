@@ -22,6 +22,7 @@ interface ModalProps {
   itemsForList?: any[];
   itemsConfig?: { header: string; accessor: string; render?: (item: any) => React.ReactNode }[]; // Configuración de los campos
   itemsTitle?: string; // Título para los productos en comodato
+  buttonAction?: { label: string; onClick: () => void; className?: string };
 }
 
 function getNestedValue(obj: any, path: string) {
@@ -39,6 +40,7 @@ export const Modal: React.FC<ModalProps> = ({
   itemsForList,
   itemsConfig,
   itemsTitle,
+  buttonAction
 }) => {
   if (!isOpen) return null;
 
@@ -95,7 +97,19 @@ export const Modal: React.FC<ModalProps> = ({
               />
             </div>
           </div>
-        )}
+          )}
+          {/* Acción opcional */}
+          {buttonAction && (
+            <div className={`modal-actions ${classModal ? classModal+"-modal-actions" : ""}`}>
+              <button
+                type="button"
+                onClick={buttonAction.onClick}
+                className={`modal-action-button ${classModal ? classModal+"-modal-action-button" : ""} ${buttonAction.className ?? ""}`}
+              >
+                {buttonAction.label}
+              </button>
+            </div>
+          )}
       </div>
     </div>,
     document.body

@@ -21,3 +21,8 @@
 .orders-modal-view-content div:last-child {
     width: 100%;
 }
+
+.orders-modal-actions button{
+    background: #93FFD1;
+    color: var(--text-color-1);
+}

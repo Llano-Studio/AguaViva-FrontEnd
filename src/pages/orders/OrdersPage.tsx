@@ -15,7 +15,8 @@ import { orderModalConfig, orderProductsConfig } from "../../config/orders/order
 import { Modal } from "../../components/common/Modal";
 import OrderForm from "../../components/orders/OrderForm";
 import OrderOneOffForm from "../../components/orders/OrderOneOffForm";
-import ModalOrderPayment from "../../components/orders/ModalOrderPayment"; 
+import ModalOrderPayment from "../../components/orders/ModalOrderPayment";
+import ModalActionConfirm from "../../components/common/ModalActionConfirm";
 import "../../styles/css/pages/orders/ordersPage.css";
 import SpinnerLoading from "../../components/common/SpinnerLoading";
 import { useAuth } from "../../hooks/useAuth";
@@ -87,7 +88,8 @@ const OrdersPage: React.FC = () => {
   const [localSortDirection, setLocalSortDirection] = useState<("asc" | "desc")[]>([]);
   const { currentUser } = useAuth();
   const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
-  const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;  
+  const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+  const [showActionConfirm, setShowActionConfirm] = useState(false);
 
   const sortOrdersLocally = (orders: any[], sortBy: string[], sortDirection: ("asc" | "desc")[]) => {
     if (sortBy.length === 0) return orders;
@@ -165,6 +167,21 @@ const OrdersPage: React.FC = () => {
     } finally {
       setShowDeleteModal(false);
       setOrderToDelete(null);
+    }
+  };
+
+  const handleConfirmDelivered = async () => {
+    try {
+      if (!orderToView) return;
+      if (orderToView.order_type === "HYBRID" && orderToView.order_id) {
+        await updateOrder(orderToView.order_id, { status: "DELIVERED" } as any);
+      } else if (orderToView.order_type === "ONE_OFF" && orderToView.purchase_id) {
+        await updateOrderOneOff(orderToView.purchase_id, { status: "DELIVERED" } as any);
+      }
+      showSnackbar("Pedido actualizado a ENTREGADO.", "success");
+      setShowActionConfirm(false);
+    } catch (err: any) {
+      showSnackbar(err?.message || "Error al actualizar el estado del pedido", "error");
     }
   };
 
@@ -486,6 +503,21 @@ const OrdersPage: React.FC = () => {
         itemsForList={orderProducts}
         itemsConfig={orderProductsConfig}
         itemsTitle="Productos del Pedido"
+        buttonAction={
+          orderToView && orderToView.status !== "DELIVERED"
+            ? {
+                label: "Marcar como Entregado",
+                onClick: () => setShowActionConfirm(true),
+              }
+            : undefined
+        }
+      />
+      {/* Confirmación de acción */}
+      <ModalActionConfirm
+        isOpen={showActionConfirm}
+        onClose={() => setShowActionConfirm(false)}
+        onConfirm={handleConfirmDelivered}
+        content="marcar este pedido como ENTREGADO"
       />
 
       {/* Modal de Eliminar */}
