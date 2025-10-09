@@ -3,6 +3,7 @@ import { formatDate as formatDateLong } from "../../utils/formatDate";
 import { formatDateForView } from "../../utils/formateDateForView";
 import PreviewImg from "../../components/common/PreviewImg";
 import PreviewPDF from "../../components/common/PreviewPDF";
+import { renderStatusComodatoLabel } from "../../utils/statusComodatoLabels";
 
 const isPdfUrl = (url?: string) => !!url && /\.pdf(?:$|\?)/i.test(url);
 const isImageUrl = (url?: string) =>
@@ -13,7 +14,7 @@ export const clientComodatoModalConfig = sortByOrder([
   { label: "Producto ID", accessor: "product_id", order: 1 },
   { label: "Descripción", accessor: "article_description", order: 2 },
   { label: "Cantidad", accessor: "quantity", order: 3 },
-  { label: "Estado", accessor: "status", order: 4, render: (v: string) => statusMap[v] || v },
+  { label: "Estado", accessor: "status", order: 4, render: (v: string) => renderStatusComodatoLabel(v) },
   { label: "Entrega", accessor: "delivery_date", order: 5, render: renderDate },
   { label: "Devolución esperada", accessor: "expected_return_date", order: 6, render: renderDate },
   { label: "Devolución real", accessor: "actual_return_date", order: 7, render: renderDate },

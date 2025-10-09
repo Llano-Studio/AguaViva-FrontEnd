@@ -1,5 +1,6 @@
 import { sortByOrder } from "../../utils/sortByOrder";
 import { formatDateForView } from "../../utils/formateDateForView";
+import { renderStatusSubscriptionLabel } from "../../utils/statusSubscriptionLabels";
 
 export const clientSubscriptionListColumns = sortByOrder([
   { header: "Abono", accessor: "subscription_plan_name", order: 0, render: (item: any) => item.subscription_plan?.name },
@@ -9,5 +10,5 @@ export const clientSubscriptionListColumns = sortByOrder([
   { header: "Día de recolección", accessor: "collection_day", order: 4, render: (item: any) => item.collection_day },
   { header: "Modo de pago", accessor: "payment_mode", order: 5, render: (item: any) => item.payment_mode === "ADVANCE" ? "Adelantado" : "Vencido" },
   { header: "Día de vencimiento", accessor: "payment_due_day", order: 6, render: (item: any) => item.payment_due_day ?? "" },
-  { header: "Estado", accessor: "status", order: 7, render: (item: any) => item.status },
+  { header: "Estado", accessor: "status", order: 7, render: (item: any) => renderStatusSubscriptionLabel(item.status) },
 ]);

@@ -1,5 +1,6 @@
 import { sortByOrder } from "../../utils/sortByOrder";
 import { formatDateForView } from "../../utils/formateDateForView";
+import { renderStatusSubscriptionLabel } from "../../utils/statusSubscriptionLabels";
 
 export const clientSubscriptionModalConfig = sortByOrder([
   { label: "Abono", accessor: "subscription_plan.name", order: 0 },
@@ -8,7 +9,7 @@ export const clientSubscriptionModalConfig = sortByOrder([
   { label: "Fecha inicio", accessor: "start_date", order: 3, render: (v: string) => formatDateForView(v) },
   { label: "Día de pago", accessor: "collection_day", order: 4 },
   { label: "Modo de pago", accessor: "payment_mode", order: 5, render: (v: string) => v === "ADVANCE" ? "Adelantado" : "Vencido" },
-  { label: "Estado", accessor: "status", order: 6 },
+  { label: "Estado", accessor: "status", order: 6, render: (v: string) => renderStatusSubscriptionLabel(v) },
   { label: "Horario preferido", accessor: "delivery_preferences.preferred_time_range", order: 7 },
   {
     label: "Días preferidos",

@@ -6,3 +6,7 @@
 .route-sheets-section-container{
     margin-top: 50px;
 }
+
+.deliveries-modal-view-content div:last-child {
+    width: 100%;
+}

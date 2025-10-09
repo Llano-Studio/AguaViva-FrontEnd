@@ -364,7 +364,12 @@ const OrdersPage: React.FC = () => {
             </button>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as any)}
+              onChange={(e) => {
+                const newType = e.target.value as any;
+                setFilterType(newType);
+                setSearchRegular("");
+                setSearchOneOff("");
+              }}
               className={`page-type-filter ${titlePage}-page-type-filter`}
             >
               {(orderFiltersConfig[0]?.options ?? [])

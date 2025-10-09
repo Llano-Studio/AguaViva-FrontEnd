@@ -1,6 +1,7 @@
 import { sortByOrder } from "../../utils/sortByOrder";
 import { formatDate as formatDateLong } from "../../utils/formatDate";
 import { formatDateForView } from "../../utils/formateDateForView";
+import { renderStatusComodatoLabel } from "../../utils/statusComodatoLabels";
 
 export const clientComodatoListColumns = sortByOrder([
   {
@@ -19,7 +20,7 @@ export const clientComodatoListColumns = sortByOrder([
     header: "Estado",
     accessor: "status",
     order: 2,
-    render: (item: any) => item.status,
+    render: (item: any) => renderStatusComodatoLabel(item.status),
   },
   {
     header: "Entrega",
