@@ -15,7 +15,7 @@ export const useCancellationOrders = () => {
 
   // Paginación simple opcional (si backend soporta)
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(20);
+  const [limit, setLimit] = useState<number>(15);
 
   const fetchOrders = useCallback(
     async (params: CancellationOrderQueryParams = {}) => {

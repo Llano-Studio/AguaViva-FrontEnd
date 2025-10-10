@@ -11,7 +11,7 @@ export const useRouteSheets = () => {
 
   // Paginación, filtros y ordenamiento múltiple
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
@@ -51,7 +51,7 @@ export const useRouteSheets = () => {
         setTotal(response.meta.total);
         setTotalPages(response.meta.totalPages || 1);
         setPage(response.meta.page || 1);
-        setLimit(response.meta.limit || 10);
+        setLimit(response.meta.limit || 15);
         return true;
         } catch (err: any) {
         setError(err.message || "Error al obtener hojas de ruta");

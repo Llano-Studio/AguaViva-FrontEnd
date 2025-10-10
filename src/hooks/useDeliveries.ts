@@ -12,7 +12,7 @@ export const useDeliveries = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");

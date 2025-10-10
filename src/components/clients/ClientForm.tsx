@@ -53,7 +53,7 @@ const getInitialValues = (isEditing: boolean, clientToEdit?: Client | null): Cre
     localityId: 0,
     zoneId: 0,
     registrationDate: new Date().toISOString().split('T')[0],
-    type: ClientType.INDIVIDUAL,
+    type: ClientType.PLAN,
     notes: "",
     is_active: true
   };

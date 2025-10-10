@@ -23,7 +23,6 @@ import { useAuth } from "../../hooks/useAuth";
 import { UserRole } from "../../interfaces/User";
 import { buildIsRole } from "../../utils/buildIsRole";
 
-
 const OrdersPage: React.FC = () => {
   const {
     orders: regularOrders,
@@ -44,7 +43,7 @@ const OrdersPage: React.FC = () => {
     fetchOrders: fetchRegularOrders,
     deleteOrder: deleteRegularOrder,
     productsOfOrder, // Función para obtener productos de una orden
-    updateOrder
+    updateOrder,
   } = useOrders();
 
   const {
@@ -66,7 +65,7 @@ const OrdersPage: React.FC = () => {
     fetchOrders: fetchOneOffOrders,
     deleteOrder: deleteOneOffOrder,
     productsOfOrderOneOff: productsOfOrderOneOff,
-    updateOrder: updateOrderOneOff
+    updateOrder: updateOrderOneOff,
   } = useOrdersOneOff();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -91,44 +90,59 @@ const OrdersPage: React.FC = () => {
   const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
   const [showActionConfirm, setShowActionConfirm] = useState(false);
 
+  // Paginación local para "ALL"
+  const MAX_ALL_ROWS = 15;
+  const [pageAll, setPageAll] = useState(1);
+  const [searchAll, setSearchAll] = useState("");
+
   const sortOrdersLocally = (orders: any[], sortBy: string[], sortDirection: ("asc" | "desc")[]) => {
     if (sortBy.length === 0) return orders;
-    
+
     return [...orders].sort((a, b) => {
       for (let i = 0; i < sortBy.length; i++) {
         const column = sortBy[i];
         const direction = sortDirection[i];
-        
-        let aValue = column.split('.').reduce((obj, key) => obj?.[key], a);
-        let bValue = column.split('.').reduce((obj, key) => obj?.[key], b);
-        
-        // Convertir a string para comparación
-        aValue = aValue?.toString() || '';
-        bValue = bValue?.toString() || '';
-        
-        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+
+        let aValue = column.split(".").reduce((obj, key) => obj?.[key], a);
+        let bValue = column.split(".").reduce((obj, key) => obj?.[key], b);
+
+        aValue = aValue?.toString() || "";
+        bValue = bValue?.toString() || "";
+
+        if (aValue < bValue) return direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return direction === "asc" ? 1 : -1;
       }
       return 0;
     });
   };
 
+  // Datos combinados y paginación local para "ALL"
+  const allCombined = [...regularOrders, ...oneOffOrders];
+  const allSorted = sortOrdersLocally(allCombined, localSortBy, localSortDirection);
+  const totalAll = allSorted.length;
+  const startIndexAll = (pageAll - 1) * MAX_ALL_ROWS;
+  const pagedAll = allSorted.slice(startIndexAll, startIndexAll + MAX_ALL_ROWS);
+
   // Unifica los pedidos según el filtro
   const orders = (() => {
     if (filterType === "ORDER") return regularOrders;
     if (filterType === "ONE_OFF") return oneOffOrders;
-    
-    // Para "ALL", aplicar ordenamiento local
-    const allOrders = [...regularOrders, ...oneOffOrders];
-    return sortOrdersLocally(allOrders, localSortBy, localSortDirection);
+    return pagedAll; // "ALL" con paginación local
   })();
 
   // Unifica paginación y totales según el filtro
-  const page = filterType === "ORDER" ? pageRegular : filterType === "ONE_OFF" ? pageOneOff : 1;
-  const setPage = filterType === "ORDER" ? setPageRegular : filterType === "ONE_OFF" ? setPageOneOff : () => {};
-  const totalPages = filterType === "ORDER" ? totalPagesRegular : filterType === "ONE_OFF" ? totalPagesOneOff : 1;
-  const total = filterType === "ORDER" ? totalRegular : filterType === "ONE_OFF" ? totalOneOff : orders.length;
-
+  const page =
+    filterType === "ORDER" ? pageRegular : filterType === "ONE_OFF" ? pageOneOff : pageAll;
+  const setPage =
+    filterType === "ORDER" ? setPageRegular : filterType === "ONE_OFF" ? setPageOneOff : setPageAll;
+  const totalPages =
+    filterType === "ORDER"
+      ? totalPagesRegular
+      : filterType === "ONE_OFF"
+      ? totalPagesOneOff
+      : Math.max(1, Math.ceil(totalAll / MAX_ALL_ROWS));
+  const total =
+    filterType === "ORDER" ? totalRegular : filterType === "ONE_OFF" ? totalOneOff : totalAll;
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -137,7 +151,6 @@ const OrdersPage: React.FC = () => {
   }, [regularOrders, oneOffOrders]);
 
   useEffect(() => {
-    // TODO: Reemplazar con servicio PaymentMethodsService si está disponible.
     setPaymentMethods([
       { label: "Efectivo", value: 1 },
       { label: "Transferencia", value: 2 },
@@ -190,15 +203,14 @@ const OrdersPage: React.FC = () => {
     setShowViewModal(true);
 
     try {
-      if(order.order_id){
+      if (order.order_id) {
         const products = await productsOfOrder(order.order_id);
         setOrderProducts(products);
       }
-      if(order.purchase_id){
+      if (order.purchase_id) {
         const products = await productsOfOrderOneOff(order.purchase_id);
         setOrderProducts(products);
-      } 
-
+      }
     } catch (error) {
       console.error("Error al obtener productos de la orden:", error);
     }
@@ -246,18 +258,16 @@ const OrdersPage: React.FC = () => {
   };
 
   const getLastWordAfterDot = (field: string): string => {
-    if (field.includes('.')) {
-      return field.split('.').pop() || field;
+    if (field.includes(".")) {
+      return field.split(".").pop() || field;
     }
     return field;
   };
 
   const handleSort = (column: string) => {
-    // Extraer solo la última palabra después del punto para comparación
     const processedColumn = getLastWordAfterDot(column);
 
     if (filterType === "ALL") {
-      // Manejar ordenamiento local para "ALL"
       const idx = localSortBy.indexOf(processedColumn);
       if (idx === -1) {
         setLocalSortBy([...localSortBy, processedColumn]);
@@ -270,6 +280,7 @@ const OrdersPage: React.FC = () => {
         setLocalSortBy(localSortBy.filter((_, i) => i !== idx));
         setLocalSortDirection(localSortDirection.filter((_, i) => i !== idx));
       }
+      setPageAll(1); // reset de página en ALL al reordenar
       return;
     }
 
@@ -310,11 +321,24 @@ const OrdersPage: React.FC = () => {
 
   const titlePage = "orders";
 
-  const start = (page - 1) * (orders.length || 1) + (orders.length > 0 ? 1 : 0);
-  const end = (page - 1) * (orders.length || 1) + orders.length;
+  // Rango mostrado para el paginador
+  const start =
+    filterType === "ALL"
+      ? totalAll === 0
+        ? 0
+        : startIndexAll + 1
+      : orders.length
+      ? (page - 1) * (orders.length || 1) + 1
+      : 0;
+
+  const end =
+    filterType === "ALL"
+      ? Math.min(startIndexAll + orders.length, totalAll)
+      : orders.length
+      ? (page - 1) * (orders.length || 1) + orders.length
+      : 0;
 
   const isHybridEditing = editingOrder ? ("order_id" in editingOrder) : false;
-
 
   return (
     <div className={`table-scroll page-container ${titlePage + "-page-container"}`}>
@@ -331,8 +355,27 @@ const OrdersPage: React.FC = () => {
           <div className={`page-header-div-1 ${titlePage + "-page-header-div-1"}`}>
             <SearchBar
               ref={searchInputRef}
-              value={filterType === "ORDER" ? searchRegular : filterType === "ONE_OFF" ? searchOneOff : ""}
-              onChange={filterType === "ORDER" ? setSearchRegular : filterType === "ONE_OFF" ? setSearchOneOff : () => {}}
+              value={
+                filterType === "ALL"
+                  ? searchAll                          // NUEVO
+                  : filterType === "ORDER"
+                  ? searchRegular
+                  : searchOneOff
+              }
+              onChange={
+                filterType === "ALL"
+                  ? (v) => {                           // NUEVO: actualiza ambas búsquedas
+                      setSearchAll(v);
+                      setSearchRegular(v);
+                      setSearchOneOff(v);
+                      setPageAll(1);                   // reset paginación local
+                      setPageRegular(1);               // reset backend regular
+                      setPageOneOff(1);                // reset backend one-off
+                    }
+                  : filterType === "ORDER"
+                  ? setSearchRegular
+                  : setSearchOneOff
+              }
               placeholder="Buscar pedidos..."
               class={titlePage}
             />
@@ -369,6 +412,8 @@ const OrdersPage: React.FC = () => {
                 setFilterType(newType);
                 setSearchRegular("");
                 setSearchOneOff("");
+                setSearchAll("");        // NUEVO: limpiar búsqueda ALL
+                setPageAll(1);           // NUEVO
               }}
               className={`page-type-filter ${titlePage}-page-type-filter`}
             >
@@ -386,6 +431,7 @@ const OrdersPage: React.FC = () => {
         </div>
 
         <OrdersTable
+          key={`orders-${filterType}-${page}`}
           orders={orders}
           onEdit={handleEditClick}
           onDelete={canDelete ? (order) => handleDeleteClick(getOrderRowId(order)) : undefined}
@@ -408,7 +454,6 @@ const OrdersPage: React.FC = () => {
           onSort={handleSort}
           onView={handleViewClick}
           onPayment={(order) => {
-            // Abrir modal de pago para esta orden
             setOrderToPay(order);
             setShowPaymentModal(true);
           }}
@@ -451,7 +496,7 @@ const OrdersPage: React.FC = () => {
             <h2 className={`form-title ${titlePage + "-form-title"}`}>Editar Pedido</h2>
           </div>
 
-          {editingOrder && isHybridEditing && (
+          {editingOrder && (isHybridEditing as boolean) && (
             <OrderForm
               isEditing
               orderToEdit={editingOrder}
@@ -466,12 +511,14 @@ const OrdersPage: React.FC = () => {
                   return false;
                 }
               }}
-              refreshOrders={async () => { await fetchRegularOrders(); }}
+              refreshOrders={async () => {
+                await fetchRegularOrders();
+              }}
               onSuccess={(msg: string) => handleOrderUpdated(msg || "Pedido actualizado correctamente.")}
             />
           )}
 
-          {editingOrder && !isHybridEditing && (
+          {editingOrder && !(isHybridEditing as boolean) && (
             <OrderOneOffForm
               isEditing
               orderToEdit={editingOrder}
@@ -486,7 +533,9 @@ const OrdersPage: React.FC = () => {
                   return false;
                 }
               }}
-              refreshOrders={async () => { await fetchOneOffOrders(); }}
+              refreshOrders={async () => {
+                await fetchOneOffOrders();
+              }}
               onSuccess={(msg: string) => handleOrderUpdated(msg || "Pedido actualizado correctamente.")}
             />
           )}
@@ -555,7 +604,11 @@ const OrdersPage: React.FC = () => {
         onClear={handleClearFilters}
       />
 
-      {(isLoadingRegular || isLoadingOneOff) && <div className="p-4 container-loading"><SpinnerLoading /></div>}
+      {(isLoadingRegular || isLoadingOneOff) && (
+        <div className="p-4 container-loading">
+          <SpinnerLoading />
+        </div>
+      )}
       {(errorRegular || errorOneOff) && (
         <div className="text-red-500 p-4">{errorRegular || errorOneOff}</div>
       )}

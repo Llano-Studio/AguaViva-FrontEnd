@@ -8,7 +8,7 @@ export class OrderService {
     const safeParams = {
       ...params,
       page: Number(params?.page) || 1,
-      limit: Number(params?.limit) || 10,
+      limit: Number(params?.limit) || 16,
     };
     return await httpAdapter.get<OrdersResponse>(this.ordersUrl, { params: safeParams });
   }

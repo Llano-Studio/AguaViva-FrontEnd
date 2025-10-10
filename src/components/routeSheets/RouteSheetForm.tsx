@@ -70,26 +70,42 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   });
 
   const [formattedDate, setFormattedDate] = useState<string>("");
-
   const [isDriverAutoSelected, setIsDriverAutoSelected] = useState(true);
 
   const selectedZoneId = vehicles.find((v) => v.value === selectedVehicleId)?.zoneId || null;
 
-  const firstLoad = useRef(true);
+  // Controlar limpieza visual y evitar refetches duplicados
+  const isClearingRef = useRef(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const skipRefetch = useRef(false);
 
   // Normaliza las órdenes (regulares + one-off) para mostrarlas en la tabla
   const mappedOrders = useMemo(() => mapOrdersForTable(orders as any), [orders]);
 
-  useEffect(() => {
-    fetchVehicles();
-    fetchOrders(orderSearch, selectedZoneId, {
-      deliveryDateFrom: selectedDate,
-      deliveryDateTo: selectedDate,
+  // Helper para refetch según filtros actuales
+  const refetchOrdersFor = async (params?: { date?: string; zoneId?: number | null }) => {
+    const date = params?.date ?? selectedDate;
+    const zoneId =
+      typeof params?.zoneId !== "undefined"
+        ? params?.zoneId
+        : vehicles.find((v) => v.value === selectedVehicleId)?.zoneId || null;
+
+    await fetchOrders(orderSearch, zoneId, {
+      deliveryDateFrom: date,
+      deliveryDateTo: date,
     });
+  };
+
+  // Montaje inicial
+  useEffect(() => {
+    (async () => {
+      await fetchVehicles();
+      await refetchOrdersFor({ date: selectedDate, zoneId: selectedZoneId });
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Cuando cambian las órdenes, seleccionarlas por defecto
+  // Auto-selección por defecto de todas las órdenes listadas
   useEffect(() => {
     if (orders.length > 0) {
       setSelectedOrders(orders.map((order) => (order as any).id));
@@ -98,36 +114,14 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     }
   }, [orders, setSelectedOrders]);
 
+  // Buscar por texto
   useEffect(() => {
-    if (!firstLoad.current) {
-      fetchOrders(orderSearch, selectedZoneId, {
-        deliveryDateFrom: selectedDate,
-        deliveryDateTo: selectedDate,
-      });
-    }
+    if (skipRefetch.current) return;
+    refetchOrdersFor({ date: selectedDate, zoneId: selectedZoneId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedVehicleId, selectedDate]);
+  }, [orderSearch]);
 
-  useEffect(() => {
-    if (firstLoad.current) {
-      firstLoad.current = false;
-      return;
-    }
-    fetchOrders(orderSearch, selectedZoneId, {
-      deliveryDateFrom: selectedDate,
-      deliveryDateTo: selectedDate,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderSearch, selectedDate]);
-
-  useEffect(() => {
-    fetchOrders(orderSearch, selectedZoneId, {
-      deliveryDateFrom: selectedDate,
-      deliveryDateTo: selectedDate,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate]);
-
+  // Cargar choferes al cambiar móvil (sin refetch de órdenes aquí para evitar duplicidad)
   useEffect(() => {
     if (selectedVehicleId) {
       fetchDrivers(selectedVehicleId).then(() => {
@@ -143,15 +137,73 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVehicleId, isDriverAutoSelected]);
 
-  const handleDriverChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newDriverId = Number(e.target.value);
-    setSelectedDriverId(newDriverId);
-    setIsDriverAutoSelected(false);
-  };
-
   useEffect(() => {
     setFormattedDate(formatDate(selectedDate));
   }, [selectedDate]);
+
+  // Limpiar y pedir de nuevo al cambiar fecha
+  const handleDateChange = async (date: string) => {
+    skipRefetch.current = true;
+    isClearingRef.current = true;
+    setIsClearing(true);
+    setSelectedOrders([]);
+    setSelectedDate(date);
+
+    try {
+      await refetchOrdersFor({ date, zoneId: selectedZoneId });
+    } finally {
+      isClearingRef.current = false;
+      setIsClearing(false);
+      setTimeout(() => {
+        skipRefetch.current = false;
+      }, 0);
+    }
+  };
+
+  // Limpiar y pedir de nuevo al cambiar móvil
+  const handleVehicleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newVehicleId = Number(e.target.value);
+    const newZoneId = vehicles.find((v) => v.value === newVehicleId)?.zoneId || null;
+
+    skipRefetch.current = true;
+    isClearingRef.current = true;
+    setIsClearing(true);
+    setSelectedOrders([]);
+    setSelectedVehicleId(newVehicleId);
+    setIsDriverAutoSelected(true);
+
+    try {
+      await refetchOrdersFor({ date: selectedDate, zoneId: newZoneId });
+    } finally {
+      isClearingRef.current = false;
+      setIsClearing(false);
+      setTimeout(() => {
+        skipRefetch.current = false;
+      }, 0);
+    }
+  };
+
+  // Limpiar y pedir de nuevo al cambiar chofer (aunque no afecte filtros, para evitar residuo visual)
+  const handleDriverChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newDriverId = Number(e.target.value);
+    setSelectedDriverId(newDriverId);
+    setIsDriverAutoSelected(false);
+
+    skipRefetch.current = true;
+    isClearingRef.current = true;
+    setIsClearing(true);
+    setSelectedOrders([]);
+
+    try {
+      await refetchOrdersFor({ date: selectedDate, zoneId: selectedZoneId });
+    } finally {
+      isClearingRef.current = false;
+      setIsClearing(false);
+      setTimeout(() => {
+        skipRefetch.current = false;
+      }, 0);
+    }
+  };
 
   const handleSubmit = async (data: any) => {
     try {
@@ -170,11 +222,17 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
         };
 
         if (isOneOff) {
-          // ONE_OFF: solo one_off_purchase_id (+ header si aplica)
-          const purchaseId = order?.purchase_id ?? order?.one_off_purchase_id;
-          if (purchaseId) detail.one_off_purchase_id = Number(purchaseId);
-          if (order?.one_off_purchase_header_id)
-            detail.one_off_purchase_header_id = Number(order.one_off_purchase_header_id);
+          // Enviar SIEMPRE el header id (mismo valor, distinto nombre de campo)
+          const headerId =
+            order?.one_off_purchase_header_id ??
+            order?.purchase_header_id ??
+            order?.purchase_id ??
+            order?.one_off_purchase_id;
+
+          if (headerId) {
+            detail.one_off_purchase_header_id = Number(headerId);
+          }
+          // Nota: no enviar one_off_purchase_id
         } else {
           // HYBRID: solo order_id (+ cycle_payment_id si aplica)
           detail.order_id = Number(order?.order_id ?? 0);
@@ -182,7 +240,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
         }
 
         return detail;
-        });
+      });
 
       const routeSheetData: CreateRouteSheetDTO = {
         driver_id: (selectedDriverId as number) || 0,
@@ -223,16 +281,13 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
         <div className={`${className}-form-header-content`}>
           <DatePickerWithLabel
             value={selectedDate}
-            onChange={setSelectedDate}
+            onChange={handleDateChange}
             className={className}
           />
 
           <select
             value={selectedVehicleId}
-            onChange={(e) => {
-              setSelectedVehicleId(Number(e.target.value));
-              setIsDriverAutoSelected(true);
-            }}
+            onChange={handleVehicleChange}
             required
           >
             <option value="">Móvil</option>
@@ -242,6 +297,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
               </option>
             ))}
           </select>
+
           <select
             value={selectedDriverId}
             onChange={handleDriverChange}
@@ -260,7 +316,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
 
       <div style={{ margin: "24px 0" }}>
         <DataTable<any>
-          data={mappedOrders}
+          data={isClearing ? [] : mappedOrders}
           columns={[
             {
               header: "",
