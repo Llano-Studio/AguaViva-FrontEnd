@@ -1,28 +1,30 @@
+export type UserRole = "ADMINISTRATIVE" | "SUPERADMIN" | "BOSSADMINISTRATIVE" | "DRIVERS";
+
 export interface User {
-    id: number;
-    email: string;
-    name: string;
-    role: "ADMIN" | "USER";
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    profileImageUrl?: string;
-  }
-  
+  id: number;
+  email: string;
+  name: string;
+  role: UserRole;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  profileImageUrl?: string;
+}
+
 export interface CreateUserDTO {
-    name: string;
-    email: string;
-    password: string;
-    isActive: boolean;
-    role: string; 
-  }
+  name: string;
+  email: string;
+  password: string;
+  isActive: boolean;
+  role: UserRole;
+}
 
 export interface UsersResponse {
-    data: User[];
-    meta: {
-      limit: number;
-      page: number;
-      total: number;
-      totalPages: number;
-    };
-  }
+  data: User[];
+  meta: {
+    limit: number;
+    page: number;
+    total: number;
+    totalPages: number;
+  };
+}

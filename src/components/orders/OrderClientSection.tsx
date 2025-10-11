@@ -47,7 +47,7 @@ const handleClientSelect = async (client: any) => {
         onSubmit={() => {}}
         searchFieldProps={{
           customer_id: {
-            value: selectedClient?.person_id || "",
+            value: form.watch("customer_id") || selectedClient?.person_id || "",
             fetchOptions: (query: string) => fetchClients({ personId: query }, "PLAN"),
             renderOption: (client: any) => <span>{client.person_id}</span>,
             onOptionSelect: handleClientSelect,

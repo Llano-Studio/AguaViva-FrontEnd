@@ -1,5 +1,14 @@
+import {
+  Zone,
+  Locality,
+  ZonesResponse,
+  Country,
+  Province,
+  CreateLocalityDTO,
+  UpdateLocalityDTO,
+  DeleteLocalityResponse,
+} from "../interfaces/Locations";
 import { httpAdapter } from "./httpAdapter";
-import { Zone, Locality, ZonesResponse, Country, Province } from "../interfaces/Locations";
 
 export class LocationService {
   private zonesUrl = "/zones";
@@ -7,142 +16,130 @@ export class LocationService {
   private countriesUrl = "/countries";
   private provincesUrl = "/provinces";
 
-  // ============ ZONES ============
-  
-  async getZones(): Promise<Zone[]> {
+  // ZONES
+  async getZones(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<ZonesResponse> {
+    const safeParams = {
+      ...params,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 10,
+    };
+    return await httpAdapter.get<ZonesResponse>(this.zonesUrl, { params: safeParams });
+  }
+
+  async getZoneById(id: number): Promise<Zone | null> {
     try {
-      const response = await httpAdapter.get<ZonesResponse>(this.zonesUrl);
-      return response.data || [];
+      return await httpAdapter.get<Zone>(`${this.zonesUrl}/${id}`);
     } catch (error) {
-      console.error("Error al obtener zonas:", error);
-      return [];
+      console.error("Error en getZoneById:", error);
+      return null;
     }
   }
 
-  // ============ LOCALITIES ============
-  
-  async getLocalities(): Promise<Locality[]> {
-    try {
-      const response = await httpAdapter.get<Locality[]>(this.localitiesUrl);
-      return response || [];
-    } catch (error) {
-      console.error("Error al obtener localidades:", error);
-      return [];
-    }
+  // LOCALITIES
+  async getLocalities(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<Locality[]> {
+    const safeParams = {
+      ...params,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 10,
+    };
+    return await httpAdapter.get<Locality[]>(this.localitiesUrl, { params: safeParams });
   }
 
-  /**
-   * Obtiene una localidad por ID
-   * @param id ID de la localidad
-   * @returns Promise<Locality | null>
-   */
   async getLocalityById(id: number): Promise<Locality | null> {
     try {
-      const response = await httpAdapter.get<Locality>(`${this.localitiesUrl}/${id}`);
-      return response || null;
+      return await httpAdapter.get<Locality>(`${this.localitiesUrl}/${id}`);
     } catch (error) {
-      console.error("Error al obtener localidad:", error);
+      console.error("Error en getLocalityById:", error);
       return null;
     }
   }
 
-  // ============ COUNTRIES ============
-  
-  async getCountries(): Promise<Country[]> {
+  async createLocality(locality: CreateLocalityDTO): Promise<Locality> {
     try {
-      const response = await httpAdapter.get<Country[]>(this.countriesUrl);
-      return response || [];
-    } catch (error) {
-      console.error("Error al obtener países:", error);
-      return [];
+      return await httpAdapter.post<Locality>(locality, this.localitiesUrl);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al crear localidad");
     }
   }
 
-  /**
-   * Obtiene un país por ID
-   * @param id ID del país
-   * @returns Promise<Country | null>
-   */
+  async updateLocality(id: number, locality: Partial<UpdateLocalityDTO>): Promise<Locality | null> {
+    try {
+      return await httpAdapter.patch<Locality>(locality, `${this.localitiesUrl}/${id}`);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar localidad");
+    }
+  }
+
+  async deleteLocality(id: number): Promise<DeleteLocalityResponse> {
+    try {
+      return await httpAdapter.delete<DeleteLocalityResponse>(`${this.localitiesUrl}/${id}`);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar localidad");
+    }
+  }
+
+  // COUNTRIES
+  async getCountries(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<Country[]> {
+    const safeParams = {
+      ...params,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 10,
+    };
+    return await httpAdapter.get<Country[]>(this.countriesUrl, { params: safeParams });
+  }
+
   async getCountryById(id: number): Promise<Country | null> {
     try {
-      const response = await httpAdapter.get<Country>(`${this.countriesUrl}/${id}`);
-      return response || null;
+      return await httpAdapter.get<Country>(`${this.countriesUrl}/${id}`);
     } catch (error) {
-      console.error("Error al obtener país:", error);
+      console.error("Error en getCountryById:", error);
       return null;
     }
   }
 
-  // ============ PROVINCES ============
-  
-  async getProvinces(): Promise<Province[]> {
-    try {
-      const response = await httpAdapter.get<Province[]>(this.provincesUrl);
-      return response || [];
-    } catch (error) {
-      console.error("Error al obtener provincias:", error);
-      return [];
-    }
+  // PROVINCES
+  async getProvinces(params?: { page?: number; limit?: number; search?: string; sortBy?: string; [key: string]: any }): Promise<Province[]> {
+    const safeParams = {
+      ...params,
+      page: Number(params?.page) || 1,
+      limit: Number(params?.limit) || 10,
+    };
+    return await httpAdapter.get<Province[]>(this.provincesUrl, { params: safeParams });
   }
 
-  /**
-   * Obtiene una provincia por ID
-   * @param id ID de la provincia
-   * @returns Promise<Province | null>
-   */
   async getProvinceById(id: number): Promise<Province | null> {
     try {
-      const response = await httpAdapter.get<Province>(`${this.provincesUrl}/${id}`);
-      return response || null;
+      return await httpAdapter.get<Province>(`${this.provincesUrl}/${id}`);
     } catch (error) {
-      console.error("Error al obtener provincia:", error);
+      console.error("Error en getProvinceById:", error);
       return null;
     }
   }
 
-  // ============ FILTROS ADICIONALES ============
-  
-  /**
-   * Obtiene provincias filtradas por país
-   * @param countryId ID del país
-   * @returns Promise<Province[]>
-   */
+  // FILTROS ADICIONALES
   async getProvincesByCountry(countryId: number): Promise<Province[]> {
     try {
-      const response = await httpAdapter.get<Province[]>(`${this.provincesUrl}?country_id=${countryId}`);
-      return response || [];
+      return await httpAdapter.get<Province[]>(`${this.provincesUrl}?country_id=${countryId}`);
     } catch (error) {
-      console.error("Error al obtener provincias por país:", error);
+      console.error("Error en getProvincesByCountry:", error);
       return [];
     }
   }
 
-  /**
-   * Obtiene localidades filtradas por provincia
-   * @param provinceId ID de la provincia
-   * @returns Promise<Locality[]>
-   */
   async getLocalitiesByProvince(provinceId: number): Promise<Locality[]> {
     try {
-      const response = await httpAdapter.get<Locality[]>(`${this.localitiesUrl}?province_id=${provinceId}`);
-      return response || [];
+      return await httpAdapter.get<Locality[]>(`${this.localitiesUrl}?province_id=${provinceId}`);
     } catch (error) {
-      console.error("Error al obtener localidades por provincia:", error);
+      console.error("Error en getLocalitiesByProvince:", error);
       return [];
     }
   }
 
-  /**
-   * Obtiene localidades filtradas por zona
-   * @param zoneId ID de la zona
-   * @returns Promise<Locality[]>
-   */
   async getLocalitiesByZone(zoneId: number): Promise<Locality[]> {
     try {
-      const response = await httpAdapter.get<Locality[]>(`${this.localitiesUrl}?zone_id=${zoneId}`);
-      return response || [];
+      return await httpAdapter.get<Locality[]>(`${this.localitiesUrl}?zone_id=${zoneId}`);
     } catch (error) {
-      console.error("Error al obtener localidades por zona:", error);
+      console.error("Error en getLocalitiesByZone:", error);
       return [];
     }
   }

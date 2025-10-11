@@ -7,6 +7,7 @@ const PasswordRecoveryPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [emailSent, setEmailSent] = useState<boolean>(false);
   const authService = new AuthService();
   const navigate = useNavigate();
 
@@ -81,9 +82,11 @@ const PasswordRecoveryPage: React.FC = () => {
             />
             {error && <p className="error">{error}</p>}
             {message && <p className="message">{message}</p>}
-            <button type="submit" className="submit-button">
-              Enviar Correo
-            </button>
+            {!emailSent && (
+              <button type="submit" className="submit-button">
+                Enviar Correo
+              </button>
+            )}
           </form>
         </div>
       </div>

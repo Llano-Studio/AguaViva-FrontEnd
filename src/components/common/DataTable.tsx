@@ -1,5 +1,5 @@
 import React from 'react';
-import { EditButton, DeleteButton, ViewButton, DownloadButton } from './ActionButtons';
+import { EditButton, DeleteButton, ViewButton, DownloadButton, CancelButton, PaymentButton } from './ActionButtons';
 import SortBy from './SortBy';
 import { getSemaphoreStyle } from './SemaphoreStatus';
 import {Column} from '../../interfaces/Common';
@@ -12,11 +12,13 @@ interface DataTableProps<T extends { id: number }> {
   onDelete?: (id: number) => void;
   onView?: (item: T) => void;
   onDownload?: (item: T) => void;
+  onPayment?: (item: T) => void;
+  onCancel?: (item: T) => void;
+  paymentVisible?: (item: T) => boolean;
   class?: string;
   sortBy?: string[];
   sortDirection?: ("asc" | "desc")[];
   onSort?: (column: keyof T) => void;
-  // Nuevo: props opcionales para semáforo
   useSemaphoreStatus?: boolean;
   semaphoreField?: keyof T;
   semaphoreColorMap?: Record<string, string>;
@@ -35,6 +37,9 @@ export function DataTable<T extends { id: number }>({
   onDelete, 
   onView,
   onDownload,
+  onPayment,
+  onCancel,
+  paymentVisible,
   class: classTable,
   sortBy = [],
   sortDirection = [],
@@ -95,9 +100,13 @@ export function DataTable<T extends { id: number }>({
                   </td>
                 ))}
                 <td className={`table-td-2 ${classTable ? classTable + "-table-td-2" : ""}`}>
+                  {onPayment && (!paymentVisible || paymentVisible(item)) && (
+                    <PaymentButton onClick={() => onPayment(item)} />
+                  )}
                   {onDownload && <DownloadButton onClick={() => onDownload(item)} />}
                   {onView && <ViewButton onClick={() => onView(item)} />}
                   {onEdit && <EditButton onClick={() => onEdit(item)} />}
+                  {onCancel && <CancelButton onClick={() => onCancel(item)} />}
                   {onDelete && <DeleteButton onClick={() => onDelete(item.id)} />}
                 </td>
               </tr>

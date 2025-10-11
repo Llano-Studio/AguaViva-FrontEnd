@@ -4,6 +4,7 @@ import Select from "react-select";
 import { Field } from '../../interfaces/Common';
 import '../../styles/css/components/common/itemForm.css';
 import SearchBarWithDropdown from './SearchBarWithDropdown';
+import { formatCUIT } from "../../utils/formatCUIT";
 
 // Props del componente
 interface ItemFormProps<T extends FieldValues> extends UseFormReturn<T> {
@@ -62,6 +63,21 @@ export function ItemForm<T extends FieldValues>({
         value: field.validation.minLength,
         message: `Mínimo ${field.validation.minLength} caracteres`
       };
+    }
+    // NUEVO: reglas min/max para RHF en numéricos
+    if (field.type === 'number') {
+      if (field.validation?.min !== undefined) {
+        validationRules.min = {
+          value: field.validation.min,
+          message: `Mínimo ${field.validation.min}`,
+        };
+      }
+      if (field.validation?.max !== undefined) {
+        validationRules.max = {
+          value: field.validation.max,
+          message: `Máximo ${field.validation.max}`,
+        };
+      }
     }
 
     switch (field.type) {
@@ -129,11 +145,52 @@ export function ItemForm<T extends FieldValues>({
             />
           );
         }
+
+        // NUEVO: límites y clamping
+        const minVal = field.validation?.min as number | undefined;
+        const maxVal = field.validation?.max as number | undefined;
+        const stepVal = (field.validation as any)?.step ?? 1;
+
+        const clampNumber = (raw: string) => {
+          if (raw === "") return raw;
+          let n = Number(raw);
+          if (Number.isNaN(n)) return "";
+          if (minVal !== undefined && n < minVal) n = minVal;
+          if (maxVal !== undefined && n > maxVal) n = maxVal;
+          return String(n);
+        };
+
         return (
           <input
             type="number"
-            {...register(field.name as any, validationRules)}
+            inputMode="numeric"
+            min={minVal !== undefined ? minVal : undefined}
+            max={maxVal !== undefined ? maxVal : undefined}
+            step={stepVal}
+            {...register(field.name as any, { ...validationRules, valueAsNumber: true })}
             className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+            onInput={(e) => {
+              const input = e.currentTarget;
+              const clamped = clampNumber(input.value);
+              if (clamped !== input.value) {
+                input.value = clamped;
+              }
+            }}
+            onBlur={(e) => {
+              const input = e.currentTarget;
+              const clamped = clampNumber(input.value);
+              if (clamped !== input.value) {
+                input.value = clamped;
+              }
+            }}
+            onKeyDown={(e) => {
+              const disallowed = ['e', 'E', '+'];
+              const allowMinus = minVal === undefined || minVal < 0;
+              if (disallowed.includes(e.key)) e.preventDefault();
+              if (!allowMinus && e.key === '-') e.preventDefault();
+              // si step es entero, bloqueamos decimales
+              if (Number(stepVal) === 1 && e.key === '.') e.preventDefault();
+            }}
           />
         );
       case 'date':
@@ -236,6 +293,67 @@ export function ItemForm<T extends FieldValues>({
           />
         );
       }
+
+      case 'taxId': {
+        const reg = register(field.name as any, {
+          ...validationRules,
+          pattern: {
+            value: /^\d{2}-\d{8}-\d{1}$/,
+            message: "Formato inválido. Use XX-XXXXXXXX-X",
+          },
+        });
+
+        if (field.disabled) {
+          return (
+            <input
+              type="text"
+              value={watch(field.name as any) ?? ""}
+              className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+              disabled
+              readOnly
+              tabIndex={-1}
+              placeholder={(field as any).placeholder || "XX-XXXXXXXX-X"}
+            />
+          );
+        }
+
+        return (
+          <input
+            type="text"
+            {...reg}
+            className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
+            placeholder={(field as any).placeholder || "XX-XXXXXXXX-X"}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={13} // 11 dígitos + 2 guiones
+            onKeyDown={(e) => {
+              const ctrl = e.ctrlKey || e.metaKey;
+              const allowedCtrl = ['a','c','v','x'];
+              const navigation = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+              if (ctrl && allowedCtrl.includes(e.key.toLowerCase())) return;
+              if (navigation.includes(e.key)) return;
+              // Solo dígitos (los guiones los agrega el formateador)
+              if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+            }}
+            onPaste={(e) => {
+              e.preventDefault();
+              const text = (e.clipboardData || (window as any).clipboardData).getData('text');
+              const formatted = formatCUIT(text);
+              (e.currentTarget as HTMLInputElement).value = formatted;
+              reg.onChange({ target: { name: field.name, value: formatted } });
+              if (onFieldChange) onFieldChange(field.name as string, formatted);
+            }}
+            onChange={(e) => {
+              const formatted = formatCUIT(e.target.value);
+              e.target.value = formatted;
+              reg.onChange(e);
+              if (onFieldChange) onFieldChange(field.name as string, formatted);
+            }}
+          />
+        );
+      }
+
+
       default:
         if (field.disabled) {
           return (

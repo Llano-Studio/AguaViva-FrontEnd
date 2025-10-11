@@ -1,0 +1,13 @@
+.hide-inner-form-actions-suscription{
+    background: var(--bg-color-3);
+    border: solid 1.5px var(--bg-color-2);
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.suscription-client-title{
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color-3);
+    margin-bottom: 20px;
+}

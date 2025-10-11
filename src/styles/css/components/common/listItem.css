@@ -1,53 +1,80 @@
 @import "tailwindcss";
 
 .listItem-table{
-    width: 100%;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
+.listItem-empty {
+  padding: 12px;
+  color: var(--text-color-2);
+}
+
+/* Filas como grid para alinear columnas entre head y body */
+thead .listItem-tr,
 tbody .listItem-tr{
-    border: solid 1px var(--bg-color-2);
-    border-radius: 7px;
-    min-height: 64px;
-    padding: 5px 15px;
-    font-size: 12.5px;
-    font-weight: 400;
-    color: var(--text-color-1);
-    display: flex;
-    margin-bottom: 10px;
-    justify-content: space-between;
-    align-items: center;
+  display: grid;
+  align-items: center;
 }
 
+/* Header */
 thead .listItem-tr{
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
+  margin-bottom: 15px;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
-.listItem-table th{
-    font-size: 10px;
-    font-weight: 400;
+.listItem-th{
+  font-size: 10px;
+  font-weight: 400;
+  text-align: left;
 }
 
+/* Body rows con estilo Figma */
+tbody .listItem-tr{
+  border: solid 1px var(--bg-color-2);
+  border-radius: 7px;
+  min-height: 64px;
+  padding: 5px 15px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--text-color-1);
+  margin-bottom: 10px;
+}
 
+/* Celdas */
+.listItem-td{
+  text-align: center;
+}
+
+/* Primera columna alineada a la izquierda (coincide con tu diseño) */
 .listItem-tr-thead th:first-child,
 .listItem-tr-tbody td:first-child{
-    width: 200px;
-    text-align: start;
+  text-align: start;
 }
 
-.listItem-table thead th,
-.listItem-table tbody td{
-    min-width: 100px;
+/* Contenido truncado para evitar desbordes y desalineaciones */
+.listItem-cell{
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* cambiar a normal + word-break si querés wrap */
+  width: 100%;
+  text-align: center;
 }
 
-.listItem-table thead th:last-child,
-.listItem-table tbody td:last-child{
-  min-width: 95px;
+/* Alinear solo el primer .listItem-cell de cada fila */
+.listItem-tr-thead .listItem-th:first-child .listItem-cell,
+.listItem-tr-tbody .listItem-td:first-child .listItem-cell{
+  text-align: start;
 }
 
-.listItem-table tbody td{
-    text-align: center;
+/* Columna de acciones */
+.listItem-actions{
+  text-align: right;
 }
+
+/* Eliminamos min-widths y flex que desalineaban columnas */
+/* .listItem-table thead th, .listItem-table tbody td { min-width: 100px; } */
+/* thead .listItem-tr, tbody .listItem-tr { display: flex; } */

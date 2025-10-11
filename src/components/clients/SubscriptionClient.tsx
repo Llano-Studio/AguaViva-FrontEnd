@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ModalSubscriptionClient from "./ModalSubscriptionClient";
 import { ListItem } from "../common/ListItem";
 import { clientSubscriptionListColumns } from "../../config/clients/clientSubscriptionListColumns";
 import { clientSubscriptionModalConfig } from "../../config/clients/clientSubscriptionModalConfig";
 import { Modal } from "../common/Modal";
 import { SubscriptionPlanService } from "../../services/SubscriptionPlanService";
+import { ClientSubscriptionService } from "../../services/ClientSubscriptionService";
 import useClientSubscriptions from "../../hooks/useClientSubscriptions";
 import ModalDeleteConfirm from "../common/ModalDeleteConfirm";
 import { parseTimeRangeFields } from "../../utils/parseTimeRangeFields";
+import { useSnackbar } from "../../context/SnackbarContext";
+import ModalCancelledSubscription from "./ModalCancelledSubscription";
+import ModalCancelledConfirm from "../common/ModalCancelledConfirm";
+import useClients from "../../hooks/useClients";
+import useCancellationOrders from "../../hooks/useCancellationOrders";
+import { ClientSubscription, CreateClientSubscriptionDTO, UpdateClientSubscriptionDTO } from "../../interfaces/ClientSubscription";
+import { getDefaultCollectionDay } from "../../utils/getDefaultCollectionDay";
 import "../../styles/css/components/clients/subscriptionClient.css";
 
 interface SubscriptionClientProps {
@@ -25,11 +33,27 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<any>(null);
-  
+  const { cancelSubscription } = useClients();
+ 
+
+  // Listas separadas
+  const [activeSubscriptions, setActiveSubscriptions] = useState<any[]>([]);
+  const [cancelledSubscriptions, setCancelledSubscriptions] = useState<any[]>([]);
+
+  // Estados Cancelacion
+  const [showCancelFormModal, setShowCancelFormModal] = useState(false);
+  const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
+  const [subscriptionToCancel, setSubscriptionToCancel] = useState<any>(null);
+  const [cancelFormValues, setCancelFormValues] = useState<any>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const subsServiceRef = useRef(new ClientSubscriptionService());
+  const { showSnackbar } = useSnackbar();
+
   const {
-    subscriptions,
+    // El hook lo seguimos usando para create/update/delete
     createSubscription,
-    fetchSubscriptionsByCustomer,
     deleteSubscription,
     updateSubscription,
   } = useClientSubscriptions();
@@ -39,43 +63,63 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
       const service = new SubscriptionPlanService();
       const res = await service.getSubscriptionPlans();
       if (res && res.data) {
-        setPlansOptions(res.data.map((plan: any) => ({
-          label: plan.name,
-          value: plan.subscription_plan_id
-        })));
+        setPlansOptions(
+          res.data.map((plan: any) => ({
+            label: plan.name,
+            value: plan.subscription_plan_id,
+          }))
+        );
       }
     };
     fetchPlans();
   }, []);
 
+  // Cargar ambas listas por estado
   useEffect(() => {
     if (isEditing && clientId) {
-      fetchSubscriptionsByCustomer(clientId);
+      void refreshLists();
     }
-  }, [isEditing, clientId, fetchSubscriptionsByCustomer]);
+  }, [isEditing, clientId]);
 
-  const handleAddSubscription = async (values: any) => {
+  const refreshLists = async () => {
+    if (!clientId) return;
+    try {
+      const [act, canc] = await Promise.all([
+        subsServiceRef.current.getSubscriptionsByCustomer(clientId, { status: "ACTIVE" }),
+        subsServiceRef.current.getSubscriptionsByCustomer(clientId, { status: "CANCELLED" }),
+      ]);
+      setActiveSubscriptions(Array.isArray(act?.data) ? act.data : []);
+      setCancelledSubscriptions(Array.isArray(canc?.data) ? canc.data : []);
+    } catch {
+      setActiveSubscriptions([]);
+      setCancelledSubscriptions([]);
+    }
+  };
+
+  const handleAddSubscription = async (values: CreateClientSubscriptionDTO) => {
     setLoading(true);
     setSubscriptionError(null);
     try {
-      // Clonar valores para no mutar el original
-      const dataToSend = { ...values };
+      const dataToSend: CreateClientSubscriptionDTO = {
+        ...values,
+        customer_id: clientId,
+        collection_day: values.collection_day ?? getDefaultCollectionDay(),
+        payment_mode: values.payment_mode || "ADVANCE",
+        status: "ACTIVE",
+      };
 
-      // Limpiar preferred_days si está vacío o no existe
-      if (
-        !dataToSend.delivery_preferences?.preferred_days ||
-        dataToSend.delivery_preferences.preferred_days.length === 0
-      ) {
-        if (dataToSend.delivery_preferences) {
-          delete dataToSend.delivery_preferences.preferred_days;
-        }
+      if (!dataToSend.delivery_preferences?.preferred_days || dataToSend.delivery_preferences.preferred_days.length === 0) {
+        if (dataToSend.delivery_preferences) delete dataToSend.delivery_preferences.preferred_days;
       }
 
-      await createSubscription({ ...dataToSend, customer_id: clientId });
+      await createSubscription(dataToSend);
       setShowModal(false);
-      await fetchSubscriptionsByCustomer(clientId);
+      await refreshLists();
+      showSnackbar("Suscripción creada correctamente.", "success");
     } catch (err: any) {
-      setSubscriptionError(err.message || "Error al agregar abono");
+      const msg = err?.message || "Error al agregar abono";
+      setSubscriptionError(msg);
+      showSnackbar(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -87,9 +131,14 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
   };
 
   const handleConfirmDelete = async () => {
-    if (subscriptionToDelete) {
+    if (!subscriptionToDelete) return;
+    try {
       await deleteSubscription(subscriptionToDelete.subscription_id);
-      await fetchSubscriptionsByCustomer(clientId);
+      await refreshLists();
+      showSnackbar("Suscripción eliminada correctamente.", "success");
+    } catch (err: any) {
+      showSnackbar(err?.message || "Error al eliminar la suscripción", "error");
+    } finally {
       setShowDeleteModal(false);
       setSubscriptionToDelete(null);
     }
@@ -100,32 +149,27 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
     setShowModal(true);
   };
 
-  const handleEditSubscription = async (values: any) => {
+  const handleEditSubscription = async (values: UpdateClientSubscriptionDTO) => {
     setLoading(true);
     setShowModal(true);
     setSubscriptionError(null);
     try {
-      // Clonar valores para no mutar el original
-      const dataToSend = { ...values };
+      const dataToSend: UpdateClientSubscriptionDTO = { ...values };
 
-      // Limpiar preferred_days si está vacío o no existe
-      if (
-        !dataToSend.delivery_preferences?.preferred_days ||
-        dataToSend.delivery_preferences.preferred_days.length === 0
-      ) {
-        if (dataToSend.delivery_preferences) {
-          delete dataToSend.delivery_preferences.preferred_days;
-        }
+      if (!dataToSend.delivery_preferences?.preferred_days || dataToSend.delivery_preferences.preferred_days.length === 0) {
+        if (dataToSend.delivery_preferences) delete dataToSend.delivery_preferences.preferred_days;
       }
 
-      // Limpiar el payload para enviar solo los campos que la API espera
       const cleaned = cleanSubscriptionPayload(dataToSend);
       await updateSubscription(subscriptionToEdit.subscription_id, cleaned);
       setShowModal(false);
       setSubscriptionToEdit(null);
-      await fetchSubscriptionsByCustomer(clientId);
+      await refreshLists();
+      showSnackbar("Suscripción actualizada correctamente.", "success");
     } catch (err: any) {
-      setSubscriptionError(err.message || "Error al editar abono");
+      const msg = err?.message || "Error al editar abono";
+      setSubscriptionError(msg);
+      showSnackbar(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -138,37 +182,87 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
 
   if (!isEditing) return null;
 
-  function cleanSubscriptionPayload(data: any) {
-  return {
-    subscription_plan_id: data.subscription_plan_id,
-    end_date: data.end_date,
-    status: data.status,
-    notes: data.notes,
-    delivery_preferences: data.delivery_preferences,
-  };
-}
 
-  const initialValues = subscriptionToEdit
-  ? {
-      ...subscriptionToEdit,
-      delivery_preferences: parseTimeRangeFields(
-        subscriptionToEdit.delivery_preferences,
-        [
-          {
-            source: "preferred_time_range",
-            start: "preferred_time_range_start",
-            end: "preferred_time_range_end",
-          },
-          {
-            source: "avoid_times",
-            start: "avoid_times_start",
-            end: "avoid_times_end",
-            isArray: true,
-          },
-        ]
-      ),
+  const handleCancelledSubscriptions = (item: any) => {
+    setSubscriptionToCancel(item);
+    setCancelFormValues(null);
+    setShowCancelFormModal(true);
+  };
+
+  // Submit del formulario (primer modal) -> abre confirm
+  const handlePrepareCancellation = async (values: any) => {
+    setCancelFormValues(values);
+    setShowCancelFormModal(false);
+    setShowCancelConfirmModal(true);
+  };
+
+  const executeCancellation = async () => {
+    if (!subscriptionToCancel || !cancelFormValues) {
+      setShowCancelConfirmModal(false);
+      return;
     }
-  : undefined;
+    setCancelLoading(true);
+    setCancelError(null);
+    try {
+      // Solo cancelar suscripción (enviar payload nuevo)
+      await cancelSubscription(
+        subscriptionToCancel.customer_id || clientId,
+        subscriptionToCancel.subscription_id,
+        {
+          cancellation_date:
+            cancelFormValues?.cancellation_date ||
+            cancelFormValues?.scheduled_collection_date ||
+            new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+          notes: cancelFormValues?.notes || undefined,
+        }
+      );
+
+      showSnackbar("Suscripción cancelada correctamente.", "success");
+      setShowCancelConfirmModal(false);
+      setSubscriptionToCancel(null);
+      setCancelFormValues(null);
+      await refreshLists();
+    } catch (e: any) {
+      const msg = e?.message || "Error al cancelar abono";
+      setCancelError(msg);
+      showSnackbar(msg, "error");
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  function cleanSubscriptionPayload(data: any): UpdateClientSubscriptionDTO {
+    return {
+      subscription_plan_id: data.subscription_plan_id,
+      start_date: data.start_date,
+      collection_day: data.collection_day,
+      payment_mode: data.payment_mode,
+      payment_due_day: data.payment_due_day,
+      status: data.status,
+      notes: data.notes,
+      delivery_preferences: data.delivery_preferences,
+    };
+  }
+
+  const initialValues =
+    subscriptionToEdit
+      ? {
+          ...subscriptionToEdit,
+          delivery_preferences: parseTimeRangeFields(subscriptionToEdit.delivery_preferences, [
+            {
+              source: "preferred_time_range",
+              start: "preferred_time_range_start",
+              end: "preferred_time_range_end",
+            },
+            {
+              source: "avoid_times",
+              start: "avoid_times_start",
+              end: "avoid_times_end",
+              isArray: true,
+            },
+          ]),
+        }
+      : undefined;
 
   return (
     <div className="subscriptionClient-actions-container">
@@ -187,6 +281,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
           Agregar Abono
         </button>
       </div>
+
       <ModalSubscriptionClient
         isOpen={showModal}
         onClose={() => {
@@ -200,16 +295,32 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
         error={subscriptionError}
       />
 
+      <h3 className="subscriptionClient-title">Activos</h3>
       <ListItem
-        items={subscriptions}
+        items={activeSubscriptions}
         columns={clientSubscriptionListColumns}
-        getKey={item => item.subscription_id}
+        getKey={(item) => item.subscription_id}
         content="abono"
         genere="M"
         onRemove={handleRemoveSubscription}
         onEdit={handleOpenEditSubscription}
         onView={handleViewSubscription}
+        onCancel={handleCancelledSubscriptions}
       />
+
+      {cancelledSubscriptions.length > 0 && (
+        <>
+          <h3 className="subscriptionClient-title">Cancelados</h3>
+          <ListItem
+            items={cancelledSubscriptions}
+            columns={clientSubscriptionListColumns}
+            getKey={(item) => item.subscription_id}
+            content="abonos-cancelled"
+            genere="M"
+            onView={handleViewSubscription}
+          />
+        </>
+      )}
 
       <Modal
         isOpen={showViewSubscriptionModal}
@@ -217,6 +328,31 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
         title="Detalle del abono"
         config={clientSubscriptionModalConfig}
         data={subscriptionToView}
+      />
+
+      <ModalCancelledSubscription
+        isOpen={showCancelFormModal}
+        onClose={() => {
+          setShowCancelFormModal(false);
+          setSubscriptionToCancel(null);
+          setCancelFormValues(null);
+        }}
+        onSubmit={handlePrepareCancellation}
+        initialValues={null}
+        loading={cancelLoading}
+        error={cancelError}
+      />
+
+      <ModalCancelledConfirm
+        isOpen={showCancelConfirmModal}
+        onClose={() => {
+          setShowCancelConfirmModal(false);
+          setSubscriptionToCancel(null);
+          setCancelFormValues(null);
+        }}
+        onDelete={executeCancellation}
+        content="abono"
+        genere="M"
       />
 
       <ModalDeleteConfirm

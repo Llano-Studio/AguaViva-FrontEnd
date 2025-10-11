@@ -1,0 +1,21 @@
+.modalLocalities-add-locality-button{
+    color: var(--text-color-2);
+    background: var(--acent-color-1);
+    font-size: 11px;
+    font-weight: 600;
+    width: fit-content;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    padding: 0.6em 3em;
+    justify-self: end;
+    margin-bottom: 20px;
+}
+
+.modalLocalities-container .table-container{
+    max-height: 400px;
+    overflow-y: auto;
+}

@@ -1,0 +1,22 @@
+.modalClientComodato-title{
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color-3);
+    margin-bottom: 13px;
+}
+
+.client-subscription-form{
+    padding: 0;
+    border: none;
+    row-gap: 10px;
+}
+
+.modalClientComodato-wrapper{
+    width: 75%;
+}
+
+.modalClientComodato-button-close{
+    padding: 0;
+}
+
+

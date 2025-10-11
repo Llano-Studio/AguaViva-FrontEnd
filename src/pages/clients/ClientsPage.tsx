@@ -3,20 +3,24 @@ import { DataTable } from '../../components/common/DataTable';
 import { Modal } from '../../components/common/Modal';
 import { Client } from '../../interfaces/Client';
 import useClients from '../../hooks/useClients';
-import useZones from '../../hooks/useZones'; // Agregar este import
+import useZones from '../../hooks/useZones';
 import ClientForm from '../../components/clients/ClientForm';
 import { useNavigate } from "react-router-dom";
 import { clientColumns } from "../../config/clients/clientFieldsConfig";
 import SearchBar from "../../components/common/SearchBar";
 import FilterDrawer from "../../components/common/FilterDrawer";
 import { clientFilters } from "../../config/clients/clientFiltersConfig";
-import { clientModalConfig ,loanedProductsConfig } from "../../config/clients/clientModalConfig";
+import { clientModalConfig } from "../../config/clients/clientModalConfig";
+import { clientComodatoListColumns } from "../../config/clients/clientComodatoListColumns";
 import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import Switch from "../../components/common/Switch";
 import { useSnackbar } from "../../context/SnackbarContext";
-import '../../styles/css/pages/pages.css';
+import ClientPayment from "../../components/clients/ClientPayment";
 import PaginationControls from "../../components/common/PaginationControls";
 import useLocations from "../../hooks/useLocations";
+import useClientSubscriptions from "../../hooks/useClientSubscriptions";
+import '../../styles/css/pages/pages.css';
+import SpinnerLoading from '../../components/common/SpinnerLoading';
 
 const ClientsPage: React.FC = () => {
   const { 
@@ -39,13 +43,12 @@ const ClientsPage: React.FC = () => {
     setSortDirection,
     fetchClients,
     deleteClient,
-    fetchLoanedProducts,
-    loanedProducts, // Productos en comodato enriquecidos
+    // Reemplazamos productos prestados por comodatos
+    fetchPersonComodatos,
+    comodatos,
   } = useClients();
 
-  // Hook para obtener zonas
   const { zones, fetchZones } = useZones();
-  
   const [showViewModal, setShowViewModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -54,9 +57,14 @@ const ClientsPage: React.FC = () => {
   const [semaphoreOn, setSemaphoreOn] = useState(false);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
-
   const { showSnackbar } = useSnackbar();
   const { localities, fetchLocalities } = useLocations();
+  const [showPaymentPanel, setShowPaymentPanel] = useState(false);
+  const [clientForPayment, setClientForPayment] = useState<Client | null>(null);
+
+  // Subscripciones por cliente: mostrar botón Pagar solo si existe
+  const { fetchSubscriptionsByCustomer } = useClientSubscriptions();
+  const [hasSubscription, setHasSubscription] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -64,7 +72,6 @@ const ClientsPage: React.FC = () => {
     }
   }, [clients]);
 
-  // Cargar zonas al montar el componente
   useEffect(() => {
     fetchZones();
   }, []);
@@ -77,7 +84,32 @@ const ClientsPage: React.FC = () => {
     fetchZones(); 
   }, []);
 
-  // Crear filtros dinámicos con las opciones de zona
+  useEffect(() => {
+    let cancelled = false;
+    const loadSubs = async () => {
+      try {
+        const results = await Promise.all(
+          clients.map(async (c) => {
+            const res: any = await fetchSubscriptionsByCustomer(c.person_id);
+            const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+            const has = Array.isArray(list) && list.length > 0;
+            return [c.person_id, has] as const;
+          })
+        );
+        if (!cancelled) {
+          const map: Record<number, boolean> = {};
+          results.forEach(([id, has]) => (map[id] = has));
+          setHasSubscription(map);
+        }
+      } catch {
+        if (!cancelled) setHasSubscription({});
+      }
+    };
+    if (clients.length) loadSubs();
+    else setHasSubscription({});
+    return () => { cancelled = true; };
+  }, [clients, fetchSubscriptionsByCustomer]);
+
   const dynamicClientFilters = clientFilters.map((filter) => {
     if (filter.name === "zoneIds") {
       return {
@@ -122,6 +154,7 @@ const ClientsPage: React.FC = () => {
 
   const handleEditClick = (client: Client) => {
     setSelectedClient(client);
+    setShowPaymentPanel(false); // cerrar pagos si estaba abierto
     setShowForm(true);
   };
 
@@ -134,16 +167,14 @@ const ClientsPage: React.FC = () => {
     setFilters((prev: any) => ({ ...prev, [name]: value }));
   };
 
-
   const handleApplyFilters = () => {
     const transformedFilters = { ...filters };
-    // Transformar el filtro de localidades en una cadena separada por comas
     if (filters.locality && Array.isArray(filters.locality)) {
       transformedFilters.localityIds = filters.locality.join(",");
-      delete transformedFilters.locality; // Eliminar el campo original
+      delete transformedFilters.locality;
     }
 
-    setFilters(transformedFilters); // Guardar los filtros transformados
+    setFilters(transformedFilters);
     setShowFilters(false);
     setPage(1);
   };
@@ -170,7 +201,6 @@ const ClientsPage: React.FC = () => {
     setPage(1);
   };
 
-  // Maneja el éxito en crear/editar cliente
   const handleFormSuccess = (msg: string) => {
     showSnackbar(msg, "success");
     setShowForm(false);
@@ -181,12 +211,19 @@ const ClientsPage: React.FC = () => {
   const handleViewClient = async (client: Client) => {
     setSelectedClient(client);
     setShowViewModal(true);
-
     try {
-      await fetchLoanedProducts(client.person_id); // Obtiene los productos en comodato enriquecidos
-    } catch (error) {
-      console.error("Error al obtener productos en comodato:", error);
+      await fetchPersonComodatos(client.person_id);
+    } catch (e) {
+      console.error("Error al obtener comodatos:", e);
     }
+  };
+
+  // Prearmado para implementar registro de pago
+  const handlePayment = (item: Client & { id: number }) => {
+    setShowForm(false); // cerrar edición si estaba abierta
+    const c = clients.find(c => c.person_id === item.id);
+    if (c) setClientForPayment(c);
+    setShowPaymentPanel(true);
   };
 
   if (error) {
@@ -194,7 +231,7 @@ const ClientsPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading /></div>;
   }
 
   const start = (page - 1) * (clients.length || 1) + (clients.length > 0 ? 1 : 0);
@@ -204,10 +241,9 @@ const ClientsPage: React.FC = () => {
 
   return (
     <div className={`table-scroll page-container ${titlePage+"-page-container"}`}>
-      {/* Panel de la tabla */}
       <div
         className={`page-content ${titlePage+"-page-content"}
-          ${showForm ? "-translate-x-full" : "translate-x-0"}
+          ${(showForm || showPaymentPanel) ? "-translate-x-full" : "translate-x-0"}
         `}
       >
         <div>
@@ -265,6 +301,8 @@ const ClientsPage: React.FC = () => {
           onView={handleViewClient}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
+          onPayment={handlePayment}
+          paymentVisible={(item) => !!hasSubscription[item.id]}
           class={titlePage}
           sortBy={sortBy}
           sortDirection={sortDirection}
@@ -291,7 +329,6 @@ const ClientsPage: React.FC = () => {
         />
       </div>
 
-      {/* Panel del formulario */}
       <div
         className={`form-container ${titlePage+"-form-container"}
           ${showForm ? "translate-x-0" : "translate-x-full"}
@@ -318,7 +355,32 @@ const ClientsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal de Vista */}
+      <div
+        className={`form-container ${titlePage+"-form-container"}
+          ${showPaymentPanel ? "translate-x-0" : "translate-x-full"}
+        `}
+      >
+        <div className={`form-wrapper ${titlePage+"-form-wrapper"}`}>
+          <div className={`form-header ${titlePage+"-form-header"}`}>
+            <button
+              onClick={() => { setShowPaymentPanel(false); setClientForPayment(null); }}
+              className={`form-close-button ${titlePage+"-form-close-button"}`}
+            >
+              <img src="/assets/icons/back.svg" alt="Volver" className={`form-icon-cancel ${titlePage+"-form-icon-cancel"}`} />
+            </button>
+            <h2 className={`form-title ${titlePage+"-form-title"}`}>Pagos de Abonos</h2>
+          </div>
+
+          {clientForPayment && (
+            <ClientPayment
+              clientId={clientForPayment.person_id}
+              onClose={() => { setShowPaymentPanel(false); setClientForPayment(null); }}
+              className={titlePage}
+            />
+          )}
+        </div>
+      </div>
+
       <Modal
         isOpen={showViewModal}
         onClose={() => {
@@ -329,12 +391,11 @@ const ClientsPage: React.FC = () => {
         class={titlePage}
         config={clientModalConfig}
         data={selectedClient}
-        itemsForList={loanedProducts} // Productos en comodato
-        itemsConfig={loanedProductsConfig} // Configuración de los productos
-        itemsTitle="Productos en Comodato" // Título para los productos
+        itemsForList={comodatos}
+        itemsConfig={clientComodatoListColumns}
+        itemsTitle="Productos en Comodato"
       />
 
-      {/* Modal de Eliminar */}
       <ModalDeleteConfirm
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -343,11 +404,10 @@ const ClientsPage: React.FC = () => {
         genere="M"
       />
 
-      {/* Drawer de filtros */}
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        fields={dynamicClientFilters} // Usar filtros dinámicos
+        fields={dynamicClientFilters}
         values={filters}
         onChange={handleFilterChange}
         onApply={handleApplyFilters}

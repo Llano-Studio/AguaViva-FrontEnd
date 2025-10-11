@@ -1,4 +1,5 @@
-.status-badge {
+.status-badge,
+.status-payment-badge {
   padding: 4px 8px;
   border-radius: 3px;
   font-weight: 400;
@@ -22,19 +23,18 @@
   background-color: #DBEAFE;
 }
 
-.status-badge--ready-for-delivery {
-  background-color: #E0E7FF;
+.status-badge--ready-for_delivery {
+  background-color: #93e6ff;
 }
 
 .status-badge--in-delivery {
-  background-color: #F3E8FF;
+  background-color: #ff29ea;
 }
 
 .status-badge--delivered {
   background-color: #93FFD1;
 }
 
-.status-badge--canceled,
 .status-badge--cancelled {
   background-color: #FF9999;
 }
@@ -46,3 +46,21 @@
 .status-badge--retirado {
   background-color: #93FFD1;
 }
+
+
+.status-payment-badge--pending {
+  background-color: #FFF799;
+}
+
+.status-payment-badge--paid {
+  background-color: #93FFD1;
+}
+
+.status-payment-badge--partial {
+  background-color: #93e6ff;
+}
+
+.status-payment-badge--none {
+  background-color: transparent;
+}
+

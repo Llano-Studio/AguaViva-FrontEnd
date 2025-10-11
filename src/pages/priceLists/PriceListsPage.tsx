@@ -11,9 +11,13 @@ import FilterDrawer from "../../components/common/FilterDrawer";
 import { priceListFilters } from "../../config/priceLists/priceListFiltersConfig";
 import { priceListModalConfig } from "../../config/priceLists/priceListModalConfig";
 import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
-import "../../styles/css/pages/pages.css";
 import { useSnackbar } from "../../context/SnackbarContext";
 import PaginationControls from "../../components/common/PaginationControls";
+import { buildIsRole } from "../../utils/buildIsRole";
+import { useAuth } from "../../hooks/useAuth";
+import type { UserRole } from "../../interfaces/User";
+import "../../styles/css/pages/pages.css";
+import SpinnerLoading from "../../components/common/SpinnerLoading";
 
 const PriceListsPage: React.FC = () => {
   const {
@@ -46,6 +50,12 @@ const PriceListsPage: React.FC = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { showSnackbar } = useSnackbar();
+  const { currentUser } = useAuth();
+  const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
+  const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+  const canEdit = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+  const canCreate = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -128,7 +138,7 @@ const PriceListsPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading /></div>;
   }
 
   const start = (page - 1) * (priceLists.length || 1) + (priceLists.length > 0 ? 1 : 0);
@@ -169,6 +179,7 @@ const PriceListsPage: React.FC = () => {
               />
               Filtros
             </button>
+            {canCreate && (
             <button
               onClick={() => navigate("/listas-precios/nueva-lista-precios")}
               className={`page-new-button ${titlePage+"-page-new-button"}`}
@@ -181,6 +192,7 @@ const PriceListsPage: React.FC = () => {
               />
               Nueva Lista
             </button>
+            )}
           </div>
         </div>
         <DataTable
@@ -190,8 +202,8 @@ const PriceListsPage: React.FC = () => {
             setSelectedPriceList(priceList);
             setShowViewModal(true);
           }}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
+          onEdit={canEdit ? handleEditClick : undefined}
+          onDelete={canDelete ? handleDeleteClick : undefined}
           class={titlePage}
           sortBy={sortBy}
           sortDirection={sortDirection}

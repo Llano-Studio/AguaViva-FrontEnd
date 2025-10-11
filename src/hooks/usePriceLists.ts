@@ -1,5 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { PriceList, CreatePriceListDTO, UpdatePriceListDTO } from "../interfaces/PriceList";
+import {
+  PriceList,
+  CreatePriceListDTO,
+  UpdatePriceListDTO,
+  PriceListHistoryItem,
+  PriceListHistoryListResponse,
+  PaginatedMeta,
+  UndoPriceUpdateRequest,
+  UndoPriceUpdateResponse,
+} from "../interfaces/PriceList";
 import { PriceListService } from "../services/PriceListService";
 import { cleanFilters } from "../utils/filterUtils";
 
@@ -11,9 +20,15 @@ export const usePriceLists = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Historial (lista e item)
+  const [priceListHistory, setPriceListHistory] = useState<PriceListHistoryItem[]>([]);
+  const [priceListHistoryMeta, setPriceListHistoryMeta] = useState<PaginatedMeta | null>(null);
+  const [itemHistory, setItemHistory] = useState<PriceListHistoryItem[]>([]);
+  const [itemHistoryMeta, setItemHistoryMeta] = useState<PaginatedMeta | null>(null);
+
   // Paginación, filtros y ordenamiento múltiple
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
@@ -37,10 +52,7 @@ export const usePriceLists = () => {
     ) => {
       try {
         setIsLoading(true);
-        
-        // Limpiar filtros antes de enviar
         const cleanedFilters = cleanFilters(filtersParam);
-        
         const response = await priceListService.getPriceLists({
           page: pageParam,
           limit: limitParam,
@@ -68,18 +80,14 @@ export const usePriceLists = () => {
     fetchPriceLists();
   }, [page, limit, search, filters, sortBy, sortDirection, fetchPriceLists]);
 
-  // Nuevo: obtener una lista de precios por ID y exponer sus items
   const fetchPriceListById = useCallback(async (id: number) => {
     try {
       setIsLoading(true);
       const priceList = await priceListService.getPriceListById(id);
       setSelectedPriceList(priceList);
-      // Soporta ambas variantes: price_list_item (singular) y price_list_items (plural)
-      setSelectedPriceListItems(
-        priceList?.price_list_item || []
-      );
+      setSelectedPriceListItems(priceList?.price_list_item || []);
       return priceList;
-    } catch (err) {
+    } catch {
       setSelectedPriceList(null);
       setSelectedPriceListItems([]);
       return null;
@@ -144,7 +152,6 @@ export const usePriceLists = () => {
     try {
       setIsLoading(true);
       const result = await priceListService.applyPercentage(id, payload);
-      // Opcional: refresca la lista seleccionada
       await fetchPriceListById(id);
       return result;
     } catch (err: any) {
@@ -153,7 +160,61 @@ export const usePriceLists = () => {
     } finally {
       setIsLoading(false);
     }
-  };  
+  };
+
+  // Nuevo: obtener historial de una lista
+  const fetchPriceListHistory = async (id: number, params?: { page?: number; limit?: number }) => {
+    try {
+      setIsLoading(true);
+      const res = await priceListService.getPriceListHistory(id, params);
+      setPriceListHistory(res?.data || []);
+      setPriceListHistoryMeta(res?.meta || null);
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener historial de lista");
+      setPriceListHistory([]);
+      setPriceListHistoryMeta(null);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Nuevo: obtener historial de un item
+  const fetchPriceListItemHistory = async (itemId: number, params?: { page?: number; limit?: number }) => {
+    try {
+      setIsLoading(true);
+      const res = await priceListService.getPriceListItemHistory(itemId, params);
+      setItemHistory(res?.data || []);
+      setItemHistoryMeta(res?.meta || null);
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener historial de item");
+      setItemHistory([]);
+      setItemHistoryMeta(null);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Nuevo: deshacer actualizaciones de precio
+  const undoPriceUpdate = async (payload: UndoPriceUpdateRequest): Promise<UndoPriceUpdateResponse | null> => {
+    try {
+      setIsLoading(true);
+      const res = await priceListService.undoPriceUpdate(payload);
+      // Opcional: refrescar historial de lista si se está visualizando una
+      if (selectedPriceList?.price_list_id) {
+        await fetchPriceListHistory(selectedPriceList.price_list_id, { page: priceListHistoryMeta?.page || 1, limit: priceListHistoryMeta?.limit || 10 });
+      }
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al deshacer actualizaciones de precios");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     priceLists,
@@ -163,18 +224,24 @@ export const usePriceLists = () => {
     setSelectedPriceListItems,
     isLoading,
     error,
+
+    // CRUD
     deletePriceList,
     updatePriceList,
     createPriceList,
+
+    // Fetch
     fetchPriceListById,
     refreshPriceLists: () => fetchPriceLists(page, limit, search, filters, getSortParams()),
+    fetchPriceLists,
+
+    // Paging/filter/sort
     page,
     setPage,
     limit,
     setLimit,
     total,
     totalPages,
-    fetchPriceLists,
     search,
     setSearch,
     filters,
@@ -183,6 +250,17 @@ export const usePriceLists = () => {
     setSortBy,
     sortDirection,
     setSortDirection,
+
+    // Extra
     applyPercentage,
+
+    // Nuevo: historial y undo
+    priceListHistory,
+    priceListHistoryMeta,
+    itemHistory,
+    itemHistoryMeta,
+    fetchPriceListHistory,
+    fetchPriceListItemHistory,
+    undoPriceUpdate,
   };
 };

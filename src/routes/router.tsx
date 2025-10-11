@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import PrivateRoute from "./PrivateRoute";
+import SpinnerLoading from "../components/common/SpinnerLoading"; // <-- agregar
+
 
 // Lazy loaded pages
 const DashboardPage = React.lazy(() => import("../pages/dashboard/DashboardPage"));
@@ -17,6 +19,7 @@ const NewUserPage = React.lazy(() => import("../pages/users/NewUserPage"));
 const LoginPage = React.lazy(() => import("../pages/login/LoginPage"));
 const PasswordRecovery = React.lazy(() => import("../pages/passwordRecovery/PasswordRecoveryPage"));
 const ResetPasswordPage = React.lazy(() => import("../pages/resetPassword/ResetPasswordPage"));
+const EmailConfirmationPage = React.lazy(() => import("../pages/emailConfirmation/EmailConfirmationPage"));
 const ZonesPage = React.lazy(() => import("../pages/zones/ZonesPage"));
 const NewZonePage = React.lazy(() => import("../pages/zones/NewZonePage"));
 const OrdersPage = React.lazy(() => import("../pages/orders/OrdersPage"));
@@ -32,13 +35,20 @@ const NewRouteSheet = React.lazy(() => import("../pages/routeSheets/NewRouteShee
 const AppRouter: React.FC = () => {
   return (
     <Router>
-      <React.Suspense fallback={<div>Cargando...</div>}>
+      <React.Suspense 
+        fallback={
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", gap: 10 }}>
+            <SpinnerLoading size={60} />
+          </div>
+        }
+      >
         <Routes>
           {/* Rutas públicas */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/recuperar-clave" element={<PasswordRecovery />} />
           <Route path="/password-recovery" element={<PasswordRecovery />} />
           <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/confirmar-email" element={<EmailConfirmationPage />} />
 
           {/* Rutas privadas con layout */}
           <Route

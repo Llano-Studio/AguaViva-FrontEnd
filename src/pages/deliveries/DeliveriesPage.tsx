@@ -14,13 +14,14 @@ import useRouteSheets from "../../hooks/useRouteSheets";
 import { routeSheetColumns } from "../../config/routeSheets/routeSheetFieldsConfig";
 import { routeSheetModalConfig } from "../../config/routeSheets/routeSheetModalConfig";
 import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
-import {RouteSheetForm} from "../../components/routeSheets/RouteSheetForm";
-import { routeSheetFields } from "../../config/routeSheets/routeSheetFieldsConfig";
+import { RouteSheetForm } from "../../components/routeSheets/RouteSheetForm";
 import { CreateRouteSheetDTO, UpdateRouteSheetDTO } from "../../interfaces/RouteSheet";
 import "../../styles/css/pages/deliveries/deliveriesPage.css";
 import { useNavigate } from "react-router-dom";
 import { downloadPDF } from "../../utils/downloadPDF";
 import { BASE_URL } from "../../config";
+import OrdersTable from "../../components/orders/OrdersTable";
+import SpinnerLoading from '../../components/common/SpinnerLoading';
 
 const DeliveriesPage: React.FC = () => {
   const {
@@ -42,6 +43,7 @@ const DeliveriesPage: React.FC = () => {
     sortDirection,
     setSortDirection,
     fetchDeliveries,
+    limit,
   } = useDeliveries();
 
   const {
@@ -62,6 +64,7 @@ const DeliveriesPage: React.FC = () => {
     deleteRouteSheet,
     createRouteSheet,
     updateRouteSheet,
+    printRouteSheet,
   } = useRouteSheets();
 
   const [showViewModal, setShowViewModal] = useState(false);
@@ -75,21 +78,20 @@ const DeliveriesPage: React.FC = () => {
 
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const { printRouteSheet } = useRouteSheets();
 
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
-  }, [deliveries]);
+  }, []);
 
   useEffect(() => {
     fetchRouteSheets();
     // eslint-disable-next-line
   }, []);
 
-  const handleViewClick = (delivery: any) => {
-    setSelectedDelivery(delivery);
+  const handleViewClick = (order: any) => {
+    setSelectedDelivery(order);
     setShowViewModal(true);
   };
 
@@ -200,7 +202,6 @@ const DeliveriesPage: React.FC = () => {
       });
 
       showSnackbar("Hoja de ruta descargada correctamente", "success");
-
     } catch (err: any) {
       console.error("Error al descargar:", err);
       showSnackbar(err?.message || "Error al descargar hoja de ruta", "error");
@@ -212,11 +213,11 @@ const DeliveriesPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading /></div>;
   }
 
-  const start = (page - 1) * (deliveries.length || 1) + (deliveries.length > 0 ? 1 : 0);
-  const end = (page - 1) * (deliveries.length || 1) + deliveries.length;
+  const start = total > 0 ? (page - 1) * limit + 1 : 0;
+  const end = Math.min(page * limit, total);
 
   const routeSheetStart = (routeSheetPage - 1) * (routeSheets.length || 1) + (routeSheets.length > 0 ? 1 : 0);
   const routeSheetEnd = (routeSheetPage - 1) * (routeSheets.length || 1) + routeSheets.length;
@@ -225,7 +226,6 @@ const DeliveriesPage: React.FC = () => {
 
   return (
     <div className={`table-scroll page-container ${titlePage+"-page-container"}`}>
-      {/* Panel de la tabla */}
       <div className={`page-content ${titlePage+"-page-content"}`}>
         <div>
           <h1 className={`page-title ${titlePage+"-page-title"}`}>Entregas</h1>
@@ -267,16 +267,18 @@ const DeliveriesPage: React.FC = () => {
             </button>
           </div>
         </div>
-        <DataTable
-          data={deliveries.map(d => ({ ...d, id: d.order_id }))}
-          columns={deliveryColumns}
-          onView={handleViewClick}
-          // No pasar onEdit ni onDelete para que solo se pueda ver
-          class={titlePage}
+
+        {/* Tabla de pedidos (combinados por el hook) usando OrdersTable */}
+        <OrdersTable
+          orders={deliveries as any}
+          className={titlePage}
+          onView={handleViewClick as any}
           sortBy={sortBy}
           sortDirection={sortDirection}
           onSort={handleSort}
+          columns={deliveryColumns}
         />
+
         <PaginationControls
           page={page}
           totalPages={totalPages}
@@ -288,88 +290,71 @@ const DeliveriesPage: React.FC = () => {
           className={titlePage+"-page-pagination"}
         />
       
-      
-      
-      
-      
-      
-      {/* Panel de la tabla de hojas de ruta */}
-      <div className="route-sheets-section-container">
-        <h2 className="page-title">Hojas de Ruta</h2>
-        {errorRouteSheets && <div className="text-red-500 p-2">{errorRouteSheets}</div>}
-        <DataTable
-          data={routeSheets.map(r => ({ ...r, id: r.route_sheet_id }))}
-          columns={routeSheetColumns}
-          onView={handleViewRouteSheet}
-          onEdit={handleEditRouteSheet}
-          onDelete={handleDeleteRouteSheet}
-          onDownload={handleDownloadRouteSheet} // <-- NUEVO
-          class="route-sheets"
-          sortBy={routeSheetSortBy}
-          sortDirection={routeSheetSortDirection}
-          onSort={handleRouteSheetSort}
-        />
-        <PaginationControls
-          page={routeSheetPage}
-          totalPages={routeSheetTotalPages}
-          onPageChange={setRouteSheetPage}
-          start={routeSheetStart}
-          end={routeSheetEnd}
-          total={routeSheetTotal}
-          label="hojas de ruta"
-          className="route-sheets-pagination"
-        />
-      </div>
-
-      {/* Panel del formulario de hoja de ruta */}
-      <div
-        className={`form-container route-sheets-form-container
-          ${showRouteSheetForm ? "translate-x-0" : "translate-x-full"}
-        `}>
-        <div className="form-wrapper route-sheets-form-wrapper">
-          <div className="form-header route-sheets-form-header">
-            <button
-              onClick={handleCloseRouteSheetForm}
-              className="form-close-button route-sheets-form-close-button">
-              <img src="/assets/icons/back.svg" alt="Volver" className="form-icon-cancel route-sheets-form-icon-cancel" />
-            </button>
-            <h2 className="form-title route-sheets-form-title">
-              {selectedRouteSheet ? "Editar hoja de ruta" : "Generar hoja de ruta"}
-            </h2>
-          </div>
-          <RouteSheetForm
-            onSubmit={selectedRouteSheet
-              ? async (values: UpdateRouteSheetDTO) => {
-                  await updateRouteSheet(selectedRouteSheet.route_sheet_id, values);
-                  handleFormSuccess("Hoja de ruta editada correctamente.");
-                }
-              : async (values: CreateRouteSheetDTO) => {
-                  await createRouteSheet(values);
-                  handleFormSuccess("Hoja de ruta creada correctamente.");
-                }
-            }
-            onCancel={handleCloseRouteSheetForm}
-            isEditing={!!selectedRouteSheet}
-            routeSheetToEdit={selectedRouteSheet}
-            loading={isLoadingRouteSheets}
-            error={errorRouteSheets}
-            className="route-sheet-form"
-            onSuccess={handleFormSuccess}
+        {/* Panel de la tabla de hojas de ruta */}
+        <div className="route-sheets-section-container">
+          <h2 className="page-title">Hojas de Ruta</h2>
+          {errorRouteSheets && <div className="text-red-500 p-2">{errorRouteSheets}</div>}
+          <DataTable
+            data={routeSheets.map(r => ({ ...r, id: r.route_sheet_id }))}
+            columns={routeSheetColumns}
+            onView={handleViewRouteSheet}
+            onEdit={handleEditRouteSheet}
+            onDelete={handleDeleteRouteSheet}
+            onDownload={handleDownloadRouteSheet}
+            class="route-sheets"
+            sortBy={routeSheetSortBy}
+            sortDirection={routeSheetSortDirection}
+            onSort={handleRouteSheetSort}
+          />
+          <PaginationControls
+            page={routeSheetPage}
+            totalPages={routeSheetTotalPages}
+            onPageChange={setRouteSheetPage}
+            start={routeSheetStart}
+            end={routeSheetEnd}
+            total={routeSheetTotal}
+            label="hojas de ruta"
+            className="route-sheets-pagination"
           />
         </div>
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+
+        {/* Panel del formulario de hoja de ruta */}
+        <div
+          className={`form-container route-sheets-form-container
+            ${showRouteSheetForm ? "translate-x-0" : "translate-x-full"}
+          `}>
+          <div className="form-wrapper route-sheets-form-wrapper">
+            <div className="form-header route-sheets-form-header">
+              <button
+                onClick={handleCloseRouteSheetForm}
+                className="form-close-button route-sheets-form-close-button">
+                <img src="/assets/icons/back.svg" alt="Volver" className="form-icon-cancel route-sheets-form-icon-cancel" />
+              </button>
+              <h2 className="form-title route-sheets-form-title">
+                {selectedRouteSheet ? "Editar hoja de ruta" : "Generar hoja de ruta"}
+              </h2>
+            </div>
+            <RouteSheetForm
+              onSubmit={selectedRouteSheet
+                ? async (values: UpdateRouteSheetDTO) => {
+                    await updateRouteSheet(selectedRouteSheet.route_sheet_id, values);
+                    handleFormSuccess("Hoja de ruta editada correctamente.");
+                  }
+                : async (values: CreateRouteSheetDTO) => {
+                    await createRouteSheet(values);
+                    handleFormSuccess("Hoja de ruta creada correctamente.");
+                  }
+              }
+              onCancel={handleCloseRouteSheetForm}
+              isEditing={!!selectedRouteSheet}
+              routeSheetToEdit={selectedRouteSheet}
+              loading={isLoadingRouteSheets}
+              error={errorRouteSheets}
+              className="route-sheet-form"
+              onSuccess={handleFormSuccess}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Modal de Vista */}
@@ -384,8 +369,6 @@ const DeliveriesPage: React.FC = () => {
         config={deliveryModalConfig}
         data={selectedDelivery}
       />
-
-     
 
       {/* Modal de Vista de hoja de ruta */}
       <Modal

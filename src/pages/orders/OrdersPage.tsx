@@ -13,7 +13,15 @@ import "../../styles/css/pages/pages.css";
 import PaginationControls from "../../components/common/PaginationControls";
 import { orderModalConfig, orderProductsConfig } from "../../config/orders/orderModalConfig";
 import { Modal } from "../../components/common/Modal";
-
+import OrderForm from "../../components/orders/OrderForm";
+import OrderOneOffForm from "../../components/orders/OrderOneOffForm";
+import ModalOrderPayment from "../../components/orders/ModalOrderPayment";
+import ModalActionConfirm from "../../components/common/ModalActionConfirm";
+import "../../styles/css/pages/orders/ordersPage.css";
+import SpinnerLoading from "../../components/common/SpinnerLoading";
+import { useAuth } from "../../hooks/useAuth";
+import { UserRole } from "../../interfaces/User";
+import { buildIsRole } from "../../utils/buildIsRole";
 
 const OrdersPage: React.FC = () => {
   const {
@@ -35,6 +43,7 @@ const OrdersPage: React.FC = () => {
     fetchOrders: fetchRegularOrders,
     deleteOrder: deleteRegularOrder,
     productsOfOrder, // Función para obtener productos de una orden
+    updateOrder,
   } = useOrders();
 
   const {
@@ -56,6 +65,7 @@ const OrdersPage: React.FC = () => {
     fetchOrders: fetchOneOffOrders,
     deleteOrder: deleteOneOffOrder,
     productsOfOrderOneOff: productsOfOrderOneOff,
+    updateOrder: updateOrderOneOff,
   } = useOrdersOneOff();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -67,56 +77,86 @@ const OrdersPage: React.FC = () => {
   const { showSnackbar } = useSnackbar();
   const [showViewModal, setShowViewModal] = useState(false);
   const [orderToView, setOrderToView] = useState<any>(null);
-  const [orderProducts, setOrderProducts] = useState<any[]>([]); // Productos de la orden
-
-  // Agregar estado para el ordenamiento local cuando filterType es "ALL"
+  const [orderProducts, setOrderProducts] = useState<any[]>([]);
+  const [editingOrder, setEditingOrder] = useState<any | null>(null);
+  const [showEditPanel, setShowEditPanel] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [orderToPay, setOrderToPay] = useState<any | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<{ label: string; value: number }[]>([]);
   const [localSortBy, setLocalSortBy] = useState<string[]>([]);
   const [localSortDirection, setLocalSortDirection] = useState<("asc" | "desc")[]>([]);
+  const { currentUser } = useAuth();
+  const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
+  const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+  const [showActionConfirm, setShowActionConfirm] = useState(false);
+
+  // Paginación local para "ALL"
+  const MAX_ALL_ROWS = 15;
+  const [pageAll, setPageAll] = useState(1);
+  const [searchAll, setSearchAll] = useState("");
 
   const sortOrdersLocally = (orders: any[], sortBy: string[], sortDirection: ("asc" | "desc")[]) => {
     if (sortBy.length === 0) return orders;
-    
+
     return [...orders].sort((a, b) => {
       for (let i = 0; i < sortBy.length; i++) {
         const column = sortBy[i];
         const direction = sortDirection[i];
-        
-        let aValue = column.split('.').reduce((obj, key) => obj?.[key], a);
-        let bValue = column.split('.').reduce((obj, key) => obj?.[key], b);
-        
-        // Convertir a string para comparación
-        aValue = aValue?.toString() || '';
-        bValue = bValue?.toString() || '';
-        
-        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+
+        let aValue = column.split(".").reduce((obj, key) => obj?.[key], a);
+        let bValue = column.split(".").reduce((obj, key) => obj?.[key], b);
+
+        aValue = aValue?.toString() || "";
+        bValue = bValue?.toString() || "";
+
+        if (aValue < bValue) return direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return direction === "asc" ? 1 : -1;
       }
       return 0;
     });
   };
 
+  // Datos combinados y paginación local para "ALL"
+  const allCombined = [...regularOrders, ...oneOffOrders];
+  const allSorted = sortOrdersLocally(allCombined, localSortBy, localSortDirection);
+  const totalAll = allSorted.length;
+  const startIndexAll = (pageAll - 1) * MAX_ALL_ROWS;
+  const pagedAll = allSorted.slice(startIndexAll, startIndexAll + MAX_ALL_ROWS);
+
   // Unifica los pedidos según el filtro
   const orders = (() => {
     if (filterType === "ORDER") return regularOrders;
     if (filterType === "ONE_OFF") return oneOffOrders;
-    
-    // Para "ALL", aplicar ordenamiento local
-    const allOrders = [...regularOrders, ...oneOffOrders];
-    return sortOrdersLocally(allOrders, localSortBy, localSortDirection);
+    return pagedAll; // "ALL" con paginación local
   })();
 
   // Unifica paginación y totales según el filtro
-  const page = filterType === "ORDER" ? pageRegular : filterType === "ONE_OFF" ? pageOneOff : 1;
-  const setPage = filterType === "ORDER" ? setPageRegular : filterType === "ONE_OFF" ? setPageOneOff : () => {};
-  const totalPages = filterType === "ORDER" ? totalPagesRegular : filterType === "ONE_OFF" ? totalPagesOneOff : 1;
-  const total = filterType === "ORDER" ? totalRegular : filterType === "ONE_OFF" ? totalOneOff : orders.length;
-
+  const page =
+    filterType === "ORDER" ? pageRegular : filterType === "ONE_OFF" ? pageOneOff : pageAll;
+  const setPage =
+    filterType === "ORDER" ? setPageRegular : filterType === "ONE_OFF" ? setPageOneOff : setPageAll;
+  const totalPages =
+    filterType === "ORDER"
+      ? totalPagesRegular
+      : filterType === "ONE_OFF"
+      ? totalPagesOneOff
+      : Math.max(1, Math.ceil(totalAll / MAX_ALL_ROWS));
+  const total =
+    filterType === "ORDER" ? totalRegular : filterType === "ONE_OFF" ? totalOneOff : totalAll;
 
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [regularOrders, oneOffOrders]);
+
+  useEffect(() => {
+    setPaymentMethods([
+      { label: "Efectivo", value: 1 },
+      { label: "Transferencia", value: 2 },
+      { label: "Mercado Pago", value: 3 },
+    ]);
+  }, []);
 
   const handleDeleteClick = (id: number) => {
     const order = orders.find((o: any) => o.order_id === id || o.purchase_id === id);
@@ -143,29 +183,58 @@ const OrdersPage: React.FC = () => {
     }
   };
 
+  const handleConfirmDelivered = async () => {
+    try {
+      if (!orderToView) return;
+      if (orderToView.order_type === "HYBRID" && orderToView.order_id) {
+        await updateOrder(orderToView.order_id, { status: "DELIVERED" } as any);
+      } else if (orderToView.order_type === "ONE_OFF" && orderToView.purchase_id) {
+        await updateOrderOneOff(orderToView.purchase_id, { status: "DELIVERED" } as any);
+      }
+      showSnackbar("Pedido actualizado a ENTREGADO.", "success");
+      setShowActionConfirm(false);
+    } catch (err: any) {
+      showSnackbar(err?.message || "Error al actualizar el estado del pedido", "error");
+    }
+  };
+
   const handleViewClick = async (order: any) => {
     setOrderToView(order);
     setShowViewModal(true);
 
     try {
-      if(order.order_id){
+      if (order.order_id) {
         const products = await productsOfOrder(order.order_id);
         setOrderProducts(products);
       }
-      if(order.purchase_id){
+      if (order.purchase_id) {
         const products = await productsOfOrderOneOff(order.purchase_id);
         setOrderProducts(products);
-      } 
-
+      }
     } catch (error) {
       console.error("Error al obtener productos de la orden:", error);
     }
   };
 
   const handleEditClick = (order: any) => {
-    // Aquí puedes abrir el modal de edición o navegar a la edición
-    // Por ejemplo:
-    // navigate(`/pedidos/editar/${order.order_id || order.purchase_id}`);
+    setEditingOrder(order);
+    setShowEditPanel(true);
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditPanel(false);
+    setEditingOrder(null);
+  };
+
+  const handleOrderUpdated = async (msg?: string) => {
+    if (editingOrder?.order_type === "HYBRID") {
+      await fetchRegularOrders();
+    } else {
+      await fetchOneOffOrders();
+    }
+    if (msg) showSnackbar(msg, "success");
+    setShowEditPanel(false);
+    setEditingOrder(null);
   };
 
   const handleFilterChange = (name: string, value: any) => {
@@ -189,18 +258,16 @@ const OrdersPage: React.FC = () => {
   };
 
   const getLastWordAfterDot = (field: string): string => {
-    if (field.includes('.')) {
-      return field.split('.').pop() || field;
+    if (field.includes(".")) {
+      return field.split(".").pop() || field;
     }
     return field;
   };
 
   const handleSort = (column: string) => {
-    // Extraer solo la última palabra después del punto para comparación
     const processedColumn = getLastWordAfterDot(column);
 
     if (filterType === "ALL") {
-      // Manejar ordenamiento local para "ALL"
       const idx = localSortBy.indexOf(processedColumn);
       if (idx === -1) {
         setLocalSortBy([...localSortBy, processedColumn]);
@@ -213,6 +280,7 @@ const OrdersPage: React.FC = () => {
         setLocalSortBy(localSortBy.filter((_, i) => i !== idx));
         setLocalSortDirection(localSortDirection.filter((_, i) => i !== idx));
       }
+      setPageAll(1); // reset de página en ALL al reordenar
       return;
     }
 
@@ -253,56 +321,107 @@ const OrdersPage: React.FC = () => {
 
   const titlePage = "orders";
 
+  // Rango mostrado para el paginador
+  const start =
+    filterType === "ALL"
+      ? totalAll === 0
+        ? 0
+        : startIndexAll + 1
+      : orders.length
+      ? (page - 1) * (orders.length || 1) + 1
+      : 0;
+
+  const end =
+    filterType === "ALL"
+      ? Math.min(startIndexAll + orders.length, totalAll)
+      : orders.length
+      ? (page - 1) * (orders.length || 1) + orders.length
+      : 0;
+
+  const isHybridEditing = editingOrder ? ("order_id" in editingOrder) : false;
+
   return (
-    <div className={`table-scroll page-container ${titlePage}-page-container`}>
+    <div className={`table-scroll page-container ${titlePage + "-page-container"}`}>
       {/* Panel de la tabla */}
-      <div className={`page-content ${titlePage}-page-content`}>
+      <div
+        className={`page-content ${titlePage + "-page-content"}
+          ${showEditPanel ? "-translate-x-full" : "translate-x-0"}
+        `}
+      >
         <div>
-          <h1 className={`page-title ${titlePage}-page-title`}>Pedidos</h1>
+          <h1 className={`page-title ${titlePage + "-page-title"}`}>Pedidos</h1>
         </div>
-        <div className={`page-header ${titlePage}-page-header`}>
-          <div className={`page-header-div-1 ${titlePage}-page-header-div-1`}>
+        <div className={`page-header ${titlePage + "-page-header"}`}>
+          <div className={`page-header-div-1 ${titlePage + "-page-header-div-1"}`}>
             <SearchBar
               ref={searchInputRef}
-              value={filterType === "ORDER" ? searchRegular : filterType === "ONE_OFF" ? searchOneOff : ""}
-              onChange={filterType === "ORDER" ? setSearchRegular : filterType === "ONE_OFF" ? setSearchOneOff : () => {}}
+              value={
+                filterType === "ALL"
+                  ? searchAll                          // NUEVO
+                  : filterType === "ORDER"
+                  ? searchRegular
+                  : searchOneOff
+              }
+              onChange={
+                filterType === "ALL"
+                  ? (v) => {                           // NUEVO: actualiza ambas búsquedas
+                      setSearchAll(v);
+                      setSearchRegular(v);
+                      setSearchOneOff(v);
+                      setPageAll(1);                   // reset paginación local
+                      setPageRegular(1);               // reset backend regular
+                      setPageOneOff(1);                // reset backend one-off
+                    }
+                  : filterType === "ORDER"
+                  ? setSearchRegular
+                  : setSearchOneOff
+              }
               placeholder="Buscar pedidos..."
               class={titlePage}
             />
           </div>
-          <div className={`page-header-div-2 ${titlePage}-page-header-div-2`}>
+          <div className={`page-header-div-2 ${titlePage + "-page-header-div-2"}`}>
             <button
               onClick={() => setShowFilters(true)}
-              className={`page-filter-button ${titlePage}-page-filter-button`}
+              className={`page-filter-button ${titlePage + "-page-filter-button"}`}
             >
               <img
                 src="/assets/icons/filter-icon.svg"
                 alt="Filtros"
-                className={`page-filter-button-icon ${titlePage}-page-filter-button-icon`}
+                className={`page-filter-button-icon ${titlePage + "-page-filter-button-icon"}`}
                 style={{ display: "inline-block" }}
               />
               Filtros
             </button>
             <button
               onClick={() => navigate("/pedidos/nuevo-pedido")}
-              className={`page-new-button ${titlePage}-page-new-button`}
+              className={`page-new-button ${titlePage + "-page-new-button"}`}
             >
               <img
                 src="/assets/icons/huge-icon.svg"
                 alt="Nuevo pedido"
-                className={`page-new-button-icon ${titlePage}-page-new-button-icon`}
+                className={`page-new-button-icon ${titlePage + "-page-new-button-icon"}`}
                 style={{ display: "inline-block" }}
               />
               Nuevo Pedido
             </button>
             <select
               value={filterType}
-              onChange={e => setFilterType(e.target.value as any)}
+              onChange={(e) => {
+                const newType = e.target.value as any;
+                setFilterType(newType);
+                setSearchRegular("");
+                setSearchOneOff("");
+                setSearchAll("");        // NUEVO: limpiar búsqueda ALL
+                setPageAll(1);           // NUEVO
+              }}
               className={`page-type-filter ${titlePage}-page-type-filter`}
             >
               {(orderFiltersConfig[0]?.options ?? [])
-                .filter(opt => opt && (typeof opt.value === "string" || typeof opt.value === "number"))
-                .map(opt => (
+                .filter(
+                  (opt) => opt && (typeof opt.value === "string" || typeof opt.value === "number")
+                )
+                .map((opt) => (
                   <option key={String(opt.value)} value={String(opt.value)}>
                     {opt.label}
                   </option>
@@ -310,43 +429,149 @@ const OrdersPage: React.FC = () => {
             </select>
           </div>
         </div>
+
         <OrdersTable
+          key={`orders-${filterType}-${page}`}
           orders={orders}
           onEdit={handleEditClick}
-          onDelete={order => handleDeleteClick(getOrderRowId(order))}
+          onDelete={canDelete ? (order) => handleDeleteClick(getOrderRowId(order)) : undefined}
           className={titlePage}
           columns={orderTableColumns}
-          sortBy={filterType === "ALL" ? localSortBy : (filterType === "ORDER" ? sortByRegular : sortByOneOff)}
-          sortDirection={filterType === "ALL" ? localSortDirection : (filterType === "ORDER" ? sortDirectionRegular : sortDirectionOneOff)}
+          sortBy={
+            filterType === "ALL"
+              ? localSortBy
+              : filterType === "ORDER"
+              ? sortByRegular
+              : sortByOneOff
+          }
+          sortDirection={
+            filterType === "ALL"
+              ? localSortDirection
+              : filterType === "ORDER"
+              ? sortDirectionRegular
+              : sortDirectionOneOff
+          }
           onSort={handleSort}
           onView={handleViewClick}
+          onPayment={(order) => {
+            setOrderToPay(order);
+            setShowPaymentModal(true);
+          }}
+          paymentVisible={(row) => {
+            const total = parseFloat(String((row as any).total_amount ?? "0"));
+            return !isNaN(total) && total !== 0;
+          }}
         />
+
         <PaginationControls
           page={page}
           totalPages={totalPages}
           onPageChange={setPage}
-          start={(page - 1) * (orders.length || 1) + (orders.length > 0 ? 1 : 0)}
-          end={(page - 1) * (orders.length || 1) + orders.length}
+          start={start}
+          end={end}
           total={total}
           label="pedidos"
           className={titlePage + "-page-pagination"}
         />
       </div>
 
+      {/* Panel formulario edición */}
+      <div
+        className={`form-container ${titlePage + "-form-container"}
+          ${showEditPanel ? "translate-x-0" : "translate-x-full"}
+        `}
+      >
+        <div className={`form-wrapper ${titlePage + "-form-wrapper"}`}>
+          <div className={`form-header ${titlePage + "-form-header"}`}>
+            <button
+              onClick={handleCancelEdit}
+              className={`form-close-button ${titlePage + "-form-close-button"}`}
+            >
+              <img
+                src="/assets/icons/back.svg"
+                alt="Volver"
+                className={`form-icon-cancel ${titlePage + "-form-icon-cancel"}`}
+              />
+            </button>
+            <h2 className={`form-title ${titlePage + "-form-title"}`}>Editar Pedido</h2>
+          </div>
+
+          {editingOrder && (isHybridEditing as boolean) && (
+            <OrderForm
+              isEditing
+              orderToEdit={editingOrder}
+              onCancel={handleCancelEdit}
+              class={titlePage}
+              onSubmit={async (data: any) => {
+                try {
+                  if (!updateOrder) return false;
+                  await updateOrder(editingOrder.order_id, data);
+                  return true;
+                } catch {
+                  return false;
+                }
+              }}
+              refreshOrders={async () => {
+                await fetchRegularOrders();
+              }}
+              onSuccess={(msg: string) => handleOrderUpdated(msg || "Pedido actualizado correctamente.")}
+            />
+          )}
+
+          {editingOrder && !(isHybridEditing as boolean) && (
+            <OrderOneOffForm
+              isEditing
+              orderToEdit={editingOrder}
+              onCancel={handleCancelEdit}
+              class={titlePage}
+              onSubmit={async (data: any) => {
+                try {
+                  if (!updateOrderOneOff) return false;
+                  await updateOrderOneOff(editingOrder.purchase_id, data);
+                  return true;
+                } catch {
+                  return false;
+                }
+              }}
+              refreshOrders={async () => {
+                await fetchOneOffOrders();
+              }}
+              onSuccess={(msg: string) => handleOrderUpdated(msg || "Pedido actualizado correctamente.")}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Modal de Vista */}
       <Modal
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
           setOrderToView(null);
-          setOrderProducts([]); 
+          setOrderProducts([]);
         }}
         title="Detalles del Pedido"
         class={titlePage}
         config={orderModalConfig}
         data={orderToView}
-        itemsForList={orderProducts} 
-        itemsConfig={orderProductsConfig} 
+        itemsForList={orderProducts}
+        itemsConfig={orderProductsConfig}
         itemsTitle="Productos del Pedido"
+        buttonAction={
+          orderToView && orderToView.status !== "DELIVERED"
+            ? {
+                label: "Marcar como Entregado",
+                onClick: () => setShowActionConfirm(true),
+              }
+            : undefined
+        }
+      />
+      {/* Confirmación de acción */}
+      <ModalActionConfirm
+        isOpen={showActionConfirm}
+        onClose={() => setShowActionConfirm(false)}
+        onConfirm={handleConfirmDelivered}
+        content="marcar este pedido como ENTREGADO"
       />
 
       {/* Modal de Eliminar */}
@@ -356,6 +581,16 @@ const OrdersPage: React.FC = () => {
         onDelete={handleConfirmDelete}
         content="pedido"
         genere="M"
+      />
+
+      <ModalOrderPayment
+        isOpen={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setOrderToPay(null);
+        }}
+        order={orderToPay}
+        paymentMethods={paymentMethods}
       />
 
       {/* Drawer de filtros */}
@@ -369,9 +604,14 @@ const OrdersPage: React.FC = () => {
         onClear={handleClearFilters}
       />
 
-      {/* Loading/Error */}
-      {(isLoadingRegular || isLoadingOneOff) && <div className="p-4">Cargando...</div>}
-      {(errorRegular || errorOneOff) && <div className="text-red-500 p-4">{errorRegular || errorOneOff}</div>}
+      {(isLoadingRegular || isLoadingOneOff) && (
+        <div className="p-4 container-loading">
+          <SpinnerLoading />
+        </div>
+      )}
+      {(errorRegular || errorOneOff) && (
+        <div className="text-red-500 p-4">{errorRegular || errorOneOff}</div>
+      )}
     </div>
   );
 };

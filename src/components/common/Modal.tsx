@@ -22,6 +22,7 @@ interface ModalProps {
   itemsForList?: any[];
   itemsConfig?: { header: string; accessor: string; render?: (item: any) => React.ReactNode }[]; // Configuración de los campos
   itemsTitle?: string; // Título para los productos en comodato
+  buttonAction?: { label: string; onClick: () => void; className?: string };
 }
 
 function getNestedValue(obj: any, path: string) {
@@ -39,6 +40,7 @@ export const Modal: React.FC<ModalProps> = ({
   itemsForList,
   itemsConfig,
   itemsTitle,
+  buttonAction
 }) => {
   if (!isOpen) return null;
 
@@ -58,7 +60,7 @@ export const Modal: React.FC<ModalProps> = ({
           </button>
         </div>
         {config && data ? (
-          <div className={`modal-content ${classModal ? classModal+"-modal-content" : ""}`}>
+          <div className={`modal-view-content ${classModal ? classModal+"-modal-view-content" : ""}`}>
             {config.map((item) => (
               <div key={item.accessor} className={item.className ? `${classModal ? classModal+"-" : ""}${item.className}` : ""}>
                 {item.label && (
@@ -87,13 +89,27 @@ export const Modal: React.FC<ModalProps> = ({
         {itemsForList && itemsForList.length > 0 && itemsConfig && (
           <div className="modal-items-list-container">
             {itemsTitle && <h3>{itemsTitle}</h3>}
-            <ListItem
-              items={itemsForList}
-              columns={itemsConfig}
-              getKey={(item) => item.product_id}
-            />
+            <div className={`table-scroll`}>
+              <ListItem
+                items={itemsForList}
+                columns={itemsConfig}
+                getKey={(item) => item.product_id}
+              />
+            </div>
           </div>
-        )}
+          )}
+          {/* Acción opcional */}
+          {buttonAction && (
+            <div className={`modal-actions ${classModal ? classModal+"-modal-actions" : ""}`}>
+              <button
+                type="button"
+                onClick={buttonAction.onClick}
+                className={`modal-action-button ${classModal ? classModal+"-modal-action-button" : ""} ${buttonAction.className ?? ""}`}
+              >
+                {buttonAction.label}
+              </button>
+            </div>
+          )}
       </div>
     </div>,
     document.body

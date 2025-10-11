@@ -26,13 +26,14 @@ const getInitialValues = (
   if (isEditing && zoneToEdit && zoneToEdit.locality) {
     const locality = zoneToEdit.locality;
     const province = locality.province;
-    const country = province.country;
+    const country = province?.country;
+
     return {
       name: zoneToEdit.name,
       code: zoneToEdit.code,
       localityId: locality.locality_id,
-      provinceId: province.province_id,
-      countryId: country.country_id,
+      provinceId: province?.province_id,
+      countryId: country?.country_id,
     };
   }
   return {

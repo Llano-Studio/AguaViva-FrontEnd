@@ -15,6 +15,8 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
 import useLocations from "../../hooks/useLocations"; // Importar el hook de ubicaciones
+import ModalLocalities from "../../components/zones/ModalLocalities";
+import SpinnerLoading from '../../components/common/SpinnerLoading';
 
 
 const ZonesPage: React.FC = () => {
@@ -47,6 +49,7 @@ const ZonesPage: React.FC = () => {
   const [zoneToDelete, setZoneToDelete] = useState<Zone | null>(null);
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [showLocalitiesModal, setShowLocalitiesModal] = useState(false);
 
   const { showSnackbar } = useSnackbar();
 
@@ -159,7 +162,7 @@ const ZonesPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading/></div>;
   }
 
   const start = (page - 1) * (zones.length || 1) + (zones.length > 0 ? 1 : 0);
@@ -189,6 +192,12 @@ const ZonesPage: React.FC = () => {
             />
           </div>
           <div className={`page-header-div-2 ${titlePage+"-page-header-div-2"}`}>
+            <button
+              onClick={() => setShowLocalitiesModal(true)}
+              className={`page-action-button ${titlePage}-page-action-button`}
+            >
+              Localidades
+            </button>
             <button
               onClick={() => setShowFilters(true)}
               className={`page-filter-button ${titlePage+"-page-filter-button"}`}
@@ -289,6 +298,11 @@ const ZonesPage: React.FC = () => {
         onDelete={handleConfirmDelete}
         content="zona"
         genere="F"
+      />
+
+      <ModalLocalities
+        isOpen={showLocalitiesModal}
+        onClose={() => setShowLocalitiesModal(false)}
       />
 
       {/* Drawer de filtros */}

@@ -1,21 +1,25 @@
-import { useState, useEffect, useCallback } from "react";
-import { Client, CreateClientDTO, LoanedProduct } from "../interfaces/Client";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Client, CreateClientDTO, LoanedProduct, ChangeSubscriptionPlanDTO, CancelSubscriptionDTO } from "../interfaces/Client";
 import { ClientService } from "../services/ClientService";
 import { ProductService } from "../services/ProductService";
 import { cleanFilters } from "../utils/filterUtils";
+import { Comodato, CreateComodatoDTO, UpdateComodatoDTO } from "../interfaces/Comodato";
 
 export const useClients = () => {
-  const clientService = new ClientService();
-  const productService = new ProductService();
+  // Mantener instancias estables para evitar recrear funciones (corta loops)
+  const clientServiceRef = useRef(new ClientService());
+  const productServiceRef = useRef(new ProductService());
+
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [loanedProducts, setLoanedProducts] = useState<LoanedProduct[]>([]);
+  const [comodatos, setComodatos] = useState<Comodato[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Paginación, filtros y ordenamiento múltiple
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
@@ -39,26 +43,21 @@ export const useClients = () => {
     ) => {
       try {
         setIsLoading(true);
-        
-        // Limpiar filtros antes de enviar
         const cleanedFilters = cleanFilters(filtersParam);
-        
         const params: any = {
           page: pageParam,
           limit: limitParam,
           search: searchParam,
           sortBy: sortByParam,
-          ...cleanedFilters, // Usar filtros limpiados
+          ...cleanedFilters,
         };
-
-        const response = await clientService.getClients(params);
-        
+        const response = await clientServiceRef.current.getClients(params);
         if (response?.data) {
           setClients(response.data);
-          setTotal(response.meta.total);           
-          setTotalPages(response.meta.totalPages || 1); 
-          setPage(response.meta.page || 1);       
-          setLimit(response.meta.limit || 10);    
+          setTotal(response.meta.total);
+          setTotalPages(response.meta.totalPages || 1);
+          setPage(response.meta.page || 1);
+          setLimit(response.meta.limit || 15);
           return true;
         }
         return false;
@@ -76,15 +75,19 @@ export const useClients = () => {
     fetchClients();
   }, [page, limit, search, filters, sortBy, sortDirection, fetchClients]);
 
-  const createClient = async (clientData: CreateClientDTO) => {
+  // Modificado: devuelve el objeto creado (incluye person_id) o null
+  const createClient = async (clientData: CreateClientDTO): Promise<any | null> => {
     try {
       setIsLoading(true);
-      const newClient = await clientService.createClient(clientData);
+      const res = await clientServiceRef.current.createClient(clientData);
+      // Normalizar a objeto (soporta AxiosResponse o objeto plano)
+      const created = (res as any)?.data ?? res ?? null;
+      // Refrescar listado, pero devolver el creado para usar su person_id
       await fetchClients(page, limit, search, filters, getSortParams());
-      return true;
+      return created;
     } catch (err: any) {
       setError(err?.message || "Error al crear cliente");
-      throw err;
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -93,13 +96,13 @@ export const useClients = () => {
   const updateClient = async (id: number, clientData: Partial<CreateClientDTO>) => {
     try {
       setIsLoading(true);
-      const updatedClient = await clientService.updateClient(id, clientData);
+      const updatedClient = await clientServiceRef.current.updateClient(id, clientData);
       if (updatedClient) {
         await fetchClients(page, limit, search, filters, getSortParams());
         setSelectedClient(null);
-        return true;
+        return updatedClient;
       }
-      return false;
+      return null;
     } catch (err: any) {
       setError(err?.message || "Error al actualizar cliente");
       throw err;
@@ -111,7 +114,7 @@ export const useClients = () => {
   const deleteClient = async (id: number) => {
     try {
       setIsLoading(true);
-      await clientService.deleteClient(id);
+      await clientServiceRef.current.deleteClient(id);
       await fetchClients(page, limit, search, filters, getSortParams());
       setSelectedClient(null);
       return true;
@@ -124,22 +127,19 @@ export const useClients = () => {
   };
 
   // Obtener productos en comodato y enriquecerlos con detalles del producto
-  const fetchLoanedProducts = async (clientId: number) => {
+  const fetchLoanedProducts = useCallback(async (clientId: number) => {
     try {
       setIsLoading(true);
-      const products = await clientService.getLoanedProducts(clientId);
-
-      // Enriquecer productos con detalles (como imagen)
+      const products = await clientServiceRef.current.getLoanedProducts(clientId);
       const enrichedProducts = await Promise.all(
         products.map(async (product) => {
-          const productDetails = await productService.getProductById(product.product_id);
+          const productDetails = await productServiceRef.current.getProductById(product.product_id);
           return {
             ...product,
-            image: productDetails?.image_url || null, // Agregar imagen si está disponible
+            image: productDetails?.image_url || null,
           };
         })
       );
-
       setLoanedProducts(enrichedProducts);
       return enrichedProducts;
     } catch (err: any) {
@@ -148,13 +148,13 @@ export const useClients = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Cancelar suscripción
-  const cancelSubscription = async (personId: number, subscriptionId: number) => {
+  const cancelSubscription = useCallback(async (personId: number, subscriptionId: number, payload: CancelSubscriptionDTO) => {
     try {
       setIsLoading(true);
-      const updatedClient = await clientService.cancelSubscription(personId, subscriptionId);
+      const updatedClient = await clientServiceRef.current.cancelSubscription(personId, subscriptionId, payload);
       await fetchClients(page, limit, search, filters, getSortParams());
       return updatedClient;
     } catch (err: any) {
@@ -163,7 +163,132 @@ export const useClients = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchClients, page, limit, search, filters]);
+
+  // Cambiar plan de suscripción
+  const changeSubscriptionPlan = useCallback(async (personId: number, payload: ChangeSubscriptionPlanDTO) => {
+    try {
+      setIsLoading(true);
+      const updatedClient = await clientServiceRef.current.changeSubscriptionPlan(personId, payload);
+      await fetchClients(page, limit, search, filters, getSortParams());
+      return updatedClient;
+    } catch (err: any) {
+      setError(err?.message || "Error al cambiar el plan de suscripción");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchClients, page, limit, search, filters]);
+
+  // Comodatos: crear (acepta FormData para soportar imágenes)
+  const createComodato = useCallback(async (personId: number, payload: FormData | CreateComodatoDTO) => {
+    try {
+      setIsLoading(true);
+
+      let body: FormData;
+      if (payload instanceof FormData) {
+        body = payload;
+      } else {
+        body = new FormData();
+        Object.entries(payload || {}).forEach(([key, value]) => {
+          if (value === undefined || value === null) return;
+          if (value instanceof Blob) {
+            body.set(key, value);
+          } else if (Array.isArray(value)) {
+            value.forEach((item, idx) => {
+              if (item instanceof Blob) body.append(`${key}[${idx}]`, item);
+              else body.append(`${key}[${idx}]`, String(item));
+            });
+          } else {
+            body.set(key, String(value));
+          }
+        });
+      }
+
+      // algunos backends piden person_id también en el body
+      body.set("person_id", String(personId));
+
+      const created = await clientServiceRef.current.createComodato(personId, body);
+      return created;
+    } catch (err: any) {
+      setError(err?.message || "Error al crear comodato");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Comodatos: listar por persona
+  const fetchPersonComodatos = useCallback(async (personId: number) => {
+    try {
+      setIsLoading(true);
+      const list = await clientServiceRef.current.getPersonComodatos(personId);
+      setComodatos(list);
+      return list;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener comodatos del cliente");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Comodatos: listar todos
+  const fetchAllComodatos = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const list = await clientServiceRef.current.getAllComodatos();
+      setComodatos(list);
+      return list;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener comodatos");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Comodatos: obtener por id
+  const fetchComodatoById = useCallback(async (personId: number, comodatoId: number) => {
+    try {
+      setIsLoading(true);
+      const c = await clientServiceRef.current.getComodatoById(personId, comodatoId);
+      return c;
+    } catch (err: any) {
+      setError(err?.message || "Error al obtener el comodato");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Comodatos: actualizar
+  const updateComodato = useCallback(async (personId: number, comodatoId: number, payload: FormData | UpdateComodatoDTO) => {
+    try {
+      setIsLoading(true);
+      const updated = await clientServiceRef.current.updateComodato(personId, comodatoId, payload as any);
+      return updated;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar el comodato");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Comodatos: eliminar
+  const deleteComodato = useCallback(async (personId: number, comodatoId: number) => {
+    try {
+      setIsLoading(true);
+      const res = await clientServiceRef.current.deleteComodato(personId, comodatoId);
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar el comodato");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return {
     clients,
@@ -173,10 +298,21 @@ export const useClients = () => {
     error,
     deleteClient,
     updateClient,
-    createClient,
+    createClient, // ahora devuelve el objeto creado (con person_id)
     fetchLoanedProducts,
     loanedProducts,
     cancelSubscription,
+    // Nuevos (suscripción y comodatos)
+    changeSubscriptionPlan,
+    comodatos,
+    setComodatos,
+    createComodato,
+    fetchPersonComodatos,
+    fetchAllComodatos,
+    fetchComodatoById,
+    updateComodato,
+    deleteComodato,
+    // Paginación/filtros
     refreshClients: () => fetchClients(page, limit, search, filters, getSortParams()),
     page,
     setPage,

@@ -4,7 +4,11 @@ import { renderStatusOrderLabel } from "../../utils/statusOrderLabels";
 import { renderTypeOrderLabel } from "../../utils/typeOrderLabels";
 
 export const orderModalConfig = sortByOrder([
-  { label: "ID", accessor: "id", order: 1 },
+  { label: "Pedido ID", accessor: "id", order: 1, 
+    render: (value: string, row: any) => {
+      return row.order_id || row.purchase_id || "";
+    }
+  },
   { label: "Cliente", accessor: "customer.name", order: 2 },
   { 
     label: "Dirección", 
@@ -76,3 +80,4 @@ export const orderProductsConfig = [
     render: (item: any) => item.subtotal || "-"
   },
 ];
+

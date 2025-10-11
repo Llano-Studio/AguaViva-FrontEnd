@@ -14,6 +14,7 @@ import ModalDeleteConfirm from "../../components/common/ModalDeleteConfirm";
 import { useSnackbar } from "../../context/SnackbarContext";
 import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
+import SpinnerLoading from '../../components/common/SpinnerLoading';
 
 const UsersPage: React.FC = () => {
   const { 
@@ -131,7 +132,7 @@ const UsersPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading /></div>;
   }
 
   // Calcular el rango mostrado

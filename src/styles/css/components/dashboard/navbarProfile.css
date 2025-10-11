@@ -23,11 +23,21 @@
     justify-content: space-between;
 }
 
+.navbar-datos-profile-container-1{
+    max-width: 78%;
+}
+
 .navbar-name{
     text-transform: capitalize;
     color: #FFFFFF;
     font-size: 14px;
     font-weight: 600;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .navbar-role{
@@ -35,6 +45,13 @@
     color: #FFFFFF;
     font-size: 10px;
     font-weight: 400;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    
 }
 
 .navbar-profile-dropdown {

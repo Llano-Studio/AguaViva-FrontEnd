@@ -14,6 +14,9 @@ import { OrderOneOffArticlesSection } from "./OrderOneOffArticlesSection";
 import { ItemFormOrder } from "../common/ItemFormOrder";
 import { orderOneOffNotesFields } from "../../config/orders/orderFieldsConfig";
 import { calculatePriceTotalOrder } from "../../utils/calculatePriceTotalOrder";
+import { usePriceLists } from "../../hooks/usePriceLists";
+import useProducts from "../../hooks/useProducts";
+
 
 interface OrderOneOffFormProps {
   onSubmit: (orderData: CreateOrderOneOffDTO) => Promise<boolean>;
@@ -33,9 +36,9 @@ const getInitialValues = (
     return {
       customer: {
         name: orderToEdit.person?.name || "",
-        phone: "",
+        phone: orderToEdit.person?.phone || "",
         alias: "",
-        address: "",
+        address: orderToEdit.person?.address || "",
         taxId: "",
         localityId: orderToEdit.locality?.locality_id || 0,
         zoneId: orderToEdit.zone?.zone_id || 0,
@@ -44,13 +47,15 @@ const getInitialValues = (
       items: orderToEdit.products.map((prod) => ({
         product_id: prod.product_id,
         quantity: prod.quantity,
-        price_list_id: prod.price_list.price_list_id,
+        price_list_id: prod.price_list_id,
+        
       })),
       sale_channel_id: orderToEdit.sale_channel.sale_channel_id,
       requires_delivery: orderToEdit.requires_delivery,
       delivery_address: "",
       locality_id: orderToEdit.locality.locality_id,
       zone_id: orderToEdit.zone.zone_id,
+      zone_name: orderToEdit.zone.name,
       purchase_date: orderToEdit.purchase_date ? new Date(orderToEdit.purchase_date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
       scheduled_delivery_date: orderToEdit.scheduled_delivery_date ? new Date(orderToEdit.scheduled_delivery_date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
       delivery_time: orderToEdit.delivery_time,
@@ -120,18 +125,83 @@ const OrderOneOffForm: React.FC<OrderOneOffFormProps> = ({
     defaultValues: initialValues,
   });
 
+  const { fetchPriceListById } = usePriceLists();
+  const { fetchProductById } = useProducts();
+
   const [articles, setArticles] = useState<OrderOneOffItemInputForm[]>(orderToEdit?.products?.map((oi: any) => ({
     product_id: oi.product_id,
     product_name: oi.description || "",
     quantity: oi.quantity,
-    price_list_id: oi.price_list?.price_list_id || 0,
+    price_list_id: oi.price_list_id || 1,
     price_list_name: oi.price_list?.name || "",
     notes: oi.notes || "",
-    price_unit: oi.price_list?.unit_price || "0",
-    price_total_item: (Number(oi.price_list?.unit_price || 0) * Number(oi.quantity)).toString(),
+    price_unit: oi.unit_price || "0",
+    price_total_item: oi.subtotal,
     image_url: oi.image_url || "",
     is_returnable: oi.is_returnable || false,
   })) ?? []);
+
+
+  useEffect(() => {
+    const loadPriceListNames = async () => {
+      if (!isEditing || !orderToEdit || articles.length === 0) return;
+
+      // Verificar si aún faltan nombres
+      const needFetch = articles.some(a => a.price_list_id && !a.price_list_name);
+      if (!needFetch) return;
+
+      // Evitar llamadas duplicadas: agrupar por id
+      const ids = Array.from(
+        new Set(
+          articles
+            .filter(a => a.price_list_id && !a.price_list_name)
+            .map(a => a.price_list_id)
+        )
+      );
+
+      const idToName = new Map<number, string>();
+      await Promise.all(
+        ids.map(async id => {
+          const pl = await fetchPriceListById(id);
+            idToName.set(id, pl?.name || "");
+        })
+      );
+
+      setArticles(prev =>
+        prev.map(a =>
+          a.price_list_id && !a.price_list_name
+            ? { ...a, price_list_name: idToName.get(a.price_list_id) || "" }
+            : a
+        )
+      );
+    };
+    loadPriceListNames();
+  }, [isEditing, orderToEdit, articles, fetchPriceListById]);
+
+
+  useEffect(() => {
+    const loadImages = async () => {
+      if (!isEditing || !orderToEdit) return;
+      const missing = articles.filter(a => !a.image_url);
+      if (missing.length === 0) return;
+
+      const updates = await Promise.all(
+        missing.map(async a => {
+          const p = await fetchProductById(a.product_id);
+          return { id: a.product_id, image_url: p?.image_url || "" };
+        })
+      );
+
+      setArticles(prev =>
+        prev.map(a => {
+          const found = updates.find(u => u.id === a.product_id);
+            return found ? { ...a, image_url: found.image_url } : a;
+        })
+      );
+    };
+    loadImages();
+  }, [isEditing, orderToEdit, articles, fetchProductById]);
+
 
   // Calcular total del pedido
   useEffect(() => {

@@ -4,8 +4,17 @@ import {
   PasswordRecoveryResponse,
   ResetPasswordResponse,
   UpdatePasswordResponse,
+  EmailConfirmationResponse,
 } from "../interfaces/IAuthService";
 import { httpAdapter } from "./httpAdapter";
+import type { User } from "../interfaces/User";
+
+export type {
+  PasswordRecoveryResponse,
+  ResetPasswordResponse,
+  UpdatePasswordResponse,
+  EmailConfirmationResponse,
+};
 
 export class AuthService implements IAuthService {
   private apiUrl: string;
@@ -26,6 +35,17 @@ export class AuthService implements IAuthService {
       return null;
     } catch (error) {
       console.error("Error al intentar iniciar sesión en el servicio:", error);
+      return null;
+    }
+  }
+
+  async getProfile(): Promise<User | null> {
+    try {
+      // GET /api/auth/profile (la base '/api' la maneja httpAdapter/baseURL)
+      const response = await httpAdapter.get<User>("/auth/profile");
+      return response ?? null;
+    } catch (error) {
+      console.error("Error al obtener el perfil:", error);
       return null;
     }
   }
@@ -73,6 +93,23 @@ export class AuthService implements IAuthService {
       return response;
     } catch (error: any) {
       throw new Error(error?.message || "Error al actualizar la contraseña.");
+    }
+  }
+
+  async confirmEmail(token: string): Promise<EmailConfirmationResponse> {
+    try {
+      const response = await httpAdapter.post<EmailConfirmationResponse>(
+        { token },
+        "/auth/confirm-email"
+      );
+      return { success: !!response.success, message: response.message };
+    } catch (error: any) {
+      console.error("Error al confirmar el email:", error);
+      let errorMessage = "Error de red o servidor";
+      if (error.message === "Failed to fetch") {
+        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
+      }
+      return { success: false, message: errorMessage };
     }
   }
 }

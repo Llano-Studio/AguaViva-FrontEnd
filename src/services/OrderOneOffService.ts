@@ -4,6 +4,7 @@ import {
   OrdersOneOffResponse,
   CreateOrderOneOffDTO,
 } from "../interfaces/OrderOneOff";
+import { CreateOrderPaymentDTO, OrderPaymentResponse } from "../interfaces/Order";
 
 export class OrderOneOffService {
   private ordersUrl = "/one-off-purchases/one-off";
@@ -48,4 +49,14 @@ export class OrderOneOffService {
       throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar orden One-Off");
     }
   }
+
+  async processOneOffOrderPayment(orderId: number, payload: CreateOrderPaymentDTO): Promise<OrderPaymentResponse> {
+    try {
+      const url = `/orders/one-off/${orderId}/payments`;
+      return await httpAdapter.post<OrderPaymentResponse>(payload, url);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al procesar pago de la orden One-Off");
+    }
+  }
+
 }

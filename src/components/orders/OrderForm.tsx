@@ -13,6 +13,8 @@ import { OrderArticlesSection } from "./OrderArticlesSection";
 import { calculatePriceTotalOrder } from "../../utils/calculatePriceTotalOrder";
 import useOrders from "../../hooks/useOrders";
 import "../../styles/css/components/orders/orderForm.css";
+import { usePriceLists } from "../../hooks/usePriceLists";
+import useProducts from "../../hooks/useProducts";
 
 interface OrderFormProps {
   onSubmit: (orderData: CreateOrderDTO) => Promise<boolean>;
@@ -47,7 +49,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const [selectedProductName, setSelectedProductName] = useState<string>("");
   const [selectedPriceListName, setSelectedPriceListName] = useState<string>("");
 
-  const { fetchDeliveryPreferences } = useOrders();
+  const { fetchDeliveryPreferences, updateOrder } = useOrders();
   const [deliveryPreferences, setDeliveryPreferences] = useState<any>(null);
 
   // Hook de lógica
@@ -56,30 +58,34 @@ const OrderForm: React.FC<OrderFormProps> = ({
     fetchZoneMobiles,
   } = useFormOrder();
 
+  const { fetchPriceListById } = usePriceLists();
+  const { fetchProductById } = useProducts();
+  
   // Artículos agregados
   const [articles, setArticles] = useState<OrderItemInputForm[]>(orderToEdit?.order_item?.map((oi: any) => ({
     product_id: oi.product_id,
-    product_name: oi.product_name || "",
+    product_name: oi.product.description || "",
     quantity: oi.quantity,
-    price_list_id: oi.price_list_id,
-    price_list_name: oi.price_list_name,
+    price_list_id: oi.price_list_id ?? 1,
+        price_list_name: oi.price_list_name || "",
     notes: oi.notes,
     abono_id: oi.abono_id || "",
     abono_name: oi.abono_name || "",
-    price_unit: oi.price_unit || "0",
-    price_total_item: oi.price_total_item || "0",
+    price_unit: oi.unit_price || "0",
+    price_total_item: oi.subtotal || "0",
     image_url: oi.image_url || "",
     is_returnable: oi.is_returnable || false,
   })) ?? []);
 
   const form = useForm<CreateOrderFormDTO>({
     defaultValues: {
-      customer_id: orderToEdit?.customer_id ?? 0,
+      customer_id: orderToEdit?.customer_id,
       contract_id: orderToEdit?.contract_id,
+      customer_name: orderToEdit?.customer.name || "",
       subscription_id: orderToEdit?.subscription_id,
       sale_channel_id: orderToEdit?.sale_channel_id ?? 1,
-      order_date: orderToEdit?.order_date ?? new Date().toISOString().slice(0, 10),
-      scheduled_delivery_date: orderToEdit?.scheduled_delivery_date ?? new Date().toISOString().slice(0, 10),
+      order_date: orderToEdit?.order_date ? new Date(orderToEdit.order_date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+      scheduled_delivery_date: orderToEdit?.scheduled_delivery_date ? new Date(orderToEdit.scheduled_delivery_date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
       delivery_time: orderToEdit?.delivery_time ?? "",
       delivery_time_start: orderToEdit?.delivery_time?.split("-")[0] ?? "",
       delivery_time_end: orderToEdit?.delivery_time?.split("-")[1] ?? "",
@@ -89,13 +95,82 @@ const OrderForm: React.FC<OrderFormProps> = ({
       status: orderToEdit?.status ?? "PENDING",
       notes: orderToEdit?.notes ?? "",
       items: [],
-      customer_address: "",
+      customer_address: orderToEdit?.delivery_address,
+      phone: orderToEdit?.customer.phone || "",
       customer_id_display: undefined,
-      zone_name: "",
-      zone_id: "",
+      zone_name: orderToEdit?.customer.zone.name || "",
+      zone_id: orderToEdit?.customer.zone.zone_id || "",
       mobile: [],
     }
   });
+
+
+  useEffect(() => {
+    const loadPriceListNames = async () => {
+      if (!isEditing || !orderToEdit || articles.length === 0) return;
+
+      // Narrow explícito porque price_list_id es opcional en el tipo
+      const needFetch = articles.some(
+        a => typeof a.price_list_id === "number" && a.price_list_id > 0 && !a.price_list_name
+      );
+      if (!needFetch) return;
+
+      const ids = Array.from(
+        new Set(
+          articles
+            .filter(a => typeof a.price_list_id === "number" && a.price_list_id > 0 && !a.price_list_name)
+            .map(a => a.price_list_id as number)
+        )
+      );
+
+      const idToName = new Map<number, string>();
+
+      await Promise.all(
+        ids.map(async (id) => {
+          if (id > 0) {
+            const pl = await fetchPriceListById(id);
+            idToName.set(id, pl?.name || "");
+          }
+        })
+      );
+
+      setArticles(prev =>
+        prev.map(a =>
+          typeof a.price_list_id === "number" &&
+          a.price_list_id > 0 &&
+          !a.price_list_name
+            ? { ...a, price_list_name: idToName.get(a.price_list_id) || "" }
+            : a
+        )
+      );
+    };
+    loadPriceListNames();
+  }, [isEditing, orderToEdit, articles, fetchPriceListById]);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      if (!isEditing || !orderToEdit) return;
+      const missing = articles.filter(a => !a.image_url);
+      if (missing.length === 0) return;
+
+      const updates = await Promise.all(
+        missing.map(async a => {
+          const p = await fetchProductById(a.product_id);
+            return { id: a.product_id, image_url: p?.image_url || "" };
+        })
+      );
+
+      setArticles(prev =>
+        prev.map(a => {
+          const found = updates.find(u => u.id === a.product_id);
+          return found ? { ...a, image_url: found.image_url } : a;
+        })
+      );
+    };
+    loadImages();
+  }, [isEditing, orderToEdit, articles, fetchProductById]);
+
+
 
   useEffect(() => {
     const total = calculatePriceTotalOrder(articles);
@@ -158,7 +233,17 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const handleConfirmUpdate = async () => {
     if (!pendingValues || !orderToEdit) return;
     try {
-      // Aquí deberías llamar a tu función updateOrder si la tienes
+      // Llamamos al servicio de actualización
+      const ok = await updateOrder(orderToEdit.order_id, pendingValues);
+      if (ok) {
+        if (refreshOrders) await refreshOrders();
+        showSnackbar("Pedido actualizado correctamente.", "success");
+        if (onSuccess) onSuccess("Pedido actualizado correctamente.");
+        onCancel();
+      } else {
+        showSnackbar("No se pudo actualizar el pedido.", "error");
+        setError("No se pudo actualizar el pedido.");
+      }
     } catch (err: any) {
       setError(err?.message || "Error al actualizar el pedido");
       showSnackbar(err?.message || "Error al actualizar el pedido", "error");
@@ -224,8 +309,12 @@ const OrderForm: React.FC<OrderFormProps> = ({
       {error && <div className="error-message">{error}</div>}
 
       <div className="order-actions">
-        <button type="submit" className="order-actions-button-submit">Agregar pedido</button>
-        <button type="button" onClick={onCancel} className="order-actions-button-cancel">Cancelar</button>
+        <button type="submit" className="order-actions-button-submit">
+          {isEditing ? "Actualizar pedido" : "Agregar pedido"}
+        </button>
+        <button type="button" onClick={onCancel} className="order-actions-button-cancel">
+          Cancelar
+        </button>
       </div>
 
       <ModalUpdateConfirm

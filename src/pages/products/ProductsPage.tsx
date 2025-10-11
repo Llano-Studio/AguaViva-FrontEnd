@@ -16,6 +16,10 @@ import '../../styles/css/pages/pages.css';
 import PaginationControls from "../../components/common/PaginationControls";
 import ModalCategories from "../../components/products/ModalCategories";
 import useProductCategories from "../../hooks/useProductCategories";
+import SpinnerLoading from '../../components/common/SpinnerLoading';
+import { useAuth } from '../../hooks/useAuth';
+import { UserRole } from '../../interfaces/User';
+import { buildIsRole } from '../../utils/buildIsRole';
 
 
 const ProductsPage: React.FC = () => {
@@ -51,6 +55,10 @@ const ProductsPage: React.FC = () => {
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const { showSnackbar } = useSnackbar();
   const { categories, fetchCategories } = useProductCategories();
+  const { currentUser } = useAuth();
+  const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
+  const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
+
 
   useEffect(() => {
     if (searchInputRef.current) {
@@ -153,7 +161,7 @@ const ProductsPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Cargando...</div>;
+    return <div className="p-4 container-loading"><SpinnerLoading/></div>;
   }
 
   const start = (page - 1) * (products.length || 1) + (products.length > 0 ? 1 : 0);
@@ -223,7 +231,7 @@ const ProductsPage: React.FC = () => {
             setShowViewModal(true);
           }}
           onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
+          onDelete={canDelete ? handleDeleteClick : undefined}
           class={titlePage}
           sortBy={sortBy}
           sortDirection={sortDirection}

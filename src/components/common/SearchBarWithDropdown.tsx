@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import '../../styles/css/components/common/searchBarWithDropdown.css';
+import SpinnerLoading from "./SpinnerLoading";
 
 interface SearchBarWithDropdownProps<T> {
   value: string;
@@ -184,7 +185,7 @@ function SearchBarWithDropdownInner<T>(
       </button>
       {dropdownOpen && (
         <div className="search-bar-dropdown-menu">
-          {loading && <div className="search-bar-dropdown-loading">Cargando...</div>}
+          {loading && <div className="p-4 container-loading"><SpinnerLoading/></div>}
           {!loading && options.length === 0 && <div className="search-bar-dropdown-empty">Sin resultados</div>}
           {!loading && options.map((option, idx) => (
             <div

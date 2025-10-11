@@ -1,4 +1,4 @@
-import {PriceList, CreatePriceListDTO, UpdatePriceListDTO, PriceListsResponse, PriceListHistoryResponse,} from "../interfaces/PriceList";
+import {PriceList, CreatePriceListDTO, UpdatePriceListDTO, PriceListsResponse, PriceListHistoryListResponse, UndoPriceUpdateRequest, UndoPriceUpdateResponse,} from "../interfaces/PriceList";
 import { httpAdapter } from "./httpAdapter";
 
 export class PriceListService {
@@ -57,20 +57,29 @@ export class PriceListService {
     }
   }
 
-  // Extra: historial de cambios de una lista
-  async getPriceListHistory(id: number, params?: { page?: number; limit?: number }): Promise<PriceListHistoryResponse | null> {
+  // Nuevo: deshacer actualizaciones de precios
+  async undoPriceUpdate(payload: UndoPriceUpdateRequest): Promise<UndoPriceUpdateResponse> {
     try {
-      return await httpAdapter.get<PriceListHistoryResponse>(`${this.priceListUrl}/${id}/history`, { params });
+      return await httpAdapter.post<UndoPriceUpdateResponse>(payload, `${this.priceListUrl}/undo-price-update`);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al deshacer actualizaciones de precios");
+    }
+  }
+
+  // Historial de cambios de una lista (con meta)
+  async getPriceListHistory(id: number, params?: { page?: number; limit?: number }): Promise<PriceListHistoryListResponse | null> {
+    try {
+      return await httpAdapter.get<PriceListHistoryListResponse>(`${this.priceListUrl}/${id}/history`, { params });
     } catch (error) {
       console.error("Error en getPriceListHistory:", error);
       return null;
     }
   }
 
-  // Extra: historial de cambios de un item
-  async getPriceListItemHistory(itemId: number, params?: { page?: number; limit?: number }): Promise<PriceListHistoryResponse | null> {
+  // Historial de cambios de un item (con meta)
+  async getPriceListItemHistory(itemId: number, params?: { page?: number; limit?: number }): Promise<PriceListHistoryListResponse | null> {
     try {
-      return await httpAdapter.get<PriceListHistoryResponse>(`${this.priceListUrl}/item/${itemId}/history`, { params });
+      return await httpAdapter.get<PriceListHistoryListResponse>(`${this.priceListUrl}/item/${itemId}/history`, { params });
     } catch (error) {
       console.error("Error en getPriceListItemHistory:", error);
       return null;

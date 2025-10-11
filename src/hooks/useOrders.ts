@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Order, CreateOrderDTO, AvailableCredit } from "../interfaces/Order";
+import { Order, CreateOrderDTO, AvailableCredit, CreateOrderPaymentDTO, OrderPaymentResponse  } from "../interfaces/Order";
 import { OrderService } from "../services/OrderService";
 import { ClientSubscriptionService } from "../services/ClientSubscriptionService";
 import { ProductService } from "../services/ProductService";
@@ -14,7 +14,7 @@ export const useOrders = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
@@ -31,7 +31,7 @@ export const useOrders = () => {
   const fetchOrders = useCallback(
     async (
       pageParam = page,
-      limitParam = limit,
+      limitParam = limit ,
       searchParam = search,
       filtersParam = filters,
       sortByParam = getSortParams()
@@ -50,7 +50,7 @@ export const useOrders = () => {
           setTotal(response.meta.total);
           setTotalPages(response.meta.totalPages || 1);
           setPage(response.meta.page || 1);
-          setLimit(response.meta.limit || 10);
+          setLimit(response.meta.limit || 15);
           return true;
         }
         return false;
@@ -174,6 +174,21 @@ export const useOrders = () => {
     }
   };
 
+  const processOrderPayment = async (orderId: number, payment: CreateOrderPaymentDTO): Promise<OrderPaymentResponse> => {
+    try {
+      setIsLoading(true);
+      const res = await orderService.processOrderPayment(orderId, payment);
+      // refrescar listado manteniendo paginación/filtros actuales
+      await fetchOrders(page, limit, search, filters, getSortParams());
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al procesar pago de la orden");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     orders,
     selectedOrder,
@@ -188,6 +203,7 @@ export const useOrders = () => {
     refreshOrders: () => fetchOrders(page, limit, search, filters, getSortParams()),
     fetchDeliveryPreferences,
     getAvailableCreditsBySubscription,
+    processOrderPayment, 
     page,
     setPage,
     limit,

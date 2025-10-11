@@ -1,3 +1,5 @@
+import type { OrderType } from "./Order";
+
 export interface RouteSheetDetail {
   route_sheet_detail_id: number;
   route_sheet_id: number;
@@ -53,21 +55,38 @@ export interface CreateRouteSheetDTO {
   delivery_date: string;
   route_notes?: string;
   details: Array<{
-    order_id: number;
+    order_type: OrderType;
+    // HYBRID
+    order_id?: number;
+    cycle_payment_id?: number;
+    // ONE_OFF
+    one_off_purchase_id?: number;
+    one_off_purchase_header_id?: number;
+
     delivery_status: string;
     delivery_time: string;
     comments?: string;
   }>;
 }
 
-export interface UpdateRouteSheetDTO extends CreateRouteSheetDTO {
-  route_sheet_id?: number;
+export interface UpdateRouteSheetDTO {
+  driver_id: number;
+  vehicle_id: number;
+  delivery_date: string;
+  route_notes?: string;
   details: Array<{
-    order_id: number;
+    route_sheet_detail_id?: number;
+    order_type: OrderType;
+    // HYBRID
+    order_id?: number;
+    cycle_payment_id?: number;
+    // ONE_OFF
+    one_off_purchase_id?: number;
+    one_off_purchase_header_id?: number;
+
     delivery_status: string;
     delivery_time: string;
     comments?: string;
-    route_sheet_detail_id?: number;
   }>;
 }
 
