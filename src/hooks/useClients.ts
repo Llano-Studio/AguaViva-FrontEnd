@@ -75,15 +75,19 @@ export const useClients = () => {
     fetchClients();
   }, [page, limit, search, filters, sortBy, sortDirection, fetchClients]);
 
-  const createClient = async (clientData: CreateClientDTO) => {
+  // Modificado: devuelve el objeto creado (incluye person_id) o null
+  const createClient = async (clientData: CreateClientDTO): Promise<any | null> => {
     try {
       setIsLoading(true);
-      await clientServiceRef.current.createClient(clientData);
+      const res = await clientServiceRef.current.createClient(clientData);
+      // Normalizar a objeto (soporta AxiosResponse o objeto plano)
+      const created = (res as any)?.data ?? res ?? null;
+      // Refrescar listado, pero devolver el creado para usar su person_id
       await fetchClients(page, limit, search, filters, getSortParams());
-      return true;
+      return created;
     } catch (err: any) {
       setError(err?.message || "Error al crear cliente");
-      throw err;
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -96,9 +100,9 @@ export const useClients = () => {
       if (updatedClient) {
         await fetchClients(page, limit, search, filters, getSortParams());
         setSelectedClient(null);
-        return true;
+        return updatedClient;
       }
-      return false;
+      return null;
     } catch (err: any) {
       setError(err?.message || "Error al actualizar cliente");
       throw err;
@@ -127,7 +131,7 @@ export const useClients = () => {
     try {
       setIsLoading(true);
       const products = await clientServiceRef.current.getLoanedProducts(clientId);
-    const enrichedProducts = await Promise.all(
+      const enrichedProducts = await Promise.all(
         products.map(async (product) => {
           const productDetails = await productServiceRef.current.getProductById(product.product_id);
           return {
@@ -294,7 +298,7 @@ export const useClients = () => {
     error,
     deleteClient,
     updateClient,
-    createClient,
+    createClient, // ahora devuelve el objeto creado (con person_id)
     fetchLoanedProducts,
     loanedProducts,
     cancelSubscription,
