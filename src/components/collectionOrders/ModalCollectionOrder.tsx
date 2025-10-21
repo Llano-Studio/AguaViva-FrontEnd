@@ -13,6 +13,7 @@ interface ModalCollectionOrderProps {
   onClose: () => void;
   customerId: number;
   className?: string;
+  onChange?: () => void;
 }
 
 const ModalCollectionOrder: React.FC<ModalCollectionOrderProps> = ({
@@ -20,6 +21,7 @@ const ModalCollectionOrder: React.FC<ModalCollectionOrderProps> = ({
   onClose,
   customerId,
   className,
+  onChange,
 }) => {
   const base = className ? `${className}-` : "collectionOrder";
   const {
@@ -103,6 +105,7 @@ const ModalCollectionOrder: React.FC<ModalCollectionOrderProps> = ({
       setSnackAutoClose(true);
       setSnackOpen(true);
       resetState();
+      if (typeof onChange === "function") onChange();
     } catch (e: any) {
       // Mostrar snackbar de error
       setSnackMsg(e?.message || "Error al generar pedido de cobranza");

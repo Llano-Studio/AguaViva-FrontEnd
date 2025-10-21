@@ -17,6 +17,7 @@ interface ModalclientPaymentCycleProps {
   isOpen: boolean;
   onClose: () => void;
   cycle: any | null; // SubscriptionCyclesRow
+  onChange?: () => void; 
 }
 
 type RegisterPaymentFormValues = {
@@ -31,6 +32,7 @@ const ModalclientPaymentCycle: React.FC<ModalclientPaymentCycleProps> = ({
   isOpen,
   onClose,
   cycle,
+  onChange,
 }) => {
   const { fetchCyclePayments, registerPayment, isLoading, error } = usePaymentSubscription();
   const [payments, setPayments] = useState<any[]>([]);
@@ -144,6 +146,7 @@ const ModalclientPaymentCycle: React.FC<ModalclientPaymentCycleProps> = ({
         reference: "",
         notes: "",
       });
+      if (typeof onChange === "function") onChange();
     } catch (e) {
       console.error("Error al registrar pago:", e);
     } finally {

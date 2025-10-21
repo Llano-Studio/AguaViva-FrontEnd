@@ -20,8 +20,10 @@ interface ModalProps {
   config?: ModalConfigItem[];
   data?: any;
   itemsForList?: any[];
-  itemsConfig?: { header: string; accessor: string; render?: (item: any) => React.ReactNode }[]; // Configuración de los campos
+  itemsConfig?: { header: string | React.ReactNode; accessor: string; render?: (item: any) => React.ReactNode }[];
   itemsTitle?: string; // Título para los productos en comodato
+  loadingItems?: boolean;
+  getItemKey?: (item: any) => string | number;
   buttonAction?: { label: string; onClick: () => void; className?: string };
 }
 
@@ -40,8 +42,12 @@ export const Modal: React.FC<ModalProps> = ({
   itemsForList,
   itemsConfig,
   itemsTitle,
+  loadingItems,
+  getItemKey,
   buttonAction
 }) => {
+
+  console.log("items: ",itemsForList)
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
@@ -86,17 +92,21 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Renderizar Items */}
-        {itemsForList && itemsForList.length > 0 && itemsConfig && (
-          <div className="modal-items-list-container">
-            {itemsTitle && <h3>{itemsTitle}</h3>}
-            <div className={`table-scroll`}>
-              <ListItem
-                items={itemsForList}
-                columns={itemsConfig}
-                getKey={(item) => item.product_id}
-              />
+          {itemsForList && itemsConfig && (
+            <div className="modal-items-list-container">
+              {itemsTitle && <h3>{itemsTitle}</h3>}
+              <div className={`table-scroll`}>
+                {loadingItems ? (
+                  <div style={{ padding: 24, textAlign: "center" }}>Cargando productos...</div>
+                ) : (
+                  <ListItem
+                    items={itemsForList}
+                    columns={itemsConfig}
+                    getKey={getItemKey || ((item) => item.id || item.product_id)}
+                  />
+                )}
+              </div>
             </div>
-          </div>
           )}
           {/* Acción opcional */}
           {buttonAction && (

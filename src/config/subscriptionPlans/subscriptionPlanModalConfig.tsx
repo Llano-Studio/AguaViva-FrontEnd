@@ -54,19 +54,4 @@ export const subscriptionPlanModalConfig = sortByOrder([
     order: 8,
     render: (value: string) => formatDateForView(value)
   },
-  {
-    label: "Productos",
-    accessor: "products",
-    className: "modal-item-9",
-    order: 9,
-    render: (products: any[]) => (
-      <ul>
-        {Array.isArray(products) && products.map((p: any) => (
-          <li key={p.product_id}>
-            {p.product_description} (x{p.quantity})
-          </li>
-        ))}
-      </ul>
-    ),
-  },
 ]);

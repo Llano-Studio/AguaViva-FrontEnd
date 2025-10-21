@@ -33,6 +33,7 @@ export function ListItem<T>({
   onUndoAction, // NUEVO
   content
 }: ListItemProps<T>) {
+  console.log("ListItem items:", items);
   if (!items.length) return <div className="listItem-empty">No hay elementos para mostrar.</div>;
 
   const handleDeleteClick = (item: T) => onRemove?.(item);

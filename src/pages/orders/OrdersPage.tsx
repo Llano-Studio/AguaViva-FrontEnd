@@ -89,6 +89,20 @@ const OrdersPage: React.FC = () => {
   const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
   const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
   const [showActionConfirm, setShowActionConfirm] = useState(false);
+  const [reloadOrdersFlag, setReloadOrdersFlag] = useState(0);
+
+  const triggerReloadOrders = async () => {
+  setReloadOrdersFlag(f => f + 1);
+  if (filterType === "ORDER") {
+    await fetchRegularOrders();
+  } else if (filterType === "ONE_OFF") {
+    await fetchOneOffOrders();
+  } else {
+    // Si tienes ALL, refresca ambos
+    await fetchRegularOrders();
+    await fetchOneOffOrders();
+  }
+};
 
   // Paginación local para "ALL"
   const MAX_ALL_ROWS = 15;
@@ -431,7 +445,7 @@ const OrdersPage: React.FC = () => {
         </div>
 
         <OrdersTable
-          key={`orders-${filterType}-${page}`}
+          key={`orders-${filterType}-${page}-${reloadOrdersFlag}`}
           orders={orders}
           onEdit={handleEditClick}
           onDelete={canDelete ? (order) => handleDeleteClick(getOrderRowId(order)) : undefined}
@@ -591,6 +605,7 @@ const OrdersPage: React.FC = () => {
         }}
         order={orderToPay}
         paymentMethods={paymentMethods}
+        onChange={triggerReloadOrders}
       />
 
       {/* Drawer de filtros */}

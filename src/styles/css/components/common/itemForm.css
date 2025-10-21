@@ -149,10 +149,37 @@
   max-width: 100%;
 }
 
-.form-file{
+.form-file-container{
   max-width: 100%;
-  font-size: 14px;
+  max-height: 30px;
+  width: 100%;
+  height: 30px;
+  margin-top: 3px;
+  transition: .3s;
+  border-radius: 7px;
+  color: var(--text-color-1);
+  border: solid 1px var(--bg-color-2);
+  background: transparent;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  border-radius: 6px;
+  overflow: visible;
 }
+
+
+.form-file-container:hover {
+  border: solid 3px var(--bg-color-2);
+  opacity: 0.8;
+}
+
+.form-file{
+
+  font-size: 12px;
+
+}
+
 
 .form-error{
   font-size: 12px;

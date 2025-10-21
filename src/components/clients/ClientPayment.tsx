@@ -51,6 +51,9 @@ const ClientPayment: React.FC<ClientPaymentProps> = ({ clientId, onClose, classN
 
   const [showCollectionModal, setShowCollectionModal] = useState(false);
 
+  const [reloadFlag, setReloadFlag] = useState(0);
+  const triggerReload = () => setReloadFlag(f => f + 1);
+
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -110,7 +113,7 @@ const ClientPayment: React.FC<ClientPaymentProps> = ({ clientId, onClose, classN
     };
     load();
     return () => { cancelled = true; };
-  }, [clientId, fetchSubscriptionsByCustomer, fetchCyclePayments]);
+  }, [clientId, fetchSubscriptionsByCustomer, fetchCyclePayments, reloadFlag]);
 
 
   const handlePageChange = (subscriptionId: number, page: number) => {
@@ -200,6 +203,7 @@ const ClientPayment: React.FC<ClientPaymentProps> = ({ clientId, onClose, classN
         isOpen={showCycleModal}
         onClose={closeCycleModal}
         cycle={selectedCycle}
+        onChange={triggerReload}
       />
 
       {/* Modal de cobranza manual */}
@@ -207,6 +211,7 @@ const ClientPayment: React.FC<ClientPaymentProps> = ({ clientId, onClose, classN
         isOpen={showCollectionModal}
         onClose={() => setShowCollectionModal(false)}
         customerId={clientId}
+        onChange={triggerReload}
       />
     </div>
   );

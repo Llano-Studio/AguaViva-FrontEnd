@@ -21,7 +21,7 @@ const emptyUser: User & { password?: string } = {
   id: 0,
   name: "",
   email: "",
-  role: "USER",
+  role: "ADMINISTRATIVE",
   isActive: true,
   createdAt: "",
   updatedAt: "",
