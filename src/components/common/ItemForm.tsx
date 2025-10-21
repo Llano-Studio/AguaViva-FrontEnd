@@ -38,13 +38,25 @@ export function ItemForm<T extends FieldValues>({
   const formRef = useRef<HTMLFormElement>(null);
 
   // Para preview de imagen (opcional)
-  const filePreviews = fields
-    .filter(f => f.type === "file")
-    .reduce((acc, f) => {
-      const file = watch(f.name as any) as FileList | undefined;
-      acc[f.name as string] = file && file[0] ? URL.createObjectURL(file[0]) : null;
-      return acc;
-    }, {} as Record<string, string | null>);
+const filePreviews = fields
+  .filter(f => f.type === "file")
+  .reduce((acc, f) => {
+    const value = watch(f.name as any);
+    // Verifica que value es un FileList (por estructura)
+    if (
+      value &&
+      typeof value === "object" &&
+      typeof (value as FileList).item === "function" &&
+      value[0]
+    ) {
+      acc[f.name as string] = URL.createObjectURL(value[0]);
+    } else if (typeof value === "string" && value.startsWith("http")) {
+      acc[f.name as string] = value;
+    } else {
+      acc[f.name as string] = null;
+    }
+    return acc;
+  }, {} as Record<string, string | null>);
 
   const renderField = (field: Field<T>) => {
     const validationRules: any = {};
@@ -238,13 +250,14 @@ export function ItemForm<T extends FieldValues>({
               type="file"
               {...register(field.name as any, validationRules)}
               className={`form-file ${classForm ? classForm+"-form-file" : ""}`}
+              style={filePreviews[field.name as string] ? { fontSize: 0 } : {}}
             />
             {filePreviews[field.name as string] && (
               <img 
                 src={filePreviews[field.name as string] as string} 
                 alt="Preview" 
                 className="file-preview" 
-                style={{ maxWidth: '200px', marginTop: '10px' }}
+                style={{ maxWidth: '140px', marginTop: '10px', marginBottom: '10px' }}
               />
             )}
           </div>

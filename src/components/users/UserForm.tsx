@@ -51,6 +51,7 @@ const UserForm: React.FC<UserFormProps> = ({
     [isEditing, userToEdit]
   );
 
+
   const fields: Field<User & { password?: string }>[] = [
     ...userFields,
     ...(isEditing ? [] : [passwordField]),

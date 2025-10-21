@@ -61,7 +61,6 @@ const SubscriptionPlansPage: React.FC = () => {
   const canEdit = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;  
   const [productImages, setProductImages] = useState<Record<number, string>>({});
 
-  console.log("Selected Plan:", selectedPlan);
 
   const selectedProductsWithImages =
     selectedPlan?.products?.map(item => ({

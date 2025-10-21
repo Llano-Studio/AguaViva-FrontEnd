@@ -47,7 +47,6 @@ export const Modal: React.FC<ModalProps> = ({
   buttonAction
 }) => {
 
-  console.log("items: ",itemsForList)
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(

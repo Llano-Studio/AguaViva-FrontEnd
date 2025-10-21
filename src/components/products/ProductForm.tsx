@@ -56,7 +56,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           serial_number: productToEdit.serial_number,
           notes: productToEdit.notes,
           total_stock: productToEdit.total_stock,
-          productImage: null,
+          productImage: productToEdit.image_url,
         }
       : {
           category_id: 0,
@@ -70,6 +70,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           productImage: null,
         }
   ), [isEditing, productToEdit]);
+
+
+  console.log("Initial Values:", initialValues);
 
   // React Hook Form
   const form = useForm<CreateProductDTO>({
