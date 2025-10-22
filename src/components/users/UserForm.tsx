@@ -46,7 +46,7 @@ const UserForm: React.FC<UserFormProps> = ({
   const initialValues = useMemo(
     () =>
       isEditing && userToEdit
-        ? { ...userToEdit, password: "" }
+        ? { ...userToEdit, password: "", profileImage: userToEdit.profileImageUrl || "" }
         : emptyUser,
     [isEditing, userToEdit]
   );
