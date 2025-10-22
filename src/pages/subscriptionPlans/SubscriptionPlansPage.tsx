@@ -20,6 +20,8 @@ import SpinnerLoading from '../../components/common/SpinnerLoading';
 import { buildIsRole } from '../../utils/buildIsRole';
 import { UserRole } from '../../interfaces/User';
 import { useAuth } from '../../hooks/useAuth';
+import { subscriptionPlanProductListColumns } from '../../config/subscriptionPlans/subscriptionPlanProductListColumns';
+import { ProductService } from '../../services/ProductService';
 
 const SubscriptionPlansPage: React.FC = () => {
   const {
@@ -57,12 +59,41 @@ const SubscriptionPlansPage: React.FC = () => {
   const isRole = buildIsRole(currentUser?.role as UserRole | undefined);
   const canDelete = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;
   const canEdit = isRole.SUPERADMIN || isRole.BOSSADMINISTRATIVE;  
+  const [productImages, setProductImages] = useState<Record<number, string>>({});
+
+
+  const selectedProductsWithImages =
+    selectedPlan?.products?.map(item => ({
+      ...item,
+      image_url: productImages[item.product_id], // ahora sí tiene la imagen
+      product_description: item.product_description,
+    })) || [];
 
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [plans]);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      if (!showViewModal || !selectedPlan?.products) return;
+      const productService = new ProductService();
+      const images: Record<number, string> = {};
+      await Promise.all(
+        selectedPlan.products.map(async (item) => {
+          if (!images[item.product_id]) {
+            const product = await productService.getProductById(item.product_id);
+            if (product && product.image_url) {
+              images[item.product_id] = product.image_url;
+            }
+          }
+        })
+      );
+      setProductImages(images);
+    };
+    fetchImages();
+  }, [showViewModal, selectedPlan]);
 
   const handleDeleteClick = (id: number) => {
     const plan = plans.find(p => p.subscription_plan_id === id);
@@ -265,6 +296,10 @@ const SubscriptionPlansPage: React.FC = () => {
         class={titlePage}
         config={subscriptionPlanModalConfig}
         data={selectedPlan}
+        itemsForList={selectedProductsWithImages}
+        itemsConfig={subscriptionPlanProductListColumns}
+        getItemKey={item => item.product_id}
+        itemsTitle="Artículos del abono"
       />
 
       {/* Modal de Eliminar */}

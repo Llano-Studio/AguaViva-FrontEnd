@@ -21,7 +21,7 @@ const emptyUser: User & { password?: string } = {
   id: 0,
   name: "",
   email: "",
-  role: "USER",
+  role: "ADMINISTRATIVE",
   isActive: true,
   createdAt: "",
   updatedAt: "",
@@ -46,10 +46,11 @@ const UserForm: React.FC<UserFormProps> = ({
   const initialValues = useMemo(
     () =>
       isEditing && userToEdit
-        ? { ...userToEdit, password: "" }
+        ? { ...userToEdit, password: "", profileImage: userToEdit.profileImageUrl || "" }
         : emptyUser,
     [isEditing, userToEdit]
   );
+
 
   const fields: Field<User & { password?: string }>[] = [
     ...userFields,

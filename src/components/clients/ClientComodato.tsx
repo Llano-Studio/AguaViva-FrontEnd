@@ -12,9 +12,11 @@ import "../../styles/css/components/clients/clientComodato.css";
 interface ClientComodatoProps {
   clientId: number;
   isEditing: boolean;
+  reloadFlag?: number;
+  triggerReload?: () => void;
 }
 
-const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) => {
+const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing, reloadFlag, triggerReload }) => {
   const { showSnackbar } = useSnackbar();
   const {
     comodatos,
@@ -44,7 +46,7 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
         setLoading(false);
       }
     })();
-  }, [isEditing, clientId, fetchPersonComodatos]);
+  }, [isEditing, clientId, reloadFlag]);
 
   const handleOpenNew = () => {
     setEditingItem(null);
@@ -121,6 +123,7 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
       setShowModal(false);
       setEditingItem(null);
       await fetchPersonComodatos(clientId);
+      if (triggerReload) triggerReload();
     } catch (e: any) {
       const msg = e?.message || "Error al guardar el comodato";
       setErr(msg);
@@ -141,6 +144,7 @@ const ClientComodato: React.FC<ClientComodatoProps> = ({ clientId, isEditing }) 
       await deleteComodato(clientId, toDelete.comodato_id);
       await fetchPersonComodatos(clientId);
       showSnackbar("Comodato eliminado correctamente.", "success");
+      if (triggerReload) triggerReload();
     } catch (e: any) {
       showSnackbar(e?.message || "Error al eliminar el comodato", "error");
     } finally {

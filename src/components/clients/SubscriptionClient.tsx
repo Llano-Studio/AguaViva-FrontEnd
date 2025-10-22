@@ -21,9 +21,11 @@ import "../../styles/css/components/clients/subscriptionClient.css";
 interface SubscriptionClientProps {
   clientId: number;
   isEditing: boolean;
+  reloadFlag?: number;
+  triggerReload?: () => void;
 }
 
-const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEditing }) => {
+const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEditing, reloadFlag, triggerReload }) => {
   const [showModal, setShowModal] = useState(false);
   const [showViewSubscriptionModal, setShowViewSubscriptionModal] = useState(false);
   const [subscriptionToView, setSubscriptionToView] = useState<any>(null);
@@ -79,7 +81,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
     if (isEditing && clientId) {
       void refreshLists();
     }
-  }, [isEditing, clientId]);
+  }, [isEditing, clientId, reloadFlag]);
 
   const refreshLists = async () => {
     if (!clientId) return;
@@ -116,6 +118,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
       setShowModal(false);
       await refreshLists();
       showSnackbar("Suscripción creada correctamente.", "success");
+      if (triggerReload) triggerReload();
     } catch (err: any) {
       const msg = err?.message || "Error al agregar abono";
       setSubscriptionError(msg);
@@ -136,6 +139,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
       await deleteSubscription(subscriptionToDelete.subscription_id);
       await refreshLists();
       showSnackbar("Suscripción eliminada correctamente.", "success");
+      if (triggerReload) triggerReload();
     } catch (err: any) {
       showSnackbar(err?.message || "Error al eliminar la suscripción", "error");
     } finally {
@@ -166,6 +170,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
       setSubscriptionToEdit(null);
       await refreshLists();
       showSnackbar("Suscripción actualizada correctamente.", "success");
+      if (triggerReload) triggerReload();
     } catch (err: any) {
       const msg = err?.message || "Error al editar abono";
       setSubscriptionError(msg);

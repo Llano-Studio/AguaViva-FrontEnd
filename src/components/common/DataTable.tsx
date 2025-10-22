@@ -50,7 +50,7 @@ export function DataTable<T extends { id: number }>({
   semaphoreActive = false,
 }: DataTableProps<T>) {
   return (
-    <div className={`table-container ${classTable ? classTable+"-table-container" : ""}`} >
+    <div className={`table-scroll table-container ${classTable ? classTable+"-table-container" : ""}`} >
       <table className={`table ${classTable ? classTable+"-table" : ""}`}>
         <thead className={`table-thead ${classTable ? classTable+"-table-thead" : ""}`}>
           <tr>

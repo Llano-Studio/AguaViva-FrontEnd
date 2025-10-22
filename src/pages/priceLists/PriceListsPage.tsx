@@ -16,13 +16,17 @@ import PaginationControls from "../../components/common/PaginationControls";
 import { buildIsRole } from "../../utils/buildIsRole";
 import { useAuth } from "../../hooks/useAuth";
 import type { UserRole } from "../../interfaces/User";
-import "../../styles/css/pages/pages.css";
 import SpinnerLoading from "../../components/common/SpinnerLoading";
+import { usePriceListItems } from "../../hooks/usePriceListItem";
+import { priceListItemListColumns } from "../../config/priceLists/priceListItemListColumns";
+import "../../styles/css/pages/pages.css";
+import "../../styles/css/pages/priceLists/priceListsPage.css";
 
 const PriceListsPage: React.FC = () => {
   const {
     priceLists,
     selectedPriceList,
+    selectedPriceListItems,
     setSelectedPriceList,
     deletePriceList,
     isLoading,
@@ -40,6 +44,7 @@ const PriceListsPage: React.FC = () => {
     setSortBy,
     sortDirection,
     setSortDirection,
+    fetchPriceListById
   } = usePriceLists();
 
   const [showViewModal, setShowViewModal] = useState(false);
@@ -69,6 +74,20 @@ const PriceListsPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
+
+  const {
+    items: priceListItems,
+    fetchItems: fetchPriceListItems,
+    loading: loadingPriceListItems,
+  } = usePriceListItems(selectedPriceList?.price_list_id || 0);
+
+  useEffect(() => {
+    if (showViewModal && selectedPriceList?.price_list_id) {
+      fetchPriceListItems();
+    }
+  }, [showViewModal, selectedPriceList?.price_list_id]);
+
+
   const handleConfirmDelete = async () => {
     if (priceListToDelete) {
       try {
@@ -87,6 +106,12 @@ const PriceListsPage: React.FC = () => {
   const handleEditClick = (priceList: PriceList) => {
     setSelectedPriceList(priceList);
     setShowForm(true);
+  };
+
+  const handleViewClick = async (priceList: PriceList) => {
+    const fetched = await fetchPriceListById(priceList.price_list_id);
+    setSelectedPriceList(fetched);
+    setShowViewModal(true);
   };
 
   const handleCloseForm = () => {
@@ -198,10 +223,7 @@ const PriceListsPage: React.FC = () => {
         <DataTable
           data={priceLists.map(p => ({ ...p, id: p.price_list_id }))}
           columns={priceListColumns}
-          onView={(priceList) => {
-            setSelectedPriceList(priceList);
-            setShowViewModal(true);
-          }}
+          onView={handleViewClick}
           onEdit={canEdit ? handleEditClick : undefined}
           onDelete={canDelete ? handleDeleteClick : undefined}
           class={titlePage}
@@ -257,7 +279,12 @@ const PriceListsPage: React.FC = () => {
         class={titlePage}
         config={priceListModalConfig}
         data={selectedPriceList}
-      />
+        itemsForList={selectedPriceList?.price_list_item || []}
+        itemsConfig={priceListItemListColumns}
+        loadingItems={isLoading}
+        getItemKey={item => item.price_list_item_id}
+        itemsTitle="Productos de la Lista"
+      />  
 
       <ModalDeleteConfirm
         isOpen={showDeleteModal}

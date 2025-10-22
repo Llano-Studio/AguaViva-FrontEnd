@@ -8,7 +8,7 @@ export const priceListItemListColumns = sortByOrder([
     accessor: "product_with_image",
     order: 1,
     render: (item: PriceListItem) => (
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div  style={{ display: "flex", alignItems: "center", gap: 8 }}>
         {item.product?.image_url ? (
           <img
             src={item.product.image_url}

@@ -17,6 +17,7 @@ export interface CreateUserDTO {
   password: string;
   isActive: boolean;
   role: UserRole;
+  profileImage?: File;
 }
 
 export interface UsersResponse {

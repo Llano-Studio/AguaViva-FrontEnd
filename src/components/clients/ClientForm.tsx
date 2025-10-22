@@ -254,6 +254,8 @@ const ClientForm: React.FC<ClientFormProps> = ({
   const [plansOptions, setPlansOptions] = useState<{ label: string; value: number }[]>([]);
   const [subLoading, setSubLoading] = useState(false);
   const [subError, setSubError] = useState<string | null>(null);
+  const [reloadFlag, setReloadFlag] = useState(0);
+  const triggerReload = () => {setReloadFlag((f) => f + 1);};
 
   useEffect(() => {
     if (!isEditing) {
@@ -413,10 +415,10 @@ const ClientForm: React.FC<ClientFormProps> = ({
       )}
 
       {/* ItemForm: si es PLAN, ocultar botones internos y deshabilitar submit nativo */}
-      <div className={isPlan ? "hide-inner-form-actions" : undefined}>
+      <div className={isPlan && !isEditing ? "hide-inner-form-actions" : undefined}>
         <ItemForm<CreateClientDTO>
           {...form}
-          onSubmit={isPlan ? (() => {}) : handleSubmit}
+          onSubmit={isPlan && !isEditing ? (() => {}) : handleSubmit}
           onCancel={onCancel}
           fields={clientFields(countryOptions, provinceOptions, localityOptions, zoneOptions)}
           class={classForm}
@@ -431,8 +433,18 @@ const ClientForm: React.FC<ClientFormProps> = ({
       {/* Modo edición (sin cambios) */}
       {isEditing && clientToEdit && (
         <>
-          <SubscriptionClient clientId={clientToEdit.person_id} isEditing={isEditing} />
-          <ClientComodato clientId={clientToEdit.person_id} isEditing={isEditing} />
+          <SubscriptionClient
+            clientId={clientToEdit.person_id}
+            isEditing={isEditing}
+            reloadFlag={reloadFlag}
+            triggerReload={triggerReload}
+          />
+          <ClientComodato
+            clientId={clientToEdit.person_id}
+            isEditing={isEditing}
+            reloadFlag={reloadFlag}
+            triggerReload={triggerReload}
+          />
         </>
       )}
 

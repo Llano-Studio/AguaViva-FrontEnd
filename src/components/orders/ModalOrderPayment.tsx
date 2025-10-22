@@ -21,6 +21,7 @@ interface ModalOrderPaymentProps {
   onClose: () => void;
   order: any | null; // Order | OrderOneOff
   paymentMethods?: PaymentOption[]; // opciones del select de método de pago
+  onChange?: () => void; // NUEVO: para recargar OrdersTable
 }
 
 type OrderPaymentFormValues = {
@@ -41,6 +42,7 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
   onClose,
   order,
   paymentMethods = [],
+  onChange, // NUEVO
 }) => {
   const {
     processOrderPayment,
@@ -71,6 +73,7 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
   // Snackbar
   const [snackOpen, setSnackOpen] = useState(false);
   const [snackMsg, setSnackMsg] = useState("");
+
 
   // Valores iniciales de resumen
   const initialSummary = useMemo(() => {
@@ -137,7 +140,8 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
   const handleConfirmPayment = async () => {
     if (!pendingDTO || !order) return;
     try {
-      if (isHybrid) {
+      const type = String(order.order_type || "").toUpperCase();
+      if (type === "HYBRID") {
         await processOrderPayment(order.order_id, pendingDTO);
         const refreshed = await fetchHybridById(order.order_id);
         if (refreshed) {
@@ -148,7 +152,6 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
             remaining_amount: refreshed.remaining_amount,
             payment_status: refreshed.payment_status,
           });
-          // Reset con el nuevo saldo pendiente
           form.reset({
             amount: getNumeric(refreshed.remaining_amount, 0) as any,
             payment_method_id: pendingDTO.payment_method_id,
@@ -157,7 +160,7 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
             notes: "",
           });
         }
-      } else if (isOneOff) {
+      } else if (type === "ONE_OFF") {
         await processOneOffOrderPayment(order.purchase_id, pendingDTO);
         const refreshed = await fetchOneOffById(order.purchase_id);
         if (refreshed) {
@@ -176,14 +179,18 @@ const ModalOrderPayment: React.FC<ModalOrderPaymentProps> = ({
             notes: "",
           });
         }
+      } else {
+        setSnackMsg("Tipo de pedido desconocido para registrar el pago: " + type);
+        setSnackOpen(true);
+        return;
       }
 
-      // Snackbar de éxito
       setSnackMsg("Pago registrado correctamente");
       setSnackOpen(true);
+      if (typeof onChange === "function") onChange();
+
     } catch (e) {
       console.error("Error al registrar pago:", e);
-      // Snackbar de error
       setSnackMsg("Error al registrar pago");
       setSnackOpen(true);
     } finally {

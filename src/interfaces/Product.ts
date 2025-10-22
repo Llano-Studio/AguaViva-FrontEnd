@@ -26,7 +26,7 @@ export interface CreateProductDTO {
   serial_number: string;
   notes: string;
   total_stock: number;
-  productImage?: File | null;
+  productImage?: File | null | string;
 }
 
 export interface ProductsResponse {
