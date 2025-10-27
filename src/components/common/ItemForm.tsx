@@ -95,41 +95,85 @@ const filePreviews = fields
     switch (field.type) {
       case 'select': {
         const selectProps = selectFieldProps[field.name as string] || {};
-        const isNumberSelect = field.options && typeof field.options[0]?.value === "number";
+
+        const allOptions = (selectProps.options || field.options || []) as Array<{ label: string; value: any }>;
+        const isNumberSelect = allOptions.length > 0 && typeof allOptions[0]?.value === "number";
+
         const selectValidationRules = { ...validationRules };
         if (isNumberSelect) {
-          selectValidationRules.valueAsNumber = true;
-          if ('pattern' in selectValidationRules) {
-            delete selectValidationRules.pattern;
+          if ("pattern" in selectValidationRules) {
+            delete (selectValidationRules as any).pattern;
           }
         }
+
+        // DEFAULT: usar react-select salvo que se pida explícitamente nativo
+        const explicitFlag = selectProps.useReactSelect ?? (field as any).useReactSelect;
+        const useReactSelect = explicitFlag !== undefined ? Boolean(explicitFlag) : true; // <-- default true
+        const menuMaxHeight = selectProps.menuMaxHeight ?? (field as any).menuMaxHeight ?? 240;
+
+        if (useReactSelect) {
+          const watched = watch(field.name as any);
+          const controlledValue = selectProps.value !== undefined ? selectProps.value : watched;
+          const current = allOptions.find(o => o.value === controlledValue) ?? null;
+
+          return (
+            <Select
+              isDisabled={field.disabled}
+              options={allOptions}
+              value={current}
+              placeholder="Seleccionar..."
+              onChange={(opt: any) => {
+                const v = opt ? opt.value : "";
+                setValue(field.name as any, v as any, { shouldValidate: true, shouldDirty: true });
+                if (onFieldChange) onFieldChange(field.name as string, v);
+                if (selectProps.onChange) selectProps.onChange({ target: { value: v } });
+              }}
+              maxMenuHeight={menuMaxHeight}
+              classNamePrefix="item-form-react-select"
+              styles={{
+                menu: (base) => ({ ...base, zIndex: 9999 }),
+                menuList: (base) => ({
+                  ...base,
+                  maxHeight: menuMaxHeight,
+                  overflowY: "auto",
+                }),
+                control: (base) => ({ ...base, minHeight: "30px", fontSize: "12px" }),
+              }}
+            />
+          );
+        }
+
+        // <select> nativo (fallback solo si useReactSelect=false)
+        const watchedRaw = watch(field.name as any);
+        const resolveValue = () => {
+          const raw = selectProps.value !== undefined ? selectProps.value : watchedRaw;
+          if (isNumberSelect) {
+            if (raw === undefined || raw === null || raw === "" || Number.isNaN(raw as any)) {
+              return "";
+            }
+            return String(raw);
+          }
+          return raw ?? "";
+        };
 
         return (
           <select
             {...register(field.name as any, selectValidationRules)}
-            className={`form-select ${classForm ? classForm+"-form-select" : ""}`}
-            onChange={e => {
-              const value = isNumberSelect
-                ? (e.target.value === "" ? 0 : Number(e.target.value))
-                : e.target.value;
+            className={`form-select ${classForm ? classForm + "-form-select" : ""}`}
+            onChange={(e) => {
+              const raw = e.target.value;
+              const value = raw === "" ? "" : (isNumberSelect ? Number(raw) : raw);
               setValue(field.name as any, value as any, { shouldValidate: true, shouldDirty: true });
-              if (onFieldChange) {
-                onFieldChange(field.name as string, value);
-              }
-              if (selectProps.onChange) {
-                selectProps.onChange(e);
-              }
+              if (onFieldChange) onFieldChange(field.name as string, value);
+              if (selectProps.onChange) selectProps.onChange(e);
             }}
-            value={selectProps.value !== undefined ? selectProps.value : (watch(field.name as any) ?? (isNumberSelect ? 0 : ""))}
+            value={resolveValue()}
             disabled={field.disabled}
             {...selectProps}
           >
             <option value="">Seleccionar...</option>
-            {(selectProps.options || field.options || []).map((option: any) => (
-              <option 
-                key={option.value} 
-                value={option.value}
-              >
+            {allOptions.map((option: any) => (
+              <option key={String(option.value)} value={option.value}>
                 {option.label}
               </option>
             ))}
@@ -278,7 +322,7 @@ const filePreviews = fields
             isMulti
             options={options}
             value={currentValue}
-            classNamePrefix="react-select"
+            classNamePrefix="item-form-react-multi-select"
             onChange={selected => {
               const values = (selected as any[]).map(opt => opt.value);
               setValue(field.name as any, values as any, { shouldValidate: true, shouldDirty: true });

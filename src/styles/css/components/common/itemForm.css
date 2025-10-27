@@ -187,3 +187,68 @@
 .form-error{
   font-size: 12px;
 }
+
+
+
+/* Personalizar scrollbar del menú de react-select */
+.item-form-react-select__menu-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.item-form-react-select__menu-list::-webkit-scrollbar-track {
+  background: var(--bg-color-2);
+  border-radius: 3px;
+}
+
+.item-form-react-select__menu-list::-webkit-scrollbar-thumb {
+  background: var(--acent-color-1);
+  border-radius: 3px;
+}
+
+.item-form-react-select__menu-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color-3);
+}
+
+/* Para Firefox */
+.item-form-react-select__menu-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--acent-color-1) var(--bg-color-2);
+}
+
+.item-form-react-select__control{
+  height: 30px;
+  border-radius: 7px !important;
+}
+
+.item-form-react-select__indicator{
+  padding: 4px !important;
+}
+
+.item-form-react-select__menu,
+.item-form-react-multi-select__menu{
+  font-size: 12px;
+}
+
+.item-form-react-select__option--is-selected,
+.item-form-react-multi-select__option--is-selected{
+  background-color: var(--acent-color-1) !important;
+  color: var(--text-color-2) !important;
+}
+
+.css-b62m3t-container{
+  margin-top: 3px; 
+}
+
+.item-form-react-multi-select__indicator{
+  padding: 4px !important;
+}
+
+.item-form-react-multi-select__control{
+  min-height: 30px !important;
+  font-size: 12px !important;
+  border-radius: 7px !important;
+}
+
+.item-form-react-multi-select__placeholder{
+  font-size: 12!important;
+}
