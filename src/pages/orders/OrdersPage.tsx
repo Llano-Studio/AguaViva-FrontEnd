@@ -22,6 +22,8 @@ import SpinnerLoading from "../../components/common/SpinnerLoading";
 import { useAuth } from "../../hooks/useAuth";
 import { UserRole } from "../../interfaces/User";
 import { buildIsRole } from "../../utils/buildIsRole";
+import { getPaymentMethods } from "../../utils/paymentMethods";
+import type { PaymentMethodOption } from "../../interfaces/PaymentMethod";
 
 const OrdersPage: React.FC = () => {
   const {
@@ -82,7 +84,7 @@ const OrdersPage: React.FC = () => {
   const [showEditPanel, setShowEditPanel] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [orderToPay, setOrderToPay] = useState<any | null>(null);
-  const [paymentMethods, setPaymentMethods] = useState<{ label: string; value: number }[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodOption[]>([]);
   const [localSortBy, setLocalSortBy] = useState<string[]>([]);
   const [localSortDirection, setLocalSortDirection] = useState<("asc" | "desc")[]>([]);
   const { currentUser } = useAuth();
@@ -165,11 +167,7 @@ const OrdersPage: React.FC = () => {
   }, [regularOrders, oneOffOrders]);
 
   useEffect(() => {
-    setPaymentMethods([
-      { label: "Efectivo", value: 1 },
-      { label: "Transferencia", value: 2 },
-      { label: "Mercado Pago", value: 3 },
-    ]);
+    setPaymentMethods(getPaymentMethods());
   }, []);
 
   const handleDeleteClick = (id: number) => {

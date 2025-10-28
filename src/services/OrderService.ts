@@ -1,5 +1,6 @@
 import { httpAdapter } from "./httpAdapter";
 import { Order, OrdersResponse, CreateOrderDTO, AvailableCredit, CreateOrderPaymentDTO, OrderPaymentResponse } from "../interfaces/Order";
+import { UpdateOrderPaymentDTO, UpdateOrderPaymentResponse, DeleteOrderPaymentResponse } from "../interfaces/Order";
 
 export class OrderService {
   private ordersUrl = "/orders";
@@ -62,5 +63,23 @@ export class OrderService {
     } catch (error: any) {
       throw new Error(error?.message || error?.response?.data?.message || "Error al procesar pago de la orden");
     }
-  }  
+  }
+
+  async updateOrderPayment(transactionId: number, payload: UpdateOrderPaymentDTO): Promise<UpdateOrderPaymentResponse> {
+    try {
+      const url = `${this.ordersUrl}/payments/${transactionId}`;
+      return await httpAdapter.put<UpdateOrderPaymentResponse>(payload, url);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar pago de la orden");
+    }
+  }
+
+  async deleteOrderPayment(transactionId: number): Promise<DeleteOrderPaymentResponse> {
+    try {
+      const url = `${this.ordersUrl}/payments/${transactionId}`;
+      return await httpAdapter.delete<DeleteOrderPaymentResponse>(url);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar pago de la orden");
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Order, CreateOrderDTO, AvailableCredit, CreateOrderPaymentDTO, OrderPaymentResponse  } from "../interfaces/Order";
+import { Order, CreateOrderDTO, AvailableCredit, CreateOrderPaymentDTO, OrderPaymentResponse } from "../interfaces/Order";
+import { UpdateOrderPaymentDTO, UpdateOrderPaymentResponse, DeleteOrderPaymentResponse } from "../interfaces/Order";
 import { OrderService } from "../services/OrderService";
 import { ClientSubscriptionService } from "../services/ClientSubscriptionService";
 import { ProductService } from "../services/ProductService";
@@ -189,6 +190,36 @@ export const useOrders = () => {
     }
   };
 
+  const updateOrderPayment = async (transactionId: number, data: UpdateOrderPaymentDTO): Promise<UpdateOrderPaymentResponse> => {
+    try {
+      setIsLoading(true);
+      const res = await orderService.updateOrderPayment(transactionId, data);
+      // refrescar listado para reflejar cambios
+      await fetchOrders(page, limit, search, filters, getSortParams());
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al actualizar pago de la orden");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteOrderPayment = async (transactionId: number): Promise<DeleteOrderPaymentResponse> => {
+    try {
+      setIsLoading(true);
+      const res = await orderService.deleteOrderPayment(transactionId);
+      // refrescar listado para reflejar cambios
+      await fetchOrders(page, limit, search, filters, getSortParams());
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Error al eliminar pago de la orden");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     orders,
     selectedOrder,
@@ -203,7 +234,9 @@ export const useOrders = () => {
     refreshOrders: () => fetchOrders(page, limit, search, filters, getSortParams()),
     fetchDeliveryPreferences,
     getAvailableCreditsBySubscription,
-    processOrderPayment, 
+    processOrderPayment,
+    updateOrderPayment,
+    deleteOrderPayment,
     page,
     setPage,
     limit,
