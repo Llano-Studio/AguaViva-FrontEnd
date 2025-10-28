@@ -1,6 +1,14 @@
 import { httpAdapter } from "./httpAdapter";
-import { RegisterPaymentDTO, CyclePaymentsSummary, PaymentStats, Payment } from "../interfaces/PaymentSubscription";
-
+import {
+  RegisterPaymentDTO,
+  CyclePaymentsSummary,
+  PaymentStats,
+  Payment,
+  UpdatePaymentDTO,
+  UpdatePaymentResponse,
+  DeletePaymentDTO,
+  DeletePaymentResponse,
+} from "../interfaces/PaymentSubscription";
 
 export class PaymentSubscriptionService {
   private baseUrl = "/cycle-payments";
@@ -50,6 +58,25 @@ export class PaymentSubscriptionService {
       return await httpAdapter.get<PaymentStats>(`${this.baseUrl}/statistics`);
     } catch (error: any) {
       throw new Error(error?.message || error?.response?.data?.message || "Error al obtener estadísticas de pagos");
+    }
+  }
+
+  // NUEVO: Actualizar pago de ciclo
+  async updatePayment(paymentId: number, dto: UpdatePaymentDTO): Promise<Payment> {
+    try {
+      const resp = await httpAdapter.put<UpdatePaymentResponse>(dto, `${this.baseUrl}/${paymentId}`);
+      return (resp as any)?.data ?? resp;
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al actualizar pago");
+    }
+  }
+
+  // NUEVO: Eliminar pago de ciclo (DELETE con body)
+  async deletePayment(paymentId: number, dto: DeletePaymentDTO): Promise<DeletePaymentResponse> {
+    try {
+      return await httpAdapter.delete<DeletePaymentResponse>(`${this.baseUrl}/${paymentId}`, dto);
+    } catch (error: any) {
+      throw new Error(error?.message || error?.response?.data?.message || "Error al eliminar pago");
     }
   }
 }

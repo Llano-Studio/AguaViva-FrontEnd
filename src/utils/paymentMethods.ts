@@ -16,3 +16,6 @@ export const getPaymentMethodLabel = (value: number): string =>
 
 export const getPaymentMethodKey = (value: number): PaymentMethodKey | "" =>
   DEFAULT_PAYMENT_METHODS.find((m) => m.value === value)?.key ?? "";
+
+export const getPaymentMethodKeyOptions = (): Array<{ label: string; value: PaymentMethodKey }> =>
+  DEFAULT_PAYMENT_METHODS.map((m) => ({ label: m.label, value: m.key }));

@@ -24,6 +24,6 @@
 }
 
 .clientPaymentCycle-actions {
-  align-content: center;
-
+  align-items: center;
+  display: flex;
 }
