@@ -12,6 +12,7 @@ import { formatDate } from "../../utils/formatDate";
 import { DatePickerWithLabel } from "../common/DatePickerWithLabel";
 import { mapOrdersForTable } from "../../utils/mapOrdersForTable";
 import { useSnackbar } from "../../context/SnackbarContext";
+import { ItemForm } from "../common/ItemForm";
 
 interface RouteSheetFormProps {
   onSubmit: (values: any) => Promise<void> | void;
@@ -23,6 +24,14 @@ interface RouteSheetFormProps {
   routeSheetToEdit?: RouteSheet | null;
   onSuccess?: (msg: string) => void;
 }
+
+type RouteSheetInternalForm = {
+  vehicle_id: string | number;
+  driver_id: string | number;
+  route_notes: string;
+  orders: any[];
+  zone_ids: number[];
+};
 
 export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   onSubmit,
@@ -53,14 +62,23 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     toggleOrderSelection,
     routeNotes,
     setRouteNotes,
+    // Hook mantiene selectedZoneId (singular) para retrocompatibilidad
+    selectedZoneId,
+    setSelectedZoneId,
+    vehicleZones,
+    fetchVehicleZones,
   } = useFormRouteSheet();
 
-  const form = useForm({
+  // NUEVO: múltiples zonas seleccionadas para filtros
+  const [selectedZoneIds, setSelectedZoneIds] = useState<number[]>([]);
+
+  const form = useForm<RouteSheetInternalForm>({
     defaultValues: {
       vehicle_id: "",
       driver_id: "",
       route_notes: "",
       orders: [],
+      zone_ids: [],
     },
   });
 
@@ -72,8 +90,6 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   const [formattedDate, setFormattedDate] = useState<string>("");
   const [isDriverAutoSelected, setIsDriverAutoSelected] = useState(true);
 
-  const selectedZoneId = vehicles.find((v) => v.value === selectedVehicleId)?.zoneId || null;
-
   // Controlar limpieza visual y evitar refetches duplicados
   const isClearingRef = useRef(false);
   const [isClearing, setIsClearing] = useState(false);
@@ -82,17 +98,18 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   // Normaliza las órdenes (regulares + one-off) para mostrarlas en la tabla
   const mappedOrders = useMemo(() => mapOrdersForTable(orders as any), [orders]);
 
-  // Helper para refetch según filtros actuales
-  const refetchOrdersFor = async (params?: { date?: string; zoneId?: number | null }) => {
+  // Helper para refetch según filtros actuales (fecha + zonas múltiples)
+  const refetchOrdersFor = async (params?: { date?: string; zoneIds?: number[] }) => {
     const date = params?.date ?? selectedDate;
-    const zoneId =
-      typeof params?.zoneId !== "undefined"
-        ? params?.zoneId
-        : vehicles.find((v) => v.value === selectedVehicleId)?.zoneId || null;
+    const zoneIds = params?.zoneIds ?? selectedZoneIds;
 
-    await fetchOrders(orderSearch, zoneId, {
+    // Enviamos zonas múltiples en ambos formatos por compatibilidad (HYBRID y ONE_OFF)
+    const zoneCsv = Array.isArray(zoneIds) && zoneIds.length ? zoneIds.join(",") : undefined;
+
+    await fetchOrders(orderSearch, null, {
       deliveryDateFrom: date,
       deliveryDateTo: date,
+      ...(zoneCsv ? { zone_ids: zoneCsv, zoneIds: zoneCsv } : {}),
     });
   };
 
@@ -100,7 +117,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   useEffect(() => {
     (async () => {
       await fetchVehicles();
-      await refetchOrdersFor({ date: selectedDate, zoneId: selectedZoneId });
+      await refetchOrdersFor({ date: selectedDate, zoneIds: selectedZoneIds });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -117,7 +134,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   // Buscar por texto
   useEffect(() => {
     if (skipRefetch.current) return;
-    refetchOrdersFor({ date: selectedDate, zoneId: selectedZoneId });
+    refetchOrdersFor({ date: selectedDate, zoneIds: selectedZoneIds });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderSearch]);
 
@@ -150,7 +167,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     setSelectedDate(date);
 
     try {
-      await refetchOrdersFor({ date, zoneId: selectedZoneId });
+      await refetchOrdersFor({ date, zoneIds: selectedZoneIds });
     } finally {
       isClearingRef.current = false;
       setIsClearing(false);
@@ -160,10 +177,9 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     }
   };
 
-  // Limpiar y pedir de nuevo al cambiar móvil
+  // Al cambiar móvil: cargar choferes y zonas, resetear zonas seleccionadas (sin refetch hasta elegir zonas)
   const handleVehicleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newVehicleId = Number(e.target.value);
-    const newZoneId = vehicles.find((v) => v.value === newVehicleId)?.zoneId || null;
 
     skipRefetch.current = true;
     isClearingRef.current = true;
@@ -172,8 +188,14 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     setSelectedVehicleId(newVehicleId);
     setIsDriverAutoSelected(true);
 
+    // resetear zonas en hook (legacy) y locales (múltiple)
+    setSelectedZoneId(null);
+    setSelectedZoneIds([]);
+    form.setValue("zone_ids", []);
+
     try {
-      await refetchOrdersFor({ date: selectedDate, zoneId: newZoneId });
+      await Promise.all([fetchDrivers(newVehicleId), fetchVehicleZones(newVehicleId)]);
+      // No llamar refetchOrdersFor aquí; se hará al elegir zonas
     } finally {
       isClearingRef.current = false;
       setIsClearing(false);
@@ -183,7 +205,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     }
   };
 
-  // Limpiar y pedir de nuevo al cambiar chofer (aunque no afecte filtros, para evitar residuo visual)
+  // Limpiar y pedir de nuevo al cambiar chofer (respetando zonas seleccionadas actuales)
   const handleDriverChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newDriverId = Number(e.target.value);
     setSelectedDriverId(newDriverId);
@@ -195,7 +217,27 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     setSelectedOrders([]);
 
     try {
-      await refetchOrdersFor({ date: selectedDate, zoneId: selectedZoneId });
+      await refetchOrdersFor({ date: selectedDate, zoneIds: selectedZoneIds });
+    } finally {
+      isClearingRef.current = false;
+      setIsClearing(false);
+      setTimeout(() => {
+        skipRefetch.current = false;
+      }, 0);
+    }
+  };
+
+  // Nuevo: cambiar zonas (multiselect) => refetch con esas zonas
+  const handleZonesChange = async (zones: number[]) => {
+    setSelectedZoneIds(zones);
+
+    skipRefetch.current = true;
+    isClearingRef.current = true;
+    setIsClearing(true);
+    setSelectedOrders([]);
+
+    try {
+      await refetchOrdersFor({ date: selectedDate, zoneIds: zones });
     } finally {
       isClearingRef.current = false;
       setIsClearing(false);
@@ -285,11 +327,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
             className={className}
           />
 
-          <select
-            value={selectedVehicleId}
-            onChange={handleVehicleChange}
-            required
-          >
+          <select value={selectedVehicleId} onChange={handleVehicleChange} required>
             <option value="">Móvil</option>
             {vehicles.map((v) => (
               <option key={v.value} value={v.value}>
@@ -297,6 +335,36 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
               </option>
             ))}
           </select>
+
+          {/* Reemplazo: selector de Zonas con ItemForm (multiselect) */}
+          <div style={{ minWidth: 240 }}>
+            <ItemForm<RouteSheetInternalForm>
+              {...form}
+              onSubmit={() => {}}
+              hideActions
+              class={className+"-zone"}
+              fields={
+                [
+                  {
+                    name: "zone_ids",
+                    label: "Zonas",
+                    type: "multiselect",
+                    options: vehicleZones,
+                    isMulti: true,
+                    disabled: !vehicleZones.length,
+                    validation: { required: true },
+                  } as any,
+                ] as any
+              }
+              onFieldChange={(fieldName, value) => {
+                if (fieldName === "zone_ids") {
+                  const zones = Array.isArray(value) ? (value as number[]) : [];
+                  handleZonesChange(zones);
+                }
+              }}
+              renderInputs={() => <></>}
+            />
+          </div>
 
           <select
             value={selectedDriverId}

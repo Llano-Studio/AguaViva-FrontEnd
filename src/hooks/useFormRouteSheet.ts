@@ -13,6 +13,7 @@ export function useFormRouteSheet() {
   const [routeNotes, setRouteNotes] = useState("");
   const [orderSearch, setOrderSearch] = useState("");
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
+  const [vehicleZones, setVehicleZones] = useState<{ label: string; value: number }[]>([]);
 
   const vehicleService = new VehicleService();
   const orderService = new OrderService();
@@ -20,18 +21,12 @@ export function useFormRouteSheet() {
 
   const fetchVehicles = async () => {
     const res = await vehicleService.getVehicles();
-    const vehiclesWithZones = await Promise.all(
-      res.data.map(async (v: any) => {
-        const zones = await vehicleService.getVehicleZones(v.vehicle_id);
-        const zoneId = zones && zones.length > 0 ? zones[0].zone_id : null;
-        return {
-          label: v.name,
-          value: v.vehicle_id,
-          zoneId,
-        };
-      })
-    );
-    setVehicles(vehiclesWithZones);
+    const list = res.data.map((v: any) => ({
+      label: v.name,
+      value: v.vehicle_id,
+      zoneId: undefined, // legacy, no se usa
+    }));
+    setVehicles(list);
   };
 
   const fetchDrivers = async (vehicleId: number) => {
@@ -44,8 +39,22 @@ export function useFormRouteSheet() {
     );
   };
 
+  const fetchVehicleZones = async (vehicleId: number) => {
+    const zones = await vehicleService.getVehicleZones(vehicleId);
+    const options = (zones || [])
+      .filter((vz: any) => vz?.is_active !== false)
+      .map((vz: any) => {
+        const zone = vz.zone || {};
+        return {
+          label: zone.name ?? `Zona ${vz.zone_id}`, // Mostrar el nombre de la zona
+          value: vz.zone_id,                        // Enviar zone_id como value
+        };
+      })
+      .sort((a: any, b: any) => a.label.localeCompare(b.label));
+    setVehicleZones(options);
+  };
+
   // Traer HYBRID + ONE_OFF (solo las que requieren envío) y combinarlas
-  // Importante: para HYBRID usar zoneId (camelCase) y para ONE_OFF usar zone_id (snake_case)
   const fetchOrders = async (
     search = "",
     zoneId?: number | null,
@@ -91,8 +100,8 @@ export function useFormRouteSheet() {
 
   const setSelectedVehicleIdWithZone = (vehicleId: number) => {
     setSelectedVehicleId(vehicleId);
-    const vehicle = vehicles.find((v) => v.value === vehicleId);
-    setSelectedZoneId(vehicle ? vehicle.zoneId ?? null : null);
+    setSelectedZoneId(null);
+    setVehicleZones([]);
   };
 
   return {
@@ -114,5 +123,8 @@ export function useFormRouteSheet() {
     routeNotes,
     setRouteNotes,
     selectedZoneId,
+    setSelectedZoneId,
+    vehicleZones,
+    fetchVehicleZones,
   };
 }
