@@ -110,6 +110,8 @@ const filePreviews = fields
         const explicitFlag = selectProps.useReactSelect ?? (field as any).useReactSelect;
         const useReactSelect = explicitFlag !== undefined ? Boolean(explicitFlag) : true; // <-- default true
         const menuMaxHeight = selectProps.menuMaxHeight ?? (field as any).menuMaxHeight ?? 240;
+        const placeholderText =
+          selectProps.placeholder ?? (field as any).placeholder ?? "Seleccionar...";
 
         if (useReactSelect) {
           const watched = watch(field.name as any);
@@ -121,7 +123,7 @@ const filePreviews = fields
               isDisabled={field.disabled}
               options={allOptions}
               value={current}
-              placeholder="Seleccionar..."
+              placeholder={placeholderText}
               onChange={(opt: any) => {
                 const v = opt ? opt.value : "";
                 setValue(field.name as any, v as any, { shouldValidate: true, shouldDirty: true });
@@ -171,7 +173,7 @@ const filePreviews = fields
             disabled={field.disabled}
             {...selectProps}
           >
-            <option value="">Seleccionar...</option>
+            <option value="">{placeholderText}</option>
             {allOptions.map((option: any) => (
               <option key={String(option.value)} value={option.value}>
                 {option.label}
@@ -317,6 +319,8 @@ const filePreviews = fields
           .map((val: any) => options.find(opt => opt.value === val))
           .filter(Boolean);
 
+        const multiPlaceholder = (field as any).placeholder ?? "Seleccionar...";
+
         return (
           <Select
             isMulti
@@ -330,7 +334,7 @@ const filePreviews = fields
                 onFieldChange(field.name as string, values);
               }
             }}
-            placeholder="Seleccionar uno o más días"
+            placeholder={multiPlaceholder}
           />
         );
       case 'search': {

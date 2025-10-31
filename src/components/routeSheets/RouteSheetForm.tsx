@@ -327,22 +327,48 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
             className={className}
           />
 
-          <select value={selectedVehicleId} onChange={handleVehicleChange} required>
-            <option value="">Móvil</option>
-            {vehicles.map((v) => (
-              <option key={v.value} value={v.value}>
-                {v.label}
-              </option>
-            ))}
-          </select>
-
-          {/* Reemplazo: selector de Zonas con ItemForm (multiselect) */}
-          <div style={{ minWidth: 240 }}>
+          {/* Selector de Móvil con ItemForm (select) */}
+          <div>
             <ItemForm<RouteSheetInternalForm>
               {...form}
               onSubmit={() => {}}
               hideActions
-              class={className+"-zone"}
+              class={className + "-vehicle"}
+              fields={
+                [
+                  {
+                    name: "vehicle_id",
+                    label: "Móvil",
+                    type: "select",
+                    options: vehicles,
+                    validation: { required: true },
+                    useReactSelect: true,
+                    placeholder: "Móvil",
+                  } as any,
+                ] as any
+              }
+              selectFieldProps={{
+                vehicle_id: {
+                  value: selectedVehicleId === "" ? "" : (selectedVehicleId as number),
+                },
+              }}
+              onFieldChange={(fieldName, value) => {
+                if (fieldName === "vehicle_id") {
+                  // Reusar la lógica existente
+                  handleVehicleChange({ target: { value: String(value ?? "") } } as any);
+                }
+              }}
+              renderInputs={() => <></>}
+            />
+          </div>
+
+          {/* Reemplazo: selector de Zonas con ItemForm (multiselect) */}
+          <div style={{ minWidth: 110 }}>
+            <ItemForm<RouteSheetInternalForm>
+              {...form}
+              onSubmit={() => {}}
+              hideActions
+              class={className + "-zone"}
               fields={
                 [
                   {
@@ -353,6 +379,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
                     isMulti: true,
                     disabled: !vehicleZones.length,
                     validation: { required: true },
+                    placeholder: "Seleccionar una o mas...",
                   } as any,
                 ] as any
               }
@@ -366,19 +393,40 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
             />
           </div>
 
-          <select
-            value={selectedDriverId}
-            onChange={handleDriverChange}
-            required
-            disabled={!drivers.length}
-          >
-            <option value="">Chofer</option>
-            {drivers.map((d) => (
-              <option key={d.value} value={d.value}>
-                {d.label}
-              </option>
-            ))}
-          </select>
+          {/* Selector de Chofer con ItemForm (select) */}
+          <div>
+            <ItemForm<RouteSheetInternalForm>
+              {...form}
+              onSubmit={() => {}}
+              hideActions
+              class={className + "-driver"}
+              fields={
+                [
+                  {
+                    name: "driver_id",
+                    label: "Chofer",
+                    type: "select",
+                    options: drivers,
+                    validation: { required: true },
+                    useReactSelect: true,
+                    disabled: !drivers.length,
+                    placeholder: "Chofer",
+                  } as any,
+                ] as any
+              }
+              selectFieldProps={{
+                driver_id: {
+                  value: selectedDriverId === "" ? "" : (selectedDriverId as number),
+                },
+              }}
+              onFieldChange={(fieldName, value) => {
+                if (fieldName === "driver_id") {
+                  handleDriverChange({ target: { value: String(value ?? "") } } as any);
+                }
+              }}
+              renderInputs={() => <></>}
+            />
+          </div>
         </div>
       </div>
 

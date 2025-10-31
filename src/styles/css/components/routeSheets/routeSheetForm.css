@@ -96,11 +96,172 @@
   background-position: right 13px center; /* 10px (flecha) + 3px extra */
 }
 
-
 .routeSheet-zone-form{
     border: solid 1.5px var(--text-color-3) !important;
     border-radius: 6px !important;
     font-size: 11px;
     font-weight: 500;
     color: var(--text-color-3);
+    padding: 2px 10px !important;
+}
+
+.routeSheet-zone-form-field{
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0;
+    width: 100% !important;
+}
+
+.routeSheet-zone-form-field .css-b62m3t-container{
+    margin: 0;
+    width: 100%;
+}
+
+.routeSheet-zone-form-field .required-mark{
+    display: none;
+}
+
+.routeSheet-zone-form-label{
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    align-content: center;
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__control{
+    min-height: 6px !important;
+    height: fit-content;
+    align-items: flex-start;
+    box-shadow: none;
+    border: none;
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__value-container{
+    padding: 0 5px 0 8px;
+    align-items: flex-start;
+    height: 22px;
+    min-height: 0;
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__multi-value{
+    margin: 0 2px;
+    border: solid 1px var(--acent-color-1);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--acent-color-1);
+}
+
+.routeSheet-zone-form-field .css-9jq23d{
+    font-size: 10px;
+    padding: 2.5px 6px;
+    color: var(--acent-color-1);
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__indicators{
+    height: 21px;
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__input-container{
+    margin: 0 2px;
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__placeholder{
+    align-self: center;
+    font-size: 11px;
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__indicator-separator{
+    margin: 0 2px;
+    background-color: var(--acent-color-1) !important;
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__indicator svg{
+    fill: var(--acent-color-1);
+    stroke: var(--acent-color-1);
+    scale: 0.8;
+}
+
+.routeSheet-zone-form-field .item-form-react-multi-select__input-container{
+    display: none;
+}
+
+
+
+
+
+.routeSheet-vehicle-form,
+.routeSheet-driver-form{
+    width: fit-content;
+    padding: 0 !important;
+    height: fit-content;
+    border: none !important;
+}
+
+.routeSheet-vehicle-form-field,
+.routeSheet-driver-form-field{
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+.routeSheet-vehicle-form-label,
+.routeSheet-driver-form-label{
+    display: none;
+}
+
+.routeSheet-vehicle-form-field .item-form-react-select__single-value,
+.routeSheet-driver-form-field .item-form-react-select__single-value{
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--acent-color-1);
+    text-transform: capitalize;
+}
+
+.routeSheet-vehicle-form-field .item-form-react-select__input-container,
+.routeSheet-driver-form-field .item-form-react-select__input-container{
+    margin: 0 2px;
+}
+
+.routeSheet-vehicle-form-field .item-form-react-select__control,
+.routeSheet-driver-form-field .item-form-react-select__control{
+    min-width: 110px;
+    height: 28px;
+    min-height: 0;
+    border: solid 1.5px;
+    border-radius: 6px !important;
+    color: var(--acent-color-1);
+    background: transparent;
+}
+
+.routeSheet-vehicle-form-field .item-form-react-select__control:hover,
+.routeSheet-driver-form-field .item-form-react-select__control:hover{
+    border-color: var(--acent-color-1);
+    opacity: 0.8;
+}
+
+.routeSheet-vehicle-form-field .css-b62m3t-container,
+.routeSheet-driver-form-field .css-b62m3t-container{
+    margin: 0;
+}
+
+.routeSheet-vehicle-form-field .item-form-react-select__indicator svg,
+.routeSheet-driver-form-field .item-form-react-select__indicator svg{
+    fill: var(--acent-color-1);
+    scale: 0.8;
+}
+
+.routeSheet-vehicle-form-field .item-form-react-select__indicator-separator,
+.routeSheet-driver-form-field .item-form-react-select__indicator-separator{
+    display: none;
+}
+
+.routeSheet-vehicle-form-field .item-form-react-select__placeholder,
+.routeSheet-driver-form-field .item-form-react-select__placeholder{
+    color: var(--acent-color-1);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.routeSheet-vehicle-form-field .css-1rkkobx-control,
+.routeSheet-driver-form-field .css-1rkkobx-control{
+    box-shadow: none !important;
 }
