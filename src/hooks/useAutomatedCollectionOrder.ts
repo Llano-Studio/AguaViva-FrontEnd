@@ -4,6 +4,8 @@ import type {
   GeneratedRouteSheetFile,
   GeneratedRouteSheetListResponse,
   GeneratedRouteSheetQuery,
+  GenerateCollectionPdfBody,
+  GenerateCollectionPdfResponse,
 } from "../interfaces/AutomatedCollectionOrder";
 
 export const useAutomatedCollectionOrder = () => {
@@ -42,6 +44,24 @@ export const useAutomatedCollectionOrder = () => {
     return fetchGeneratedRouteSheets(lastQueryRef.current);
   }, [fetchGeneratedRouteSheets]);
 
+  const generateCollectionPdf = useCallback(
+    async (routeSheetId: number, body?: GenerateCollectionPdfBody): Promise<GenerateCollectionPdfResponse | null> => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const res = await serviceRef.current.generateCollectionPDF(routeSheetId, body);
+        return res;
+      } catch (err: any) {
+        const msg = err?.message || "Error al generar PDF de cobranzas automáticas";
+        setError(msg);
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
   return {
     isLoading,
     error,
@@ -49,6 +69,7 @@ export const useAutomatedCollectionOrder = () => {
     total,
     fetchGeneratedRouteSheets,
     refresh,
+    generateCollectionPdf,
   };
 };
 

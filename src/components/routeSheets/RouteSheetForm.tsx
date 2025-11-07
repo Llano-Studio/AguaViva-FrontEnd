@@ -40,6 +40,8 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   error,
   className,
   onSuccess,
+  isEditing,
+  routeSheetToEdit,
 }) => {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
@@ -62,14 +64,13 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     toggleOrderSelection,
     routeNotes,
     setRouteNotes,
-    // Hook mantiene selectedZoneId (singular) para retrocompatibilidad
     selectedZoneId,
     setSelectedZoneId,
     vehicleZones,
     fetchVehicleZones,
   } = useFormRouteSheet();
 
-  // NUEVO: múltiples zonas seleccionadas para filtros
+  // Múltiples zonas seleccionadas para filtros
   const [selectedZoneIds, setSelectedZoneIds] = useState<number[]>([]);
 
   const form = useForm<RouteSheetInternalForm>({
@@ -94,22 +95,51 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
   const isClearingRef = useRef(false);
   const [isClearing, setIsClearing] = useState(false);
   const skipRefetch = useRef(false);
+  // Evitar auto-selección mientras precargamos edición
+  const skipAutoSelectRef = useRef(false);
 
-  // Normaliza las órdenes (regulares + one-off) para mostrarlas en la tabla
-  const mappedOrders = useMemo(() => mapOrdersForTable(orders as any), [orders]);
+  // Normaliza las órdenes (regulares + one-off) para mostrarlas en la tabla (y filtra en edición)
+  const mappedOrders = useMemo(() => {
+    const list = orders as any[];
+
+    if (isEditing && routeSheetToEdit) {
+      const includedIds = new Set(
+        (routeSheetToEdit.details || [])
+          .map((d: any) => Number(d?.order?.order_id))
+          .filter((id: any) => Number.isFinite(id))
+      );
+
+      const filtered = list.filter((o: any) => {
+        const status = o.status || o.order_status || "";
+        const oid = Number(o.order_id ?? o.id);
+        if (status === "READY_FOR_DELIVERY") {
+          return includedIds.has(oid);
+        }
+        return true; // PENDING u otros
+      });
+
+      return mapOrdersForTable(filtered);
+    }
+
+    return mapOrdersForTable(list);
+  }, [orders, isEditing, routeSheetToEdit]);
 
   // Helper para refetch según filtros actuales (fecha + zonas múltiples)
   const refetchOrdersFor = async (params?: { date?: string; zoneIds?: number[] }) => {
     const date = params?.date ?? selectedDate;
     const zoneIds = params?.zoneIds ?? selectedZoneIds;
 
-    // Enviamos zonas múltiples en ambos formatos por compatibilidad (HYBRID y ONE_OFF)
     const zoneCsv = Array.isArray(zoneIds) && zoneIds.length ? zoneIds.join(",") : undefined;
 
-    await fetchOrders(orderSearch, null, {
+    // Crear => PENDING | Editar => READY_FOR_DELIVERY,PENDING (en ese orden)
+    const statusesCsv = isEditing ? "READY_FOR_DELIVERY,PENDING" : "PENDING";
+
+    return await fetchOrders(orderSearch, null, {
       deliveryDateFrom: date,
       deliveryDateTo: date,
       ...(zoneCsv ? { zone_ids: zoneCsv, zoneIds: zoneCsv } : {}),
+      // Usar 'statuses' para múltiples estados
+      statuses: statusesCsv,
     });
   };
 
@@ -122,14 +152,16 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-selección por defecto de todas las órdenes listadas
+  // Auto-selección solo cuando NO estamos editando
   useEffect(() => {
+    if (isEditing) return;
+    if (skipAutoSelectRef.current) return;
     if (orders.length > 0) {
-      setSelectedOrders(orders.map((order) => (order as any).id));
+      setSelectedOrders(orders.map((o: any) => Number(o.id)));
     } else {
       setSelectedOrders([]);
     }
-  }, [orders, setSelectedOrders]);
+  }, [orders, isEditing, setSelectedOrders]);
 
   // Buscar por texto
   useEffect(() => {
@@ -163,7 +195,12 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     skipRefetch.current = true;
     isClearingRef.current = true;
     setIsClearing(true);
-    setSelectedOrders([]);
+
+    // En edición NO limpiamos la selección del usuario
+    if (!isEditing) {
+      setSelectedOrders([]);
+    }
+
     setSelectedDate(date);
 
     try {
@@ -184,7 +221,12 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     skipRefetch.current = true;
     isClearingRef.current = true;
     setIsClearing(true);
-    setSelectedOrders([]);
+
+    // En edición NO limpiamos la selección del usuario
+    if (!isEditing) {
+      setSelectedOrders([]);
+    }
+
     setSelectedVehicleId(newVehicleId);
     setIsDriverAutoSelected(true);
 
@@ -214,7 +256,11 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     skipRefetch.current = true;
     isClearingRef.current = true;
     setIsClearing(true);
-    setSelectedOrders([]);
+
+    // En edición NO limpiamos la selección del usuario
+    if (!isEditing) {
+      setSelectedOrders([]);
+    }
 
     try {
       await refetchOrdersFor({ date: selectedDate, zoneIds: selectedZoneIds });
@@ -227,14 +273,18 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     }
   };
 
-  // Nuevo: cambiar zonas (multiselect) => refetch con esas zonas
+  // Cambiar zonas (multiselect) => refetch con esas zonas
   const handleZonesChange = async (zones: number[]) => {
     setSelectedZoneIds(zones);
 
     skipRefetch.current = true;
     isClearingRef.current = true;
     setIsClearing(true);
-    setSelectedOrders([]);
+
+    // En edición NO limpiamos la selección del usuario
+    if (!isEditing) {
+      setSelectedOrders([]);
+    }
 
     try {
       await refetchOrdersFor({ date: selectedDate, zoneIds: zones });
@@ -247,7 +297,70 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
     }
   };
 
-  const handleSubmit = async (data: any) => {
+  // Inicializar valores cuando se edita una hoja de ruta
+  useEffect(() => {
+    if (!isEditing || !routeSheetToEdit) return;
+
+    const initFromRouteSheet = async () => {
+      try {
+        skipAutoSelectRef.current = true;
+
+        const vid = routeSheetToEdit.vehicle?.vehicle_id as number | undefined;
+        const did = routeSheetToEdit.driver?.id as number | undefined;
+
+        // Preferir zones_covered si viene; fallback a vehicle.zones
+        const zonesSource =
+          (routeSheetToEdit.zones_covered && routeSheetToEdit.zones_covered.length
+            ? routeSheetToEdit.zones_covered
+            : routeSheetToEdit.vehicle?.zones) || [];
+
+        const zones = zonesSource.map((z: any) => Number(z.zone_id));
+        const date = routeSheetToEdit.delivery_date || selectedDate;
+
+        setSelectedDate(String(date));
+        const notes = routeSheetToEdit.route_notes ?? "";
+        setRouteNotes(notes);
+        form.setValue("route_notes", notes as any, { shouldDirty: false, shouldValidate: false });
+
+        if (vid) {
+          setSelectedVehicleId(vid);
+          setIsDriverAutoSelected(false);
+          await Promise.all([fetchDrivers(vid), fetchVehicleZones(vid)]);
+          form.setValue("vehicle_id", vid as any, { shouldDirty: false, shouldValidate: false });
+        } else {
+          setSelectedVehicleId("");
+          form.setValue("vehicle_id", "" as any, { shouldDirty: false, shouldValidate: false });
+        }
+
+        if (did) {
+          setSelectedDriverId(did);
+          form.setValue("driver_id", did as any, { shouldDirty: false, shouldValidate: false });
+        } else {
+          form.setValue("driver_id", "" as any, { shouldDirty: false, shouldValidate: false });
+        }
+
+        setSelectedZoneIds(zones);
+        form.setValue("zone_ids", zones as any, { shouldDirty: false, shouldValidate: false });
+
+        const fetched = await refetchOrdersFor({ date, zoneIds: zones });
+
+        const orderIdsFromDetails: number[] = (routeSheetToEdit.details || [])
+          .map((d: any) => d?.order?.order_id)
+          .filter((id: any) => typeof id === "number");
+
+        setSelectedOrders(orderIdsFromDetails);
+        console.log("Preloaded (edit) orders:", fetched);
+      } finally {
+        setTimeout(() => {
+          skipAutoSelectRef.current = false;
+        }, 0);
+      }
+    };
+
+    void initFromRouteSheet();
+  }, [isEditing, routeSheetToEdit]);
+
+  const handleSubmit = async () => {
     try {
       const details = selectedOrders.map((orderId) => {
         const order = (orders as any[]).find((o) => (o as any).id === orderId) as any;
@@ -264,19 +377,13 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
         };
 
         if (isOneOff) {
-          // Enviar SIEMPRE el header id (mismo valor, distinto nombre de campo)
           const headerId =
             order?.one_off_purchase_header_id ??
             order?.purchase_header_id ??
             order?.purchase_id ??
             order?.one_off_purchase_id;
-
-          if (headerId) {
-            detail.one_off_purchase_header_id = Number(headerId);
-          }
-          // Nota: no enviar one_off_purchase_id
+          if (headerId) detail.one_off_purchase_header_id = Number(headerId);
         } else {
-          // HYBRID: solo order_id (+ cycle_payment_id si aplica)
           detail.order_id = Number(order?.order_id ?? 0);
           if (order?.cycle_payment_id) detail.cycle_payment_id = Number(order.cycle_payment_id);
         }
@@ -284,10 +391,11 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
         return detail;
       });
 
-      const routeSheetData: CreateRouteSheetDTO = {
+      const routeSheetData = {
         driver_id: (selectedDriverId as number) || 0,
         vehicle_id: (selectedVehicleId as number) || 0,
         delivery_date: selectedDate,
+        zone_ids: selectedZoneIds, // nuevo campo
         route_notes: routeNotes || "",
         details,
       };
@@ -295,15 +403,14 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
       await onSubmit(routeSheetData);
 
       if (onSuccess) {
-        onSuccess("Hoja de ruta creada correctamente.");
+        onSuccess(isEditing ? "Hoja de ruta actualizada correctamente." : "Hoja de ruta creada correctamente.");
       } else {
-        showSnackbar("Hoja de ruta creada correctamente.", "success");
+        showSnackbar(isEditing ? "Hoja de ruta actualizada correctamente." : "Hoja de ruta creada correctamente.", "success");
       }
 
       navigate("/entregas");
     } catch (err: any) {
-      showSnackbar(err?.message || "Error al crear la hoja de ruta", "error");
-      // no navegamos en error
+      showSnackbar(err?.message || (isEditing ? "Error al actualizar la hoja de ruta" : "Error al crear la hoja de ruta"), "error");
     }
   };
 
@@ -354,7 +461,6 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
               }}
               onFieldChange={(fieldName, value) => {
                 if (fieldName === "vehicle_id") {
-                  // Reusar la lógica existente
                   handleVehicleChange({ target: { value: String(value ?? "") } } as any);
                 }
               }}
@@ -362,7 +468,7 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
             />
           </div>
 
-          {/* Reemplazo: selector de Zonas con ItemForm (multiselect) */}
+          {/* Selector de Zonas con ItemForm (multiselect) */}
           <div style={{ minWidth: 110 }}>
             <ItemForm<RouteSheetInternalForm>
               {...form}
@@ -437,14 +543,17 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
             {
               header: "",
               accessor: "selected",
-              render: (_: any, row: any) => (
-                <input
-                  className="form-checkbox"
-                  type="checkbox"
-                  checked={selectedOrders.includes(row.id)}
-                  onChange={() => toggleOrderSelection(row.id)}
-                />
-              ),
+              render: (_: any, row: any) => {
+                const rowId = Number(row.id); // asegurar number
+                return (
+                  <input
+                    className="form-checkbox"
+                    type="checkbox"
+                    checked={selectedOrders.includes(rowId)}
+                    onChange={() => toggleOrderSelection(rowId)}
+                  />
+                );
+              },
             },
             ...(deliveryColumns as any),
           ]}
@@ -467,7 +576,15 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
           disabled={loading}
           className={`${className}-form-button-submit form-submit`}
         >
-          Generar hoja de ruta
+          {isEditing ? "Guardar cambios" : "Generar hoja de ruta"}
+        </button>
+        <button
+          type="button"
+          className="form-cancel"
+          style={{ marginLeft: 8 }}
+          onClick={onCancel}
+        >
+          Cancelar
         </button>
       </div>
       {error && <div className="error-message">{error}</div>}
