@@ -147,7 +147,6 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
     try {
       const updated = await updateVehicle(vehicleToEdit.vehicle_id, pendingValues);
       if (updated) {
-        await assignZonesToVehicle(vehicleToEdit.vehicle_id, selectedZoneIds, "Asignación desde formulario", true);
         await refreshVehicles();
         if (onSuccess) onSuccess("Vehículo editado correctamente.");
         showSnackbar("Vehículo editado correctamente.", "success");

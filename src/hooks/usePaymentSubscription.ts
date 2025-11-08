@@ -1,6 +1,14 @@
 import { useCallback, useRef, useState } from "react";
 import PaymentSubscriptionService from "../services/PaymentSuscriptionService";
-import { RegisterPaymentDTO, Payment, CyclePaymentsSummary, PaymentStats, } from "../interfaces/PaymentSubscription";
+import {
+  RegisterPaymentDTO,
+  Payment,
+  CyclePaymentsSummary,
+  PaymentStats,
+  UpdatePaymentDTO,
+  DeletePaymentDTO,
+  DeletePaymentResponse,
+} from "../interfaces/PaymentSubscription";
 
 export const usePaymentSubscription = () => {
   const serviceRef = useRef(new PaymentSubscriptionService());
@@ -21,6 +29,34 @@ export const usePaymentSubscription = () => {
       return payment;
     } catch (err: any) {
       const msg = err?.message || "Error al registrar pago";
+      setError(msg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+    const updatePayment = useCallback(async (paymentId: number, dto: UpdatePaymentDTO): Promise<Payment> => {
+    try {
+      setIsLoading(true);
+      const updated = await serviceRef.current.updatePayment(paymentId, dto);
+      return updated;
+    } catch (err: any) {
+      const msg = err?.message || "Error al actualizar pago";
+      setError(msg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const deletePayment = useCallback(async (paymentId: number, dto: DeletePaymentDTO): Promise<DeletePaymentResponse> => {
+    try {
+      setIsLoading(true);
+      const resp = await serviceRef.current.deletePayment(paymentId, dto);
+      return resp;
+    } catch (err: any) {
+      const msg = err?.message || "Error al eliminar pago";
       setError(msg);
       throw err;
     } finally {
@@ -115,6 +151,8 @@ export const usePaymentSubscription = () => {
 
     // actions
     registerPayment,
+    updatePayment,
+    deletePayment, 
     fetchCyclePayments,
     fetchCustomerPayments,
     fetchPendingCycles,

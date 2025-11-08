@@ -63,7 +63,7 @@ const SubscriptionClient: React.FC<SubscriptionClientProps> = ({ clientId, isEdi
   useEffect(() => {
     const fetchPlans = async () => {
       const service = new SubscriptionPlanService();
-      const res = await service.getSubscriptionPlans();
+      const res = await service.getSubscriptionPlans({ limit: 100, page: 1 });
       if (res && res.data) {
         setPlansOptions(
           res.data.map((plan: any) => ({

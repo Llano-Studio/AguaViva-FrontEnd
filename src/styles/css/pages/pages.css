@@ -10,7 +10,10 @@
   @apply absolute top-0 left-0 w-full transition-transform duration-500 ease-in-out z-10;
   background: var(--bg-color-1);
   height: 100%;
-  
+}
+
+.page-content > *:last-child {
+  padding-bottom: 50px;
 }
 
 .page-content,

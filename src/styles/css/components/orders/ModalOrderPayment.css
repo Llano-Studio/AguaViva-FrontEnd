@@ -25,7 +25,8 @@
 
 .orderPayment-actions {
   align-content: center;
-
+  align-items: center;
+  display: flex;
 }
 
 .orderPayment-summary-data {

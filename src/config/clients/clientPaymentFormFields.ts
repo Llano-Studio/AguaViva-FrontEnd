@@ -43,3 +43,48 @@ export const clientPaymentFormFields: Field<any>[] = [
     order: 4,
   },
 ];
+
+
+type OptionKey = { label: string; value: string };
+
+export const clientPaymentFormFieldsEdit = (
+  paymentMethodKeyOptions: OptionKey[] = []
+): Field<any>[] => [
+  {
+    name: "amount",
+    label: "Monto",
+    type: "number",
+    validation: { required: true },
+    order: 0,
+  },
+  {
+    name: "payment_method",
+    label: "Método de pago",
+    type: "select",
+    options: paymentMethodKeyOptions,
+    validation: { required: true },
+    order: 1,
+    menuMaxHeight: 120,
+  } as any,
+  {
+    name: "payment_date",
+    label: "Fecha de pago",
+    type: "datetime-local",
+    validation: { required: true },
+    order: 2,
+  },
+  {
+    name: "reference",
+    label: "Referencia",
+    type: "text",
+    validation: { required: false },
+    order: 3,
+  },
+  {
+    name: "notes",
+    label: "Notas",
+    type: "textarea",
+    validation: { required: false },
+    order: 4,
+  },
+];

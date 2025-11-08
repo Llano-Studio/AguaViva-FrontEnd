@@ -185,3 +185,29 @@ export interface OrderPaymentResponse {
   payment_date: string; // ISO
   notes?: string;
 }
+
+export interface UpdateOrderPaymentDTO {
+  amount?: string;           // "2400"
+  reference?: string;        // "TXN-UPD-789456"
+  payment_method?: string;   // "EFECTIVO"
+  payment_date?: string;     // ISO string
+  notes?: string;
+}
+
+export interface UpdateOrderPaymentResponse {
+  success: boolean;
+  message: string;
+  audit_id: number;
+  data: {
+    transaction_id: number;
+    amount: string;
+    payment_date: string;  // ISO
+    reference?: string;
+    notes?: string;
+  };
+}
+
+export interface DeleteOrderPaymentResponse {
+  confirm_deletion: boolean;
+  deletion_reason: string;
+}

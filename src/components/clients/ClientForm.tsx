@@ -279,10 +279,11 @@ const ClientForm: React.FC<ClientFormProps> = ({
     }
   }, [isEditing]);
 
-  // Ref al contenedor del ClientSubscriptionForm para disparar submit programático
+  // Refs para gestión del form de suscripción
   const subFormContainerRef = useRef<HTMLDivElement>(null);
   const subSubmitResolverRef = useRef<((ok: boolean) => void) | null>(null);
   const lastCreatedClientIdRef = useRef<number | null>(null);
+  const selectedPlanIdRef = useRef<number | "" | null>(null); // almacena el plan seleccionado
 
   // onSubmit del ClientSubscriptionForm (se ejecuta al forzar submit)
   const handleSubscriptionSubmit = async (values: any) => {
@@ -345,15 +346,10 @@ const ClientForm: React.FC<ClientFormProps> = ({
       }
       lastCreatedClientIdRef.current = Number(newClientId);
 
-      // 2) Ver si hay plan seleccionado en el form de abono
-      const planField =
-        (subFormContainerRef.current?.querySelector('[name="subscription_plan_id"]') as
-          | HTMLSelectElement
-          | HTMLInputElement
-          | null) || null;
-
-      const planValue = planField?.value ?? "";
-      const hasPlanSelected = String(planValue).trim() !== "";
+      // 2) Ver si hay plan seleccionado (sin querySelector; valor provisto por el form hijo)
+      const planId = selectedPlanIdRef.current;
+      const hasPlanSelected =
+        planId !== null && String(planId).trim() !== "" && !Number.isNaN(Number(planId));
 
       // Si NO hay plan seleccionado: terminar con creación de cliente solamente
       if (!hasPlanSelected) {
@@ -463,6 +459,11 @@ const ClientForm: React.FC<ClientFormProps> = ({
               loading={subLoading}
               error={subError}
               isEditing={false}
+              onPlanChange={(pid) => {
+                // guardar el plan seleccionado reportado por el form hijo
+                selectedPlanIdRef.current =
+                  pid === "" || pid === null ? (pid as "" | null) : Number(pid);
+              }}
             />
           </div>
 

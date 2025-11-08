@@ -46,8 +46,39 @@ export const httpAdapter = {
     });
   },
 
-  async delete<T>(url: string, options?: { params?: Params }) {
+  async delete<T>(
+    url: string,
+    dataOrOptions?: any,
+    maybeOptions?: { isFormData?: boolean; params?: Params }
+  ) {
+    let data: any | undefined;
+    let options: { isFormData?: boolean; params?: Params } | undefined;
+
+    if (
+      dataOrOptions &&
+      typeof dataOrOptions === "object" &&
+      (("params" in dataOrOptions) || ("isFormData" in dataOrOptions)) &&
+      !maybeOptions
+    ) {
+      // Caso: delete(url, { params })
+      options = dataOrOptions;
+    } else {
+      // Caso: delete(url, body) o delete(url, body, options)
+      data = dataOrOptions;
+      options = maybeOptions;
+    }
+
     const query = buildQuery(options?.params);
-    return apiFetch<T>(url + query, { method: "DELETE" });
+    const isFormData = options?.isFormData;
+
+    const hasBody = typeof data !== "undefined";
+    const headers = !isFormData && hasBody ? { "Content-Type": "application/json" } : undefined;
+    const body = hasBody ? (isFormData ? data : JSON.stringify(data)) : undefined;
+
+    return apiFetch<T>(url + query, {
+      method: "DELETE",
+      headers,
+      body,
+    });
   },
 };

@@ -17,6 +17,7 @@ interface ClientSubscriptionFormProps {
   loading?: boolean;
   error?: string | null;
   isEditing?: boolean;
+  onPlanChange?: (planId: number | "" | null) => void; // avisa al padre el plan seleccionado
 }
 
 const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
@@ -27,6 +28,7 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
   loading,
   error,
   isEditing,
+  onPlanChange,
 }) => {
   const { showSnackbar } = useSnackbar();
 
@@ -62,6 +64,8 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
     defaultValues: getDefaultDates() as any,
   });
 
+  const { getValues } = form;
+
   // Armar payload antes de enviar
   const handleSubmit = async (values: CreateClientSubscriptionDTO | any) => {
     const dataToSend = { ...values };
@@ -84,6 +88,15 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
     }
   };
 
+  // Notificar al padre el valor inicial del plan (si existiera)
+  useEffect(() => {
+    if (!onPlanChange) return;
+    const initVal: any = getValues("subscription_plan_id");
+    if (initVal === undefined) return;
+    onPlanChange(initVal === "" || initVal === null ? initVal : Number(initVal));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Mostrar errores externos
   useEffect(() => {
     if (error) showSnackbar(error, "error");
@@ -97,6 +110,11 @@ const ClientSubscriptionForm: React.FC<ClientSubscriptionFormProps> = ({
         onSubmit={handleSubmit}
         onCancel={onCancel}
         class="client-subscription"
+        onFieldChange={(fieldName, value) => {
+          if (fieldName === "subscription_plan_id") {
+            onPlanChange?.(value === "" || value === null ? value : Number(value));
+          }
+        }}
       />
       {error && <div className="error-message">{error}</div>}
       {loading && <div className="p-4 container-loading"><SpinnerLoading/></div>}

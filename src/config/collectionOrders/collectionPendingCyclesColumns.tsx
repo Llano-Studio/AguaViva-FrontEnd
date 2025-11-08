@@ -1,4 +1,5 @@
 import { Column } from "../../interfaces/Common";
+import { renderStatusPaymentLabel } from "../../utils/statusPaymentLabels";
 
 export type PendingCyclesColumnsParams = {
   isSelected: (row: any) => boolean;
@@ -27,5 +28,10 @@ export const buildCollectionPendingCyclesColumns = ({
   { header: "Vencimiento", accessor: "payment_due_date", order: 3 },
   { header: "Pendiente", accessor: "pending_balance", order: 4 },
   { header: "Días atraso", accessor: "days_overdue", order: 5 },
-  { header: "Estado", accessor: "payment_status", order: 6 },
+  {
+    header: "Estado",
+    accessor: "payment_status",
+    order: 6,
+    render: (value: any, row?: any) => renderStatusPaymentLabel(value ?? row?.payment_status),
+  },
 ];

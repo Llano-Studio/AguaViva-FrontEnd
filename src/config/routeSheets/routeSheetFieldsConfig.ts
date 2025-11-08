@@ -101,12 +101,21 @@ export const routeSheetColumns: Column<RouteSheet>[] = sortByOrder([
   { header: "ID", accessor: "route_sheet_id", order: 0 },
   { header: "Chofer", accessor: "driver.name", order: 1 },
   { header: "Vehículo", accessor: "vehicle.name", order: 2 },
-  { header: "Fecha de entrega", accessor: "delivery_date", order: 3, render: formatDateForView },
-  { header: "Notas", accessor: "route_notes", order: 4 },
-  { 
-    header: "Cantidad de entregas", 
-    accessor: "details", 
-    order: 5,
+  {
+    header: "Zonas",
+    accessor: "zones_covered",
+    order: 3,
+    render: (zones: any[]) =>
+      Array.isArray(zones) && zones.length
+        ? zones.map(z => z?.name).filter(Boolean).join(", ")
+        : "-"
+  },
+  { header: "Fecha de entrega", accessor: "delivery_date", order: 4, render: formatDateForView },
+  { header: "Notas", accessor: "route_notes", order: 5 },
+  {
+    header: "Cantidad de entregas",
+    accessor: "details",
+    order: 6,
     render: (details: any[]) => details?.length ?? 0
   },
 ]);

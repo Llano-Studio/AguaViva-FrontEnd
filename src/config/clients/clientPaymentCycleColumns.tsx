@@ -1,16 +1,11 @@
 import { Column } from "../../interfaces/Common";
 import { formatDateForView } from "../../utils/formateDateForView";
+import { renderStatusPaymentLabel } from "../../utils/statusPaymentLabels";
 
 // helper para tomar valor desde value o desde la fila
 const pick = (value: any, row: any, key: string) =>
   value !== undefined ? value : row?.[key];
 
-const STATUS_MAP: Record<string, string> = {
-  PAID: "PAGADO",
-  PENDING: "PENDIENTE",
-  PARTIAL: "PAGO PARCIAL",
-  CREDITED: "CON CRÉDITO",
-};
 
 export const clientPaymentCycleColumns: Column<any>[] = [
   {
@@ -61,9 +56,7 @@ export const clientPaymentCycleColumns: Column<any>[] = [
     order: 7,
     render: (value: any, row?: any) => {
       const raw = pick(value, row, "payment_status");
-      if (!raw) return "-";
-      const key = String(raw).toUpperCase();
-      return STATUS_MAP[key] ?? raw;
+      return renderStatusPaymentLabel(raw);
     },
   },
   {
