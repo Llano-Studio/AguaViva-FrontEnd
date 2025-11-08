@@ -5,7 +5,7 @@ import { formatDateForView } from "../../utils/formateDateForView";
 // Columnas para la tabla
 export const automatedCollectionOrderColumns: Column<any>[] = sortByOrder([
   { header: "Archivo", accessor: "filename", order: 0 },
-  { header: "Fecha", accessor: "date", order: 1, render: (v: string) => (v ? formatDateForView(v) : "-") },
+  { header: "Fecha de entrega", accessor: "date", order: 1, render: (v: string) => (v ? formatDateForView(v) : "-") },
   { header: "Vehículo", accessor: "vehicleName", order: 2, render: (v: any) => v ?? "-" },
   { header: "Chofer", accessor: "driverName", order: 3, render: (v: any) => v ?? "-" },
   {
@@ -24,7 +24,7 @@ export const automatedCollectionOrderColumns: Column<any>[] = sortByOrder([
 // Config para el Modal de detalle (simple)
 export const automatedCollectionOrderModalConfig = [
   { label: "Archivo", accessor: "filename", type: "text" },
-  { label: "Fecha", accessor: "date", type: "text", render: (v: string) => (v ? formatDateForView(v) : "-") },
+  { label: "Fecha de entrega", accessor: "date", type: "text", render: (v: string) => (v ? formatDateForView(v) : "-") },
   { label: "Vehículo", accessor: "vehicleName", type: "text" },
   { label: "Chofer", accessor: "driverName", type: "text" },
   {

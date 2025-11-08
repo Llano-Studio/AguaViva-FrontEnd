@@ -8,6 +8,8 @@ export interface GeneratedRouteSheetFile {
   downloadUrl: string;
   date: string;        // ISO string
   vehicleId: number;
+  vehicleName: string | null; 
+  vehicleCode: string | null;   
   driverId: number;
   driverName: string | null;     // nuevo (puede venir null)
   drivers?: GeneratedRouteSheetDriver[]; // lista de choferes candidatos
