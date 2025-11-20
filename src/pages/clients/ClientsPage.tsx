@@ -168,7 +168,18 @@ const ClientsPage: React.FC = () => {
   };
 
   const handleApplyFilters = () => {
-    const transformedFilters = { ...filters };
+    const transformedFilters: any = { ...filters };
+
+    // is_active: array de ["true","false"] -> "false,true"
+    if (Array.isArray(filters.is_active) && filters.is_active.length > 0) {
+      const values = filters.is_active.map((v: any) => String(v).toLowerCase());
+      const unique = Array.from(new Set(values));
+      transformedFilters.is_active = unique.join(",");
+    } else {
+      delete transformedFilters.is_active;
+    }
+
+    // Mantener tu transformación existente (si viene como locality array)
     if (filters.locality && Array.isArray(filters.locality)) {
       transformedFilters.localityIds = filters.locality.join(",");
       delete transformedFilters.locality;

@@ -107,11 +107,11 @@ const filePreviews = fields
         }
 
         // DEFAULT: usar react-select salvo que se pida explícitamente nativo
-        const explicitFlag = selectProps.useReactSelect ?? (field as any).useReactSelect;
+        const explicitFlag = selectProps.useReactSelect ?? field.useReactSelect;
         const useReactSelect = explicitFlag !== undefined ? Boolean(explicitFlag) : true; // <-- default true
-        const menuMaxHeight = selectProps.menuMaxHeight ?? (field as any).menuMaxHeight ?? 240;
+        const menuMaxHeight = selectProps.menuMaxHeight ?? field.menuMaxHeight ?? 240;
         const placeholderText =
-          selectProps.placeholder ?? (field as any).placeholder ?? "Seleccionar...";
+          selectProps.placeholder ?? field.placeholder ?? "Seleccionar...";
 
         if (useReactSelect) {
           const watched = watch(field.name as any);
@@ -319,7 +319,7 @@ const filePreviews = fields
           .map((val: any) => options.find(opt => opt.value === val))
           .filter(Boolean);
 
-        const multiPlaceholder = (field as any).placeholder ?? "Seleccionar...";
+        const multiPlaceholder = field.placeholder ?? "Seleccionar...";
 
         return (
           <Select
@@ -373,7 +373,7 @@ const filePreviews = fields
               disabled
               readOnly
               tabIndex={-1}
-              placeholder={(field as any).placeholder || "XX-XXXXXXXX-X"}
+              placeholder={field.placeholder || "XX-XXXXXXXX-X"}
             />
           );
         }
@@ -383,7 +383,7 @@ const filePreviews = fields
             type="text"
             {...reg}
             className={`form-input ${classForm ? classForm+"-form-input" : ""}`}
-            placeholder={(field as any).placeholder || "XX-XXXXXXXX-X"}
+            placeholder={field.placeholder || "XX-XXXXXXXX-X"}
             inputMode="numeric"
             autoComplete="off"
             maxLength={13} // 11 dígitos + 2 guiones
@@ -446,10 +446,34 @@ const filePreviews = fields
       if (!formRef.current) return;
       const formData = new FormData(formRef.current);
 
-      // Asegura que los checkboxes estén presentes como "true"/"false"
+      // Asegura que todos los campos controlados (react-select, checkboxes, etc.) estén presentes en FormData
       fields.forEach((field) => {
+        const fieldName = field.name as string;
+        const fieldValue = data[fieldName];
+
         if (field.type === "checkbox") {
-          formData.set(field.name as string, data[field.name] ? "true" : "false");
+          formData.set(fieldName, fieldValue ? "true" : "false");
+        } else if (field.type === "select") {
+          // Determinar si usa react-select (por defecto true)
+          const useReactSelect = field.useReactSelect !== undefined ? Boolean(field.useReactSelect) : true;
+          
+          if (useReactSelect) {
+            // Para campos select que usan react-select, asegurarnos de que el valor esté en FormData
+            if (fieldValue !== undefined && fieldValue !== null && fieldValue !== "") {
+              formData.set(fieldName, String(fieldValue));
+            }
+          }
+          // Los select nativos ya están incluidos automáticamente por FormData
+        } else if (field.type === "multiselect") {
+          // Para campos multiselect, convertir array a JSON string
+          if (Array.isArray(fieldValue)) {
+            formData.set(fieldName, JSON.stringify(fieldValue));
+          }
+        } else if (field.type !== "file") {
+          // Para otros campos que no son archivos, asegurarnos de que estén en FormData
+          if (fieldValue !== undefined && fieldValue !== null && fieldValue !== "") {
+            formData.set(fieldName, String(fieldValue));
+          }
         }
       });
 
