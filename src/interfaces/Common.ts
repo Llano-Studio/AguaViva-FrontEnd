@@ -10,6 +10,9 @@ export interface Field<T> {
   value?: any;
   onChange?: (name: string, value: any) => void;
   disabled?: boolean;
+  useReactSelect?: boolean; // Para selects: true = react-select, false = select nativo
+  menuMaxHeight?: number;  // Altura máxima del menú de react-select
+  placeholder?: string;    // Texto del placeholder
 }
 
 // Validaciones opcionales

@@ -23,7 +23,7 @@ export class UserService {
     }
   }
 
-  async createUser(user: FormData, isFormData = false): Promise<User | null> {
+  async createUser(user: CreateUserDTO | FormData, isFormData = false): Promise<User | null> {
     try {
       return await httpAdapter.post<User>(user, this.registerUrl, isFormData ? { isFormData: true } : undefined);
     } catch (error: any) {
