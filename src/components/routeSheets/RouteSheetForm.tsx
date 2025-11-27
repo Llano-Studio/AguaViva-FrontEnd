@@ -349,7 +349,6 @@ export const RouteSheetForm: React.FC<RouteSheetFormProps> = ({
           .filter((id: any) => typeof id === "number");
 
         setSelectedOrders(orderIdsFromDetails);
-        console.log("Preloaded (edit) orders:", fetched);
       } finally {
         setTimeout(() => {
           skipAutoSelectRef.current = false;

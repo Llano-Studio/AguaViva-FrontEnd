@@ -202,7 +202,6 @@ const DeliveriesPage: React.FC = () => {
 
   const handleEditRouteSheet = (routeSheet: any) => {
     setSelectedRouteSheet(routeSheet);
-    console.log("Editing route sheet:", routeSheet);
     setShowRouteSheetForm(true);
   };
 
