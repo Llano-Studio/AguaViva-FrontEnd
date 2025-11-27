@@ -72,8 +72,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   ), [isEditing, productToEdit]);
 
 
-  console.log("Initial Values:", initialValues);
-
   // React Hook Form
   const form = useForm<CreateProductDTO>({
     defaultValues: initialValues,
