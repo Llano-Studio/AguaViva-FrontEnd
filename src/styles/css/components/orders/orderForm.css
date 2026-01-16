@@ -36,11 +36,11 @@
 }
 
 .notes-order-form-field{
-    width: 100%;
+    width: 100% !important;
 }
 
 .notes-order-form-textarea{
-    height: 94px;
+    height: 94px !important;
 }
 
 .order-actions{
