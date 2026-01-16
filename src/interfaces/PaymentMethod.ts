@@ -1,4 +1,17 @@
-export type PaymentMethodKey = "EFECTIVO" | "TRANSFERENCIA" | "TARJETA_DEBITO" | "TARJETA_CREDITO" | "CHEQUE" | "MERCADO_PAGO";
+export type PaymentMethodKey =
+  | "CASH"
+  | "CREDIT_CARD"
+  | "DEBIT_CARD"
+  | "BANK_TRANSFER"
+  | "MOBILE_PAYMENT"
+  | "EFECTIVO"
+  | "TRANSFERENCIA"
+  | "TARJETA_DEBITO"
+  | "TARJETA_CREDITO"
+  | "CHEQUE"
+  | "RECARGO_MORA"
+  | "TRANSFERENCIA_CREDITO"
+  | "APLICACION_CREDITO";
 
 export interface PaymentMethod {
   id: number;

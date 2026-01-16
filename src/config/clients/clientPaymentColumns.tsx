@@ -1,5 +1,6 @@
 import { Column } from "../../interfaces/Common";
 import { formatDateTimeForView } from "../../utils/formatDateTimeForView";
+import { getPaymentMethodLabelByKey } from "../../utils/paymentMethods";
 
 // toma el valor desde value o, si no viene, desde la fila
 const pick = (value: any, row: any, key: string) =>
@@ -20,7 +21,11 @@ export const clientPaymentColumns: Column<any>[] = [
     header: "Método",
     accessor: "payment_method",
     order: 1,
-    render: (value: any, row?: any) => pick(value, row, "payment_method") ?? "-",
+    render: (value: any, row?: any) => {
+      const v = pick(value, row, "payment_method");
+      if (!v) return "-";
+      return getPaymentMethodLabelByKey(String(v));
+    },
   },
   {
     header: "Monto",

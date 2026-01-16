@@ -6,7 +6,7 @@ export const DEFAULT_PAYMENT_METHODS: PaymentMethodOption[] = [
   { label: "Tarjeta de Debito", value: 3, key: "TARJETA_DEBITO" },
   { label: "Tarjeta de Crédito", value: 4, key: "TARJETA_CREDITO" },
   { label: "Cheque", value: 5, key: "CHEQUE" },
-  { label: "Mercado Pago", value: 6, key: "MERCADO_PAGO" },
+  { label: "Mercado Pago / QR", value: 6, key: "MOBILE_PAYMENT" },
 ];
 
 export const getPaymentMethods = (): PaymentMethodOption[] => DEFAULT_PAYMENT_METHODS;
@@ -16,6 +16,9 @@ export const getPaymentMethodLabel = (value: number): string =>
 
 export const getPaymentMethodKey = (value: number): PaymentMethodKey | "" =>
   DEFAULT_PAYMENT_METHODS.find((m) => m.value === value)?.key ?? "";
+
+export const getPaymentMethodLabelByKey = (key: string): string =>
+  DEFAULT_PAYMENT_METHODS.find((m) => m.key === key)?.label ?? key;
 
 export const getPaymentMethodKeyOptions = (): Array<{ label: string; value: PaymentMethodKey }> =>
   DEFAULT_PAYMENT_METHODS.map((m) => ({ label: m.label, value: m.key }));

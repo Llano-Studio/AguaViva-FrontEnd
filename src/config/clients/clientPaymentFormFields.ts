@@ -15,8 +15,10 @@ export const clientPaymentFormFields: Field<any>[] = [
     options: [
       { label: "Efectivo", value: "EFECTIVO" },
       { label: "Transferencia", value: "TRANSFERENCIA" },
-      { label: "Tarjeta", value: "TARJETA" },
-      { label: "Mercado Pago", value: "MERCADO_PAGO" },
+      { label: "Tarjeta débito", value: "TARJETA_DEBITO" },
+      { label: "Tarjeta crédito", value: "TARJETA_CREDITO" },
+      { label: "Cheque", value: "CHEQUE" },
+      { label: "Mercado Pago / QR", value: "MOBILE_PAYMENT" },
     ],
     validation: { required: true },
     order: 1,

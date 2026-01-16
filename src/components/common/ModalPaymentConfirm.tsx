@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { formatDateTimeForView } from "../../utils/formatDateTimeForView";
+import { getPaymentMethodLabelByKey } from "../../utils/paymentMethods";
 import "../../styles/css/components/common/modalPaymentConfirm.css";
 
 interface ModalPaymentConfirmProps {
@@ -41,7 +42,7 @@ const ModalPaymentConfirm: React.FC<ModalPaymentConfirmProps> = ({
           ¿Confirmar pago de ${amount}?
         </p>
         <p className="modalPaymentConfirm-legend-2">
-          Método: {payment_method} • Fecha y hora: {dateForView}
+          Método: {getPaymentMethodLabelByKey(payment_method)} • Fecha y hora: {dateForView}
           {reference ? ` • Referencia: ${reference}` : ""}
         </p>
         <div className="modalPaymentConfirm-actions">

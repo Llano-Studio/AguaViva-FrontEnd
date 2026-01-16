@@ -39,6 +39,15 @@
   background-color: #FF9999;
 }
 
+.status-badge--canceled {
+  background-color: #FF9999;
+}
+
+.status-badge--overdue,
+.status-badge--atrasado {
+  background-color: #FDBA74;
+}
+
 .status-badge--refunded {
   background-color: #FEF3C7;
 }
@@ -63,4 +72,3 @@
 .status-payment-badge--none {
   background-color: transparent;
 }
-

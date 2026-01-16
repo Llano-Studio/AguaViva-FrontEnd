@@ -7,6 +7,9 @@ export const statusOrderLabels: Record<string, string> = {
   IN_DELIVERY: "En entrega",
   RETIRADO: "Retirado",
   CANCELED: "Cancelado",
+  CANCELLED: "Cancelado",
+  OVERDUE: "Atrasado",
+  ATRASADO: "Atrasado",
   REFUNDED: "Reembolsado"
 };
 

@@ -7,6 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+public/assets/*.js
+public/assets/*.css
+public/assets/*.ts
+
 node_modules
 dist
 dist-ssr
